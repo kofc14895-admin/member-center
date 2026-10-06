@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Member Center — St. Luke Knights of Columbus</title>
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600;700&family=Lora:wght@400;500;600&family=Lato:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+    --primary: #1E3A8A;
+    --primary-light: #2563EB;
+    --secondary: #C5A572;
+    --secondary-light: #D4B583;
+    --accent: #B91C1C;
+    --light-bg: #F9FAFB;
+    --text-dark: #1F2937;
+    --text-medium: #6B7280;
+    --shadow: rgba(30, 58, 138, 0.15);
+    --green: #15803D;
+    --green-bg: #F0FDF4;
+    --amber: #B45309;
+    --amber-bg: #FFFBEB;
+    --red-bg: #FEF2F2;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html, body { max-width:100%; overflow-x:hidden; }
+body {
+    font-family:'Lora', serif;
+    color:var(--text-dark);
+    background:var(--light-bg);
+    min-height:100vh;
+}
+a { color:inherit; }
+:focus-visible { outline:3px solid var(--primary-light); outline-offset:2px; }
+
+/* mockup-only review panel */
+.review-panel { background:#fff; border-bottom:2px dashed #9CA3AF; padding:0.9rem 1.5rem; }
+.review-panel .inner { max-width:900px; margin:0 auto; display:flex; align-items:center; gap:1rem; flex-wrap:wrap; }
+.review-panel .tag {
+    font-family:'Lato', sans-serif; font-size:0.7rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase;
+    background:#374151; color:#fff; padding:0.3rem 0.6rem; border-radius:4px;
+}
+.review-panel label { font-family:'Lato', sans-serif; font-size:0.85rem; color:var(--text-medium); }
+.review-panel select { font-family:'Lato', sans-serif; font-size:0.9rem; padding:0.4rem 0.6rem; border-radius:6px; border:1.5px solid #D1D5DB; background:#fff; }
+.review-panel .note { font-family:'Lato', sans-serif; font-size:0.8rem; color:var(--text-medium); margin-left:auto; }
+
+/* header strip echoing the public site */
+.brandbar { background:white; box-shadow:0 2px 4px rgba(0,0,0,0.1); border-bottom:3px solid var(--primary); padding:0.9rem 0; }
+.brandbar .inner { max-width:900px; margin:0 auto; padding:0 1.5rem; }
+.brandbar .logo { font-family:'Crimson Pro', serif; color:var(--primary); line-height:1.2; }
+.brandbar .logo-main { display:block; font-size:1.05rem; font-weight:700; }
+.brandbar .logo-sub { display:block; font-size:0.72rem; font-family:'Lato',sans-serif; color:var(--text-medium); }
+
+/* page */
+.stage { max-width:520px; margin:0 auto; padding:3.5rem 1.5rem 2rem; }
+.hero-emblem {
+    width:64px; height:64px; margin:0 auto 1.25rem; border-radius:50%;
+    background:linear-gradient(135deg, var(--primary), var(--primary-light));
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Crimson Pro',serif; font-weight:700; color:white; font-size:1.6rem;
+    box-shadow:0 8px 20px var(--shadow);
+}
+.stage h1 { font-family:'Crimson Pro', serif; font-size:1.9rem; color:var(--primary); text-align:center; font-weight:700; }
+.stage .sub { font-family:'Lato',sans-serif; font-size:0.98rem; color:var(--text-medium); text-align:center; margin-top:0.6rem; max-width:420px; margin-left:auto; margin-right:auto; }
+
+.login-card {
+    background:white; border-radius:16px; padding:2rem; box-shadow:0 4px 15px var(--shadow); margin-top:2.25rem;
+}
+.field-label { font-family:'Lato',sans-serif; font-size:0.78rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-medium); display:block; margin-bottom:0.4rem; }
+.email-input {
+    width:100%; font-family:'Lora',serif; font-size:1.05rem; padding:0.85rem 1rem; border:1.5px solid #D1D5DB; border-radius:10px;
+}
+.email-input:focus { border-color:var(--primary-light); }
+.login-hint { font-family:'Lato',sans-serif; font-size:0.8rem; color:var(--text-medium); margin-top:0.5rem; }
+
+.btn-submit {
+    width:100%; margin-top:1.25rem; padding:0.9rem; border-radius:50px; border:none; cursor:pointer;
+    background:var(--secondary); color:white; font-family:'Lato',sans-serif; font-weight:700; font-size:1rem; transition:all .2s;
+}
+.btn-submit:hover { background:var(--secondary-light); }
+.btn-submit:disabled { opacity:0.6; cursor:default; }
+
+/* status states */
+.status-msg {
+    display:none; margin-top:1.1rem; padding:0.9rem 1rem; border-radius:10px; font-family:'Lato',sans-serif; font-size:0.88rem;
+}
+.status-msg.show { display:block; }
+.status-checking { background:#F3F4F6; color:var(--text-medium); }
+.status-found { background:var(--green-bg); color:#166534; }
+.status-notfound { background:var(--red-bg); color:#991B1B; }
+.status-notyet { background:#EFF6FF; color:#1E3A8A; line-height:1.5; }
+.status-notyet a { color:inherit; font-weight:600; }
+
+.fallback {
+    margin-top:1.75rem; padding-top:1.5rem; border-top:1px dashed #E5E7EB; text-align:center;
+}
+.fallback p { font-family:'Lato',sans-serif; font-size:0.85rem; color:var(--text-medium); }
+.fallback a { color:var(--primary); font-weight:600; text-decoration:underline; }
+
+.help-form { margin-top:1rem; padding-top:1rem; border-top:1px solid rgba(153,27,27,0.2); text-align:left; }
+.help-form.hidden { display:none; }
+.help-form .field-label { color:#991B1B; }
+.help-form .email-input { font-size:0.92rem; padding:0.6rem 0.8rem; margin-bottom:0.75rem; }
+.help-textarea { width:100%; min-height:64px; font-family:'Lora',serif; font-size:0.92rem; padding:0.6rem 0.8rem; border:1.5px solid #D1D5DB; border-radius:10px; resize:vertical; margin-bottom:0.75rem; }
+.btn-submit-secondary { margin-top:0; background:var(--accent); }
+.btn-submit-secondary:hover { background:#991B1B; }
+.help-status { font-family:'Lato',sans-serif; font-size:0.82rem; margin-top:0.6rem; }
+.help-confirm { display:none; margin-top:1rem; padding:0.85rem 1rem; background:var(--green-bg); border-left:3px solid var(--green); border-radius:6px; font-family:'Lato',sans-serif; font-size:0.85rem; color:#166534; }
+.help-confirm.open { display:block; }
+
+.council-footer {
+    text-align:center; margin-top:2.5rem; font-family:'Lato',sans-serif; font-size:0.78rem; color:var(--text-medium);
+}
+
+/* ---------- Mobile ---------- */
+@media (max-width:480px){
+    .review-panel { padding:0.7rem 1rem; }
+    .review-panel .inner { gap:0.5rem; }
+    .review-panel .note { margin-left:0; width:100%; }
+    .stage { padding:2rem 1rem 1.5rem; }
+    .stage h1 { font-size:1.55rem; }
+    .login-card { padding:1.5rem; margin-top:1.75rem; }
+}
+/* Sign-in with an emailed code */
+.step { display:none; }
+.step.active { display:block; }
+.step-title { font-family:'Crimson Pro', serif; font-size:1.5rem; color:var(--primary); font-weight:700; margin-bottom:0.4rem; }
+.step-text { font-family:'Lato',sans-serif; font-size:0.98rem; color:var(--text-dark); line-height:1.55; margin-bottom:1.1rem; }
+.code-input { width:100%; font-family:'Lato',sans-serif; font-size:2rem; font-weight:700; letter-spacing:0.55em; text-align:center;
+              padding:0.7rem 0.5rem 0.7rem 1rem; border:2px solid #D1D5DB; border-radius:10px; outline:none; }
+.code-input:focus { border-color:var(--primary-light); }
+.remember { display:flex; gap:0.7rem; align-items:flex-start; margin:1.1rem 0 0.2rem; font-family:'Lato',sans-serif; font-size:0.95rem; cursor:pointer; }
+.remember input { width:20px; height:20px; margin-top:0.1rem; accent-color:var(--primary); flex-shrink:0; }
+.remember-hint { font-size:0.85rem; color:var(--text-medium); }
+.small-links { font-family:'Lato',sans-serif; font-size:0.9rem; color:var(--text-medium); margin-top:1.1rem; line-height:1.9; text-align:center; }
+.linkish { background:none; border:none; padding:0; font:inherit; color:var(--primary); text-decoration:underline; cursor:pointer; }
+.linkish:disabled { color:var(--text-medium); text-decoration:none; cursor:default; }
+.delivery-note { font-family:'Lato',sans-serif; font-size:0.9rem; color:var(--text-medium); line-height:1.5; margin:-0.5rem 0 1.1rem; }
+</style>
+<script src="config.js"></script>
+<script src="session.js"></script>
+</head>
+<body>
+<div class="brandbar">
+    <div class="inner">
+        <div class="logo">
+            <span class="logo-main">ST. LUKE KNIGHTS OF COLUMBUS</span>
+            <span class="logo-sub">Indianapolis, Indiana · Council 14895</span>
+        </div>
+    </div>
+</div>
+
+<div class="stage">
+    <div class="hero-emblem">14895</div>
+    <h1>Member Center</h1>
+    <p class="sub" id="stageSub">Enter the email address on file with the council. We'll email you a code to sign in.</p>
+
+    <div class="login-card">
+
+        <!-- Step 1: email -->
+        <div class="step" id="step-email">
+            <form id="emailForm" action="#" method="post" novalidate onsubmit="event.preventDefault(); sendCode();">
+                <label class="field-label" for="emailField">Email address</label>
+                <input class="email-input" id="emailField" name="email" type="email" inputmode="email"
+                       autocomplete="email" autocapitalize="none" autocorrect="off" spellcheck="false"
+                       enterkeyhint="go" placeholder="you@example.com">
+                <p class="login-hint">This should match the email a data administrator has on file for you.</p>
+                <button class="btn-submit" id="sendBtn" type="submit">Email Me a Code</button>
+            </form>
+            <div class="status-msg status-checking" id="msg-checking">Checking our records&hellip;</div>
+            <div class="status-msg status-notfound" id="msg-notfound">
+                We don't have that email on file yet. Try the email your dues notices usually arrive at — or tell us who you are below and a data administrator will help you get set up.
+                <div class="help-form" id="helpForm">
+                    <label class="field-label" for="helpName">Your name</label>
+                    <input class="email-input" id="helpName" type="text" placeholder="First and last name">
+                    <label class="field-label" for="helpNote">Anything else that helps us find you (optional)</label>
+                    <textarea class="help-textarea" id="helpNote" placeholder="e.g. your member number if you know it, or which council event you usually attend"></textarea>
+                    <button type="button" class="btn-submit btn-submit-secondary" id="submitHelpBtn" onclick="submitHelpRequest()">Send to a data administrator</button>
+                    <p class="help-status" id="helpStatus"></p>
+                </div>
+                <div class="help-confirm" id="helpConfirm">Thanks — a data administrator will follow up and help get your email added.</div>
+            </div>
+            <div class="status-msg status-notyet" id="msg-notyet">
+                Thanks<span id="notyetName"></span>! We're opening the Member Center in stages so we can make sure everything works well. You'll get an email when it's your turn.
+                <div style="margin-top:0.6rem;">Questions? Email <a data-koc-email></a>.</div>
+            </div>
+            <div class="status-msg status-notfound" id="msg-error"></div>
+        </div>
+
+        <!-- Step 2: code -->
+        <div class="step" id="step-code">
+            <h2 class="step-title">Check your email</h2>
+            <p class="step-text">We sent a 6-digit code to <strong id="maskedEmail"></strong>.</p>
+            <p class="delivery-note">It usually arrives within a minute, but some email providers, like AT&amp;T or Yahoo, can take up to 10 minutes. You can keep this page open.</p>
+            <form id="codeForm" action="#" method="post" novalidate onsubmit="event.preventDefault(); verifyCode();">
+            <label class="field-label" for="codeField">6-digit code</label>
+            <input class="code-input" id="codeField" name="one-time-code" type="text" inputmode="numeric" pattern="[0-9]*"
+                   autocomplete="one-time-code" autocorrect="off" enterkeyhint="done" maxlength="6" placeholder="••••••"
+                   oninput="this.value = this.value.replace(/\D/g, '')">
+            <label class="remember">
+                <input type="checkbox" id="rememberBox" checked>
+                <span><strong>Keep me signed in on this device</strong><br><span class="remember-hint">You'll stay signed in as long as you visit at least once every 90 days. Uncheck on a shared or public computer.</span></span>
+            </label>
+            <button class="btn-submit" id="verifyBtn" type="submit">Sign In</button>
+            </form>
+            <div class="status-msg" id="msg-code"></div>
+            <p class="small-links">
+                Didn't get it? Check your spam folder, or <button type="button" class="linkish" id="resendBtn" onclick="resendCode()">send a new code</button>.<br>
+                <button type="button" class="linkish" onclick="useDifferentEmail()">Use a different email</button>
+            </p>
+        </div>
+
+        <!-- Returning visitor on a remembered device -->
+        <div class="step" id="step-returning">
+            <h2 class="step-title">Welcome back<span id="returningName"></span></h2>
+            <p class="step-text">You're still signed in on this device, so you don't need a code.</p>
+            <button class="btn-submit" id="continueBtn" onclick="continueSignedIn()">Continue to My Profile</button>
+            <p class="small-links"><button type="button" class="linkish" id="notMeBtn" onclick="notMe()">Not you? Sign in as someone else</button></p>
+        </div>
+    </div>
+
+    <div class="fallback">
+        <p>Not sure what email the council has for you, or don't have one on file at all?<br>
+        Email <a data-koc-email></a> and a data administrator will help you get set up.</p>
+    </div>
+</div>
+<p class="council-footer">St. Luke Knights of Columbus, Council 14895</p>
+
+<script>
+const VERIFY_ENDPOINT_URL = MC_ENDPOINT; // from session.js
+const SIGN_IN_SUB = "Enter the email address on file with the council. We'll email you a code to sign in.";
+let pendingEmail = '';
+let cooldownTimer = null;
+
+async function apiPost(params) {
+    const res = await fetch(VERIFY_ENDPOINT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(params)
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    return await res.json();
+}
+
+function show(id) {
+    document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+}
+
+function hideMessages() {
+    ['checking', 'notfound', 'notyet', 'error'].forEach(s => document.getElementById('msg-' + s).classList.remove('show'));
+    const m = document.getElementById('msg-code'); m.className = 'status-msg'; m.textContent = '';
+}
+
+function codeMessage(text, kind) {
+    const m = document.getElementById('msg-code');
+    m.className = 'status-msg show ' + (kind === 'ok' ? 'status-found' : 'status-notfound');
+    m.textContent = text;
+}
+
+function maskTyped(email) {
+    const [name, domain] = email.split('@');
+    return domain ? name.charAt(0) + '\u2022'.repeat(Math.max(name.length - 1, 3)) + '@' + domain : email;
+}
+
+/* The last email used to sign in, kept only when "Keep me signed in" was checked,
+   so the field is already filled in next time. "Not you?" and Sign out clear it. */
+const MC_EMAIL_KEY = 'mcLastEmail';
+function rememberEmail(email) {
+    try { email ? localStorage.setItem(MC_EMAIL_KEY, email) : localStorage.removeItem(MC_EMAIL_KEY); } catch (e) {}
+}
+function rememberedEmail() {
+    try { return localStorage.getItem(MC_EMAIL_KEY) || ''; } catch (e) { return ''; }
+}
+
+function goToProfile() { window.location.href = 'home.html'; }
+
+async function sendCode() {
+    const email = document.getElementById('emailField').value.trim().toLowerCase();
+    hideMessages();
+    document.getElementById('helpForm').classList.remove('hidden');
+    document.getElementById('helpConfirm').classList.remove('open');
+    document.getElementById('helpStatus').textContent = '';
+    if (!email) return;
+    const btn = document.getElementById('sendBtn');
+    btn.disabled = true;
+    document.getElementById('msg-checking').classList.add('show');
+    try {
+        const r = await apiPost({ action: 'requestCode', email });
+        document.getElementById('msg-checking').classList.remove('show');
+        if (r.success || r.error === 'wait') {
+            pendingEmail = email;
+            document.getElementById('maskedEmail').textContent = r.masked || maskTyped(email);
+            document.getElementById('codeField').value = '';
+            document.getElementById('stageSub').textContent = 'Almost there. Enter the code we just emailed you.';
+            show('step-code');
+            startCooldown(r.error === 'wait' ? (r.seconds || 30) : 30);
+            if (r.error === 'wait') codeMessage('We just sent you a code. Check your email.', 'ok');
+            document.getElementById('codeField').focus();
+        } else if (r.error === 'not_found') {
+            document.getElementById('msg-notfound').classList.add('show');
+        } else if (r.error === 'not_yet') {
+            document.getElementById('notyetName').textContent = r.firstName ? ', ' + r.firstName : '';
+            document.getElementById('msg-notyet').classList.add('show');
+        } else if (r.error === 'too_many_codes') {
+            showError("We've sent several codes in the last hour. Please wait a little while, then try again.");
+        } else {
+            showError("Something went wrong. Please try again.");
+        }
+    } catch (e) {
+        document.getElementById('msg-checking').classList.remove('show');
+        showError("We couldn't reach the Member Center just now. Please try again in a moment.");
+    }
+    btn.disabled = false;
+}
+
+function showError(text) {
+    const m = document.getElementById('msg-error');
+    m.textContent = text;
+    m.classList.add('show');
+}
+
+async function verifyCode() {
+    const code = document.getElementById('codeField').value.trim();
+    if (code.length !== 6) return codeMessage('Please enter all 6 digits.');
+    const btn = document.getElementById('verifyBtn');
+    btn.disabled = true;
+    btn.textContent = 'Checking\u2026';
+    try {
+        const r = await apiPost({
+            action: 'verifyCode', email: pendingEmail, code,
+            remember: document.getElementById('rememberBox').checked
+        });
+        if (r.success) {
+            Session.save(r);
+            rememberEmail(document.getElementById('rememberBox').checked ? pendingEmail : '');
+            btn.textContent = 'Signed in \u2713';
+            goToProfile();
+            return;
+        }
+        if (r.error === 'wrong_code') codeMessage(`That code doesn't match. ${r.triesLeft} ${r.triesLeft === 1 ? 'try' : 'tries'} left.`);
+        else if (r.error === 'too_many_tries') codeMessage('Too many tries. Tap "send a new code" below.');
+        else if (r.error === 'expired') codeMessage('That code has expired. Tap "send a new code" below.');
+        else codeMessage('Something went wrong. Please try again.');
+    } catch (e) {
+        codeMessage("We couldn't reach the Member Center just now. Please try again in a moment.");
+    }
+    btn.disabled = false;
+    btn.textContent = 'Sign In';
+}
+
+function startCooldown(seconds) {
+    let s = seconds;
+    const btn = document.getElementById('resendBtn');
+    btn.disabled = true;
+    clearInterval(cooldownTimer);
+    const tick = () => {
+        if (s <= 0) { clearInterval(cooldownTimer); btn.disabled = false; btn.textContent = 'send a new code'; return; }
+        btn.textContent = `send a new code (in ${s}s)`;
+        s--;
+    };
+    tick();
+    cooldownTimer = setInterval(tick, 1000);
+}
+
+async function resendCode() {
+    const btn = document.getElementById('resendBtn');
+    btn.disabled = true;
+    document.getElementById('codeField').value = '';
+    try {
+        const r = await apiPost({ action: 'requestCode', email: pendingEmail });
+        if (r.success) { codeMessage('A new code is on its way. Any code we\u2019ve sent you in the last hour will work.', 'ok'); startCooldown(30); return; }
+        if (r.error === 'wait') { startCooldown(r.seconds || 30); return; }
+        if (r.error === 'too_many_codes') codeMessage("We've sent several codes in the last hour. Please wait a little while, then try again.");
+        else codeMessage('Something went wrong. Please try again.');
+    } catch (e) {
+        codeMessage("We couldn't reach the Member Center just now. Please try again in a moment.");
+    }
+    btn.disabled = false;
+}
+
+function useDifferentEmail() {
+    clearInterval(cooldownTimer);
+    hideMessages();
+    document.getElementById('stageSub').textContent = SIGN_IN_SUB;
+    show('step-email');
+    document.getElementById('emailField').focus();
+}
+
+async function continueSignedIn() {
+    const btn = document.getElementById('continueBtn');
+    btn.disabled = true;
+    btn.textContent = 'One moment\u2026';
+    const s = await Session.renew(true);   // confirms the pass and restarts its 90 days
+    if (s) { goToProfile(); return; }
+    btn.disabled = false;
+    btn.textContent = 'Continue to My Profile';
+    document.getElementById('stageSub').textContent = 'Your sign-in has expired. ' + SIGN_IN_SUB;
+    const saved = rememberedEmail();
+    if (saved) document.getElementById('emailField').value = saved;
+    show('step-email');
+}
+
+function notMe() {
+    Session.clear();
+    rememberEmail('');
+    document.getElementById('emailField').value = '';
+    document.getElementById('rememberBox').checked = true;
+    useDifferentEmail();
+}
+
+async function submitHelpRequest() {
+    const emailTried = document.getElementById('emailField').value.trim();
+    const name = document.getElementById('helpName').value.trim();
+    const note = document.getElementById('helpNote').value.trim();
+    const btn = document.getElementById('submitHelpBtn');
+    const status = document.getElementById('helpStatus');
+
+    if (!name) {
+        status.textContent = 'Add your name so a data administrator knows who to look for.';
+        status.style.color = 'var(--accent)';
+        return;
+    }
+
+    btn.disabled = true;
+    status.textContent = 'Sending\u2026';
+    status.style.color = '';
+
+    let newValue = emailTried;
+    if (note) newValue += ' | Note: ' + note;
+
+    try {
+        const data = await apiPost({
+            action: 'logChange',
+            memberNumber: '', // unknown — this member couldn't be matched
+            memberName: name,
+            type: 'Contact Request',
+            category: 'Contact',
+            field: 'Add Email',
+            oldValue: '(none on file)',
+            newValue: newValue
+        });
+        if (data.success) {
+            document.getElementById('helpForm').classList.add('hidden');
+            document.getElementById('helpConfirm').classList.add('open');
+            status.textContent = '';
+        } else {
+            btn.disabled = false;
+            status.textContent = data.error || 'Could not send \u2014 try again, or email ' + KOC_CONFIG.emails.council + ' directly.';
+            status.style.color = 'var(--accent)';
+        }
+    } catch (e) {
+        btn.disabled = false;
+        status.textContent = 'Could not reach the log endpoint \u2014 try again, or email ' + KOC_CONFIG.emails.council + ' directly.';
+        status.style.color = 'var(--accent)';
+    }
+}
+
+
+window.addEventListener('DOMContentLoaded', () => {
+    const s = Session.read();
+    if (s) {
+        document.getElementById('returningName').textContent = s.firstName ? ', ' + s.firstName : '';
+        document.getElementById('stageSub').textContent = '';
+        show('step-returning');
+    } else {
+        const saved = rememberedEmail();
+        if (saved) document.getElementById('emailField').value = saved;
+        show('step-email');
+    }
+});
+</script>
+</body>
+</html>

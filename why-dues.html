@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Why Dues — St. Luke Knights of Columbus Member Center</title>
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600;700&family=Lora:wght@400;500;600&family=Lato:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+    --primary: #1E3A8A;
+    --primary-light: #2563EB;
+    --secondary: #C5A572;
+    --secondary-light: #D4B583;
+    --accent: #B91C1C;
+    --light-bg: #F9FAFB;
+    --text-dark: #1F2937;
+    --text-medium: #6B7280;
+    --shadow: rgba(30, 58, 138, 0.15);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html { max-width:100%; }
+body {
+    font-family:'Lora', serif;
+    color:var(--text-dark);
+    background:var(--light-bg);
+    line-height:1.65;
+    padding-bottom:4rem;
+}
+a { color:inherit; }
+:focus-visible { outline:3px solid var(--primary-light); outline-offset:2px; }
+
+/* ---------- Nav (shared with Home) ---------- */
+nav { background:white; box-shadow:0 2px 4px rgba(0,0,0,0.1); border-bottom:3px solid var(--primary); }
+nav .container { max-width:1200px; margin:0 auto; display:flex; justify-content:space-between; align-items:stretch; }
+.logo-section { padding:0.7rem 1.5rem; display:flex; align-items:center; }
+.logo { font-family:'Crimson Pro', serif; color:var(--primary); line-height:1.15; text-decoration:none; }
+.logo-main { display:block; font-size:1.05rem; font-weight:700; letter-spacing:0.2px; }
+.logo-sub { display:block; font-size:0.72rem; font-weight:400; color:var(--text-medium); font-family:'Lato',sans-serif; }
+nav ul { list-style:none; display:flex; margin:0; }
+nav ul li { display:flex; align-items:center; }
+nav a.navlink {
+    font-family:'Lato', sans-serif; font-size:0.92rem; font-weight:500; color:var(--text-medium);
+    text-decoration:none; padding:1.1rem 1.15rem; border-bottom:3px solid transparent; transition:all .2s;
+}
+nav a.navlink:hover { color:var(--primary); background:rgba(30,58,138,0.05); }
+nav a.navlink.active { color:var(--primary); font-weight:700; border-bottom-color:var(--secondary); }
+nav a.signout { font-family:'Lato',sans-serif; font-size:0.85rem; color:var(--text-medium); padding:1.1rem 1.5rem; text-decoration:none; }
+nav a.signout:hover { color:var(--accent); }
+
+/* ---------- Page ---------- */
+.hero { max-width:760px; margin:0 auto; padding:3rem 2rem 0; text-align:center; }
+.hero h1 { font-family:'Crimson Pro', serif; font-size:2.3rem; color:var(--primary); font-weight:700; }
+.hero p { font-family:'Lora',serif; font-size:1.08rem; color:var(--text-medium); margin-top:1rem; }
+
+.breakdown { max-width:900px; margin:0 auto; padding:2.5rem 2rem 0; display:grid; grid-template-columns:repeat(3, 1fr); gap:1.5rem; }
+.breakdown-card { background:white; border-radius:16px; padding:1.75rem; box-shadow:0 4px 15px var(--shadow); }
+.breakdown-card .icon {
+    width:44px; height:44px; border-radius:50%; background:var(--light-bg); display:flex; align-items:center; justify-content:center;
+    font-size:1.3rem; margin-bottom:1rem;
+}
+.breakdown-card h3 { font-family:'Crimson Pro', serif; font-size:1.15rem; color:var(--primary); font-weight:700; margin-bottom:0.6rem; }
+.breakdown-card p { font-family:'Lato',sans-serif; font-size:0.9rem; color:var(--text-medium); }
+
+.actions { max-width:700px; margin:2rem auto 0; padding:0 2rem; display:flex; gap:0.9rem; justify-content:center; flex-wrap:wrap; }
+.btn {
+    font-family:'Lato', sans-serif; font-weight:600; font-size:0.9rem; cursor:pointer;
+    border-radius:50px; padding:0.7rem 1.5rem; border:2px solid transparent; text-decoration:none; display:inline-block;
+}
+.btn-primary { background:var(--secondary); color:white; }
+.btn-primary:hover { background:var(--secondary-light); }
+.btn-outline { background:transparent; color:var(--primary); border-color:var(--primary); }
+.btn-outline:hover { background:var(--primary); color:white; }
+
+@media (max-width:720px){
+    .breakdown { grid-template-columns:1fr; }
+    nav .container { flex-wrap:wrap; }
+    .logo-section { padding:0.6rem 1rem; flex:1; min-width:200px; }
+    nav ul { flex-wrap:nowrap; width:100%; justify-content:flex-start; order:3; border-top:1px solid #F0F1F3; overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+    nav ul::-webkit-scrollbar { display:none; }
+    nav ul li { flex-shrink:0; }
+    nav a.navlink { padding:0.65rem 0.7rem; font-size:0.82rem; white-space:nowrap; }
+    .hero { padding:2rem 1.25rem 0; }
+    .hero h1 { font-size:1.7rem; }
+}
+.site-header { position:sticky; top:0; z-index:1000; }
+
+/* Menu: never break a label across two lines; below 1180px the menu gets its own row */
+nav a.navlink, nav a.signout { white-space:nowrap; }
+@media (max-width:1180px) {
+    nav .container { flex-wrap:wrap; }
+    .logo-section { flex:1; min-width:200px; }
+    nav ul { width:100%; order:3; justify-content:flex-start; border-top:1px solid #F0F1F3; overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+    nav ul::-webkit-scrollbar { display:none; }
+    nav ul li { flex-shrink:0; }
+}
+</style>
+<script src="config.js"></script>
+<script src="session.js"></script>
+<script src="nav-toggle.js"></script>
+</head>
+<body>
+
+<header class="site-header">
+<nav>
+    <div class="container">
+        <div class="logo-section">
+            <a href="home.html" class="logo preserve-member">
+                <span class="logo-main">ST. LUKE KNIGHTS OF COLUMBUS</span>
+                <span class="logo-sub">Member Center · Council 14895</span>
+            </a>
+        </div>
+        <ul>
+            <li><a href="home.html" class="navlink preserve-member">Profile</a></li>
+            <li><a href="calendar.html" class="navlink preserve-member">Calendar</a></li>
+            <li><a href="prayers.html" class="navlink preserve-member">Prayers</a></li>
+            <li><a href="groups.html" class="navlink preserve-member">Groups</a></li>
+            <li><a href="membership-card.html" class="navlink preserve-member">KofC Card</a></li>
+            <li class="nav-whydues"><a href="#" class="navlink active">Why Dues?</a></li>
+            <li><a href="verify-wizard.html" class="navlink preserve-member">Verify Data</a></li>
+        </ul>
+    </div>
+</nav>
+</header>
+
+<div class="hero">
+    <h1>Where Your Dues Go</h1>
+    <p>When Father Michael McGivney founded the Knights of Columbus in 1882, he wasn't trying to build an organization — he was trying to make sure that no Catholic family in his parish would be left without support when hardship struck. That founding purpose — one man's local response to real need in his own parish — is still exactly what our dues fund at Council 14895: our charitable works, our support and enrichment of our St. Luke parish, and our ability to show up for each other and our neighbors when it matters.</p>
+    <p>Dues aren't a membership fee in the ordinary sense — they're the mechanism that turns individual membership into collective charity. That's true whether you're able to attend every event or just able to contribute.</p>
+</div>
+
+<div class="breakdown">
+    <div class="breakdown-card">
+        <div class="icon">&#10084;</div>
+        <h3>Charitable Works</h3>
+        <p>Parish support, community outreach, and the causes our council backs each year — the reason the Knights exist in the first place.</p>
+    </div>
+    <div class="breakdown-card">
+        <div class="icon">&#127963;</div>
+        <h3>Council Operations</h3>
+        <p>Incidental meeting and event expenses, supplies, communications, and the everyday costs of keeping the council running for every member, every event.</p>
+    </div>
+    <div class="breakdown-card">
+        <div class="icon">&#128279;</div>
+        <h3>Per-Capita Fees</h3>
+        <p>A portion goes to the State and Supreme Councils — what keeps St. Luke Council connected to the broader Knights of Columbus and its national programs.</p>
+    </div>
+</div>
+
+<div class="actions">
+    <a href="home.html" class="btn btn-outline preserve-member">Back to My Profile</a>
+</div>
+
+<script>
+/* Carry the logged-in member across pages via preserve-member links */
+(function () {
+    const memberParam = new URLSearchParams(window.location.search).get("member");
+    if (!memberParam) return;
+    document.querySelectorAll("a.preserve-member").forEach(a => {
+        const url = new URL(a.getAttribute("href"), window.location.href);
+        url.searchParams.set("member", memberParam);
+        a.setAttribute("href", url.pathname + url.search);
+    });
+})();
+</script>
+
+</body>
+</html>

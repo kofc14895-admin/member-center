@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pay Dues Mockup — St. Luke Knights of Columbus Member Center</title>
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600;700&family=Lora:wght@400;500;600&family=Lato:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+    --primary: #1E3A8A;
+    --primary-light: #2563EB;
+    --secondary: #C5A572;
+    --secondary-light: #D4B583;
+    --accent: #B91C1C;
+    --light-bg: #F9FAFB;
+    --text-dark: #1F2937;
+    --text-medium: #6B7280;
+    --shadow: rgba(30, 58, 138, 0.15);
+    --green: #15803D;
+    --green-bg: #F0FDF4;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html { max-width:100%; }
+body { font-family:'Lora', serif; color:var(--text-dark); background:var(--light-bg); line-height:1.6; padding-bottom:4rem; }
+a { color:inherit; }
+:focus-visible { outline:3px solid var(--primary-light); outline-offset:2px; }
+
+.review-panel { background:#fff; border-bottom:2px dashed #9CA3AF; padding:0.9rem 1.5rem; }
+.review-panel .inner { max-width:1200px; margin:0 auto; display:flex; align-items:center; gap:1rem; flex-wrap:wrap; }
+.demo-controls { display:flex; align-items:center; gap:1rem; flex-wrap:wrap; }
+.review-panel .tag { font-family:'Lato', sans-serif; font-size:0.7rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; background:#374151; color:#fff; padding:0.3rem 0.6rem; border-radius:4px; }
+.review-panel label { font-family:'Lato', sans-serif; font-size:0.85rem; color:var(--text-medium); }
+.review-panel select { font-family:'Lato', sans-serif; font-size:0.9rem; padding:0.4rem 0.6rem; border-radius:6px; border:1.5px solid #D1D5DB; background:#fff; width:100%; max-width:340px; }
+.review-panel .note { font-family:'Lato', sans-serif; font-size:0.8rem; color:var(--text-medium); margin-left:auto; }
+
+nav { background:white; box-shadow:0 2px 4px rgba(0,0,0,0.1); border-bottom:3px solid var(--primary); }
+nav .container { max-width:1200px; margin:0 auto; display:flex; justify-content:space-between; align-items:stretch; flex-wrap:wrap; }
+.logo-section { padding:0.7rem 1.5rem; display:flex; align-items:center; }
+.logo { font-family:'Crimson Pro', serif; color:var(--primary); line-height:1.15; text-decoration:none; }
+.logo-main { display:block; font-size:1.05rem; font-weight:700; }
+.logo-sub { display:block; font-size:0.72rem; color:var(--text-medium); font-family:'Lato',sans-serif; }
+nav ul { list-style:none; display:flex; margin:0; flex-wrap:wrap; }
+nav ul li { display:flex; align-items:center; }
+nav a.navlink { font-family:'Lato', sans-serif; font-size:0.92rem; font-weight:500; color:var(--text-medium); text-decoration:none; padding:1.1rem 1.15rem; border-bottom:3px solid transparent; transition:all .2s; }
+nav a.navlink:hover { color:var(--primary); background:rgba(30,58,138,0.05); }
+nav a.signout { font-family:'Lato',sans-serif; font-size:0.85rem; color:var(--text-medium); padding:1.1rem 1.5rem; text-decoration:none; }
+
+.stage { max-width:720px; margin:0 auto; padding:2.5rem 1.5rem 0; }
+.not-logged-in { max-width:500px; margin:4rem auto; padding:0 1.5rem; text-align:center; }
+.not-logged-in h1 { font-family:'Crimson Pro', serif; font-size:1.8rem; color:var(--primary); font-weight:700; }
+.not-logged-in p { font-family:'Lato',sans-serif; font-size:0.95rem; color:var(--text-medium); margin:0.75rem 0 1.5rem; }
+.stage h1 { font-family:'Crimson Pro', serif; font-size:1.9rem; color:var(--primary); font-weight:700; }
+.stage .sub { font-family:'Lato',sans-serif; font-size:0.95rem; color:var(--text-medium); margin-top:0.5rem; }
+
+.amount-card { background:white; border-radius:16px; box-shadow:0 4px 15px var(--shadow); margin-top:1.5rem; padding:1.5rem 1.75rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; }
+.amount-card .who { font-family:'Lato',sans-serif; font-size:0.85rem; color:var(--text-medium); }
+.amount-card .who strong { display:block; font-family:'Crimson Pro',serif; font-size:1.2rem; color:var(--text-dark); font-weight:700; margin-top:0.1rem; }
+.amount-card .owed { text-align:right; }
+.amount-card .owed .label { font-family:'Lato',sans-serif; font-size:0.7rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-medium); }
+.amount-card .owed .value { font-family:'Crimson Pro',serif; font-size:1.8rem; font-weight:700; color:var(--accent); }
+.amount-card .owed .value.current { color:var(--green); }
+
+.options { display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:1.5rem; margin-top:1.5rem; }
+@media (max-width:640px){ .options { grid-template-columns:1fr; } }
+.option-card { background:white; border-radius:16px; box-shadow:0 4px 15px var(--shadow); padding:1.75rem; display:flex; flex-direction:column; }
+.option-card h2 { font-family:'Crimson Pro', serif; font-size:1.2rem; color:var(--primary); font-weight:700; margin-bottom:0.6rem; }
+.option-card p { font-family:'Lato',sans-serif; font-size:0.88rem; color:var(--text-medium); flex:1; }
+.btn { font-family:'Lato', sans-serif; font-weight:600; font-size:0.9rem; cursor:pointer; border-radius:50px; padding:0.75rem 1.4rem; border:2px solid transparent; transition:all .2s; text-decoration:none; display:inline-block; text-align:center; margin-top:1rem; }
+.btn-primary { background:var(--secondary); color:white; }
+.btn-primary:hover { background:var(--secondary-light); }
+.btn-outline { background:transparent; color:var(--primary); border-color:var(--primary); }
+.btn-outline:hover { background:var(--primary); color:white; }
+
+.payable-to { font-family:'Lato',sans-serif; font-size:0.88rem; color:var(--text-dark); margin-top:0.8rem; }
+.payable-to strong { color:var(--primary); }
+.mail-block { margin-top:1.1rem; background:var(--light-bg); border-radius:10px; padding:1rem 1.1rem; font-family:'Lato',sans-serif; font-size:0.9rem; color:var(--text-dark); white-space:pre-line; line-height:1.5; }
+.mail-note { font-family:'Lato',sans-serif; font-size:0.78rem; color:var(--text-medium); margin-top:0.7rem; }
+.mail-note strong { color:var(--text-dark); }
+
+.actions { max-width:700px; margin:2rem auto 0; padding:0 2rem; display:flex; gap:0.9rem; justify-content:center; flex-wrap:wrap; }
+
+@media (max-width:640px){
+    nav .container { flex-wrap:wrap; }
+    .logo-section { padding:0.6rem 1rem; flex:1; min-width:200px; }
+    nav ul { flex-wrap:nowrap; width:100%; justify-content:flex-start; order:3; border-top:1px solid #F0F1F3; overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+    nav ul::-webkit-scrollbar { display:none; }
+    nav ul li { flex-shrink:0; }
+    nav a.navlink { padding:0.65rem 0.7rem; font-size:0.82rem; white-space:nowrap; }
+    .review-panel { padding:0.7rem 1rem; }
+    .review-panel select { max-width:100%; }
+    .stage { padding:1.75rem 1rem 0; }
+    .amount-card { padding:1.25rem; }
+    .amount-card .owed { text-align:left; }
+    .option-card { padding:1.25rem; }
+}
+.site-header { position:sticky; top:0; z-index:1000; }
+.venmo-alt a { color:var(--primary); font-weight:600; text-decoration:underline; }
+
+/* Menu: never break a label across two lines; below 1180px the menu gets its own row */
+nav a.navlink, nav a.signout { white-space:nowrap; }
+@media (max-width:1180px) {
+    nav .container { flex-wrap:wrap; }
+    .logo-section { flex:1; min-width:200px; }
+    nav ul { width:100%; order:3; justify-content:flex-start; border-top:1px solid #F0F1F3; overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+    nav ul::-webkit-scrollbar { display:none; }
+    nav ul li { flex-shrink:0; }
+}
+</style>
+<script src="config.js"></script>
+<script src="session.js"></script>
+<script src="nav-toggle.js"></script>
+</head>
+<body>
+
+<header class="site-header">
+<div class="review-panel" id="reviewPanel" style="display:none;">
+    <div class="inner">
+        <span class="tag">Live</span>
+        <span class="demo-controls" id="demoControls">
+            <label for="memberSelect">Browse as a member (admin):</label>
+            <select id="memberSelect" onchange="browseAs(this.value)"></select>
+        </span>
+        <span class="note" id="memberNote">Choose a member to see his live record.</span>
+    </div>
+</div>
+
+<nav>
+    <div class="container">
+        <div class="logo-section">
+            <a href="home.html" class="logo preserve-member">
+                <span class="logo-main">ST. LUKE KNIGHTS OF COLUMBUS</span>
+                <span class="logo-sub">Member Center · Council 14895</span>
+            </a>
+        </div>
+        <ul>
+            <li><a href="home.html" class="navlink preserve-member">Profile</a></li>
+            <li><a href="calendar.html" class="navlink preserve-member">Calendar</a></li>
+            <li><a href="prayers.html" class="navlink preserve-member">Prayers</a></li>
+            <li><a href="groups.html" class="navlink preserve-member">Groups</a></li>
+            <li><a href="membership-card.html" class="navlink preserve-member">KofC Card</a></li>
+            <li class="nav-whydues"><a href="why-dues.html" class="navlink preserve-member">Why Dues?</a></li>
+            <li><a href="verify-wizard.html" class="navlink preserve-member">Verify Data</a></li>
+        </ul>
+    </div>
+</nav>
+</header>
+
+<div class="not-logged-in" id="notLoggedIn" style="display:none;">
+    <h1>Please sign in</h1>
+    <p>Sign in to the Member Center to view this page.</p>
+    <a href="landing.html" class="btn btn-primary">Sign in</a>
+</div>
+
+<div class="stage" id="mainContent" style="display:none;">
+    <h1>Pay Your Dues</h1>
+    <p class="sub">Pay online through Square, send with Venmo, or mail a check — whichever's easier.</p>
+
+    <div class="amount-card">
+        <div class="who">
+            Paying for
+            <strong id="memberName">Daniel R. Fitzgerald</strong>
+            Member #<span id="memberId">0142</span>
+        </div>
+        <div class="owed">
+            <div class="label">Amount Owed</div>
+            <div class="value" id="owedValue">&mdash;</div>
+        </div>
+    </div>
+
+    <div class="options">
+        <div class="option-card">
+            <h2>Pay Online</h2>
+            <p>Fast and secure through Square. You'll be taken to the council's Square page to complete payment — your dues status updates once it's processed.</p>
+            <a class="btn btn-primary" href="https://knights-of-columbus-14895.square.site/" target="_blank" rel="noopener">Pay with Square &rarr;</a>
+        </div>
+
+        <div class="option-card" id="venmoCard" style="display:none;">
+            <h2>Pay with Venmo</h2>
+            <p>For members who already use Venmo. Send your payment to the council's Financial Secretary:</p>
+            <p class="payable-to">Venmo: <strong id="venmoHandle">Loading&hellip;</strong></p>
+            <p class="mail-note">In the Venmo note, please include your name and/or the invoice number from the dues invoice emailed to you, so it's applied to the right account.</p>
+            <p class="mail-note venmo-alt"><strong>No Venmo?</strong> <a href="https://knights-of-columbus-14895.square.site/" target="_blank" rel="noopener">Use Square</a> to pay by card, no account needed.</p>
+            <a class="btn btn-primary" id="venmoLink" href="#" target="_blank" rel="noopener">Open Venmo &rarr;</a>
+        </div>
+
+        <div class="option-card">
+            <h2>Mail a Check</h2>
+            <p>Prefer a check? Here's who to make it out to and where to send it:</p>
+            <p class="payable-to">Payable to: <strong id="payableTo">Loading&hellip;</strong></p>
+            <div class="mail-block" id="mailAddress">Dave Fink
+Knights of Columbus
+Dave's Street
+City, State ZIP</div>
+            <p class="mail-note">In the memo line, please write your name and/or the invoice number from the dues invoice emailed to you, so it's applied to the right account.</p>
+        </div>
+    </div>
+
+    <div class="actions">
+        <a href="home.html" class="btn btn-outline preserve-member">Back to My Profile</a>
+    </div>
+</div>
+
+<script>
+const SHEET_ID = KOC_CONFIG.sheetId;
+const SHEET_GID = KOC_CONFIG.gids.membership; // St Luke KOC Membership DB tab
+const ASSUMPTIONS_GID = KOC_CONFIG.gids.assumptions; // Assumptions tab
+const GVIZ_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${SHEET_GID}`;
+const GVIZ_ASSUMPTIONS_URL = `https://docs.google.com/spreadsheets/d/${KOC_CONFIG.assumptionsSheetId}/gviz/tq?tqx=out:json&gid=${ASSUMPTIONS_GID}`;
+
+function fullName(m) { return [m.firstName, m.lastName].filter(Boolean).join(' ') + (m.suffix ? ' ' + m.suffix : ''); }
+function titleCase(s) { return (s || '').toString().replace(/\w\S*/g, t => t.charAt(0).toUpperCase() + t.slice(1).toLowerCase()); }
+
+function applyMember(idxOrMember) {
+    const m = (idxOrMember !== null && typeof idxOrMember === 'object') ? idxOrMember : null;
+    if (!m) return;
+    document.getElementById('memberName').textContent = fullName(m);
+    document.getElementById('memberId').textContent = m.memberNumber;
+
+    const owedRaw = (m.outstandingDues === null || m.outstandingDues === undefined) ? '' : String(m.outstandingDues);
+    const owed = parseFloat(owedRaw.replace(/[^0-9.\-]/g, ''));
+    const owedEl = document.getElementById('owedValue');
+    if (!isNaN(owed) && owed > 0) {
+        owedEl.textContent = '$' + owed.toFixed(2);
+        owedEl.classList.remove('current');
+    } else {
+        owedEl.textContent = 'Current';
+        owedEl.classList.add('current');
+    }
+}
+
+/* Admin "Browse as a member": the list is loaded live from the sheet only in admin
+   mode, so no member data is stored in this page. */
+async function initMemberSelect() {
+    const select = document.getElementById('memberSelect');
+    select.innerHTML = '<option value="">Loading members\u2026</option>';
+    try {
+        const text = await (await fetch(GVIZ_URL)).text();
+        const json = JSON.parse(text.match(/setResponse\(([\s\S]*)\);?\s*$/)[1]);
+        const cols = json.table.cols.map(c => (c.label || '').trim());
+        const val = (row, label) => { const i = cols.indexOf(label); const c = i === -1 ? null : row.c[i]; return c ? (c.v != null ? c.v : c.f) : null; };
+        const people = json.table.rows.map(r => ({
+            num: String(val(r, 'Member Number') || '').trim(),
+            first: titleCase(val(r, 'First Name')), last: titleCase(val(r, 'Last Name')), suffix: val(r, 'Suffix') || ''
+        })).filter(p => p.num).sort((a, b) => (a.last + ' ' + a.first).localeCompare(b.last + ' ' + b.first));
+        select.innerHTML = '<option value="">Choose a member\u2026</option>';
+        let letter = '', group = null;
+        people.forEach(p => {
+            const L = (p.last || '?').charAt(0).toUpperCase();
+            if (L !== letter) { letter = L; group = document.createElement('optgroup'); group.label = L; select.appendChild(group); }
+            const opt = document.createElement('option');
+            opt.value = p.num;
+            opt.textContent = `${p.last}, ${p.first}${p.suffix ? ' ' + p.suffix : ''} \u2014 #${p.num}`;
+            group.appendChild(opt);
+        });
+        const current = new URLSearchParams(window.location.search).get('member');
+        if (current) {
+            const match = people.find(p => p.num.replace(/^0+/, '') === current.replace(/^0+/, ''));
+            if (match) select.value = match.num;
+        }
+    } catch (e) {
+        select.innerHTML = '<option value="">Could not load the member list</option>';
+    }
+}
+
+async function browseAs(num) {
+    if (!num) return;
+    const note = document.getElementById('memberNote');
+    if (note) note.textContent = 'Loading #' + num + '\u2026';
+    try {
+        const live = await fetchLiveMember(num);
+        if (!live) { if (note) note.textContent = 'Could not find #' + num + ' in the sheet.'; return; }
+        applyMember(live);
+        showMainContent();
+        if (note) note.textContent = 'Showing #' + num + ', live from the sheet.';
+    } catch (e) {
+        if (note) note.textContent = 'Could not reach the sheet \u2014 try again.';
+    }
+}
+
+async function fetchLiveMember(memberNumber) {
+    const res = await fetch(GVIZ_URL);
+    const text = await res.text();
+    const match = text.match(/setResponse\(([\s\S]*)\);?\s*$/);
+    if (!match) throw new Error('Unexpected sheet response');
+    const json = JSON.parse(match[1]);
+    const cols = json.table.cols.map(c => (c.label || '').trim());
+    const idx = (label) => cols.indexOf(label);
+    const cell = (row, label) => {
+        const c = row.c[idx(label)];
+        if (!c) return null;
+        return (c.v !== null && c.v !== undefined) ? c.v : c.f;
+    };
+    const row = json.table.rows.find(r => String(cell(r, 'Member Number')).replace(/^0+/, '') === String(memberNumber).replace(/^0+/, ''));
+    if (!row) return null;
+
+    return {
+        memberNumber: cell(row, 'Member Number'),
+        firstName: titleCase(cell(row, 'First Name')),
+        lastName: titleCase(cell(row, 'Last Name')),
+        suffix: cell(row, 'Suffix'),
+        clergy: (cell(row, 'Clergy?') === 'Yes'),
+        duesBucket: (cell(row, 'Overdue') === 'Current') ? 'current' : 'behind',
+        outstandingDues: cell(row, 'Outstanding Dues'),
+    };
+}
+
+async function fetchAssumptionsRow(labelPrefix) {
+    const res = await fetch(GVIZ_ASSUMPTIONS_URL);
+    const text = await res.text();
+    const match = text.match(/setResponse\(([\s\S]*)\);?\s*$/);
+    if (!match) throw new Error('Unexpected sheet response');
+    const json = JSON.parse(match[1]);
+    const row = json.table.rows.find(r => {
+        const label = r.c[0] && (r.c[0].v || r.c[0].f);
+        return label && String(label).trim().toLowerCase().startsWith(labelPrefix);
+    });
+    if (!row) return null;
+    // Check column B, then column C — split across two columns so text and
+    // dates never share a column (a shared column caused Google's API to
+    // silently null out non-date values once it inferred a date type).
+    for (const idx of [1, 2]) {
+        const cell = row.c[idx];
+        if (cell && (cell.v !== null && cell.v !== undefined)) return cell.v;
+        if (cell && cell.f) return cell.f;
+    }
+    return null;
+}
+
+async function fetchMailAddress() {
+    return fetchAssumptionsRow('dues check mail to');
+}
+
+async function fetchPayableTo() {
+    return fetchAssumptionsRow('dues check payable to');
+}
+
+async function fetchVenmoHandle() {
+    return fetchAssumptionsRow('financial secretary venmo');
+}
+
+async function loadVenmo() {
+    const card = document.getElementById('venmoCard');
+    try {
+        const raw = await fetchVenmoHandle();
+        const handle = String(raw || '').trim().replace(/^@/, '');
+        if (!handle) return; // no handle on file — keep the card hidden
+        document.getElementById('venmoHandle').textContent = '@' + handle;
+        document.getElementById('venmoLink').href = 'https://venmo.com/u/' + encodeURIComponent(handle);
+        card.style.display = 'flex';
+    } catch (e) {
+        // quiet fail — Square and check remain available
+    }
+}
+
+function isOwnerMode() {
+    return Session.adminTools();   // a signed-in Data Administrator who has switched tools on (?admin=on)
+}
+function showMainContent() {
+    document.getElementById('notLoggedIn').style.display = 'none';
+    document.getElementById('mainContent').style.display = 'block';
+}
+function showNotLoggedIn() {
+    document.getElementById('mainContent').style.display = 'none';
+    document.getElementById('notLoggedIn').style.display = 'block';
+}
+
+async function tryLiveLogin() {
+    const memberNumber = Session.pageMember();
+    const note = document.getElementById('memberNote');
+    const owner = isOwnerMode();
+
+    if (!memberNumber) {
+        if (!owner) showNotLoggedIn();
+        return;
+    }
+
+    if (note) note.textContent = 'Loading your live record\u2026';
+    try {
+        const live = await fetchLiveMember(memberNumber);
+        if (live) {
+            applyMember(live);
+            showMainContent();
+            if (note) note.textContent = 'Logged in live \u2014 record #' + memberNumber + ' pulled straight from the sheet just now.';
+        } else if (owner) {
+            if (note) note.textContent = 'Could not find member #' + memberNumber + ' in the live sheet \u2014 showing snapshot data below instead.';
+        } else {
+            showNotLoggedIn();
+        }
+    } catch (e) {
+        if (owner) {
+            if (note) note.textContent = 'Could not reach the live sheet \u2014 showing snapshot data below instead.';
+        } else {
+            showNotLoggedIn();
+        }
+    }
+}
+
+async function loadMailAddress() {
+    const el = document.getElementById('mailAddress');
+    const payableEl = document.getElementById('payableTo');
+    try {
+        const addr = await fetchMailAddress();
+        el.textContent = addr || 'Could not find the mailing address on the Assumptions tab \u2014 check with a data administrator.';
+    } catch (e) {
+        el.textContent = 'Could not load the mailing address right now \u2014 check with a data administrator or try again shortly.';
+    }
+    try {
+        const payable = await fetchPayableTo();
+        payableEl.textContent = payable || 'Not on file \u2014 check with a data administrator.';
+    } catch (e) {
+        payableEl.textContent = 'Could not load right now.';
+    }
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+    Session.renew();   // quietly renews a remembered pass, at most once a day
+    // If arriving from the verify wizard, show a "Return to wizard" button instead
+    const fromWizard = new URLSearchParams(window.location.search).get('from') === 'wizard';
+    if (fromWizard) {
+        const actionsDiv = document.querySelector('.actions');
+        if (actionsDiv) {
+            actionsDiv.innerHTML = '<a href="verify-wizard.html?paid=1' + (Session.adminTools() && Session.pageMember() ? '&member=' + encodeURIComponent(Session.pageMember()) : '') + '" class="btn btn-primary">Return to Verify Wizard</a>';
+        }
+    }
+    if (isOwnerMode()) {
+        document.getElementById('reviewPanel').style.display = 'block';
+        initMemberSelect();
+    } else {
+        document.getElementById('demoControls').style.display = 'none';
+    }
+    tryLiveLogin();
+    loadMailAddress();
+    loadVenmo();
+});
+
+/* Carry the logged-in member across pages via preserve-member links */
+(function () {
+    const memberParam = new URLSearchParams(window.location.search).get("member");
+    if (!memberParam) return;
+    document.querySelectorAll("a.preserve-member").forEach(a => {
+        const url = new URL(a.getAttribute("href"), window.location.href);
+        url.searchParams.set("member", memberParam);
+        a.setAttribute("href", url.pathname + url.search);
+    });
+})();
+</script>
+
+</body>
+</html>

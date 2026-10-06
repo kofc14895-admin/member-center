@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calendar — St. Luke Knights of Columbus Member Center</title>
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600;700&family=Lora:wght@400;500;600&family=Lato:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+    --primary: #1E3A8A;
+    --primary-light: #2563EB;
+    --secondary: #C5A572;
+    --secondary-light: #D4B583;
+    --accent: #B91C1C;
+    --light-bg: #F9FAFB;
+    --text-dark: #1F2937;
+    --text-medium: #6B7280;
+    --shadow: rgba(30, 58, 138, 0.15);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html { max-width:100%; }
+body { font-family:'Lora', serif; color:var(--text-dark); background:var(--light-bg); line-height:1.65; padding-bottom:4rem; }
+a { color:inherit; }
+:focus-visible { outline:3px solid var(--primary-light); outline-offset:2px; }
+
+.review-panel { background:#fff; border-bottom:1px solid #E5E7EB; padding:0.6rem 1.5rem; }
+.review-panel .inner { max-width:800px; margin:0 auto; display:flex; align-items:center; gap:0.7rem; }
+.review-panel .tag { font-family:'Lato', sans-serif; font-size:0.68rem; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; background:#374151; color:#fff; padding:0.25rem 0.55rem; border-radius:4px; }
+.review-panel .note { font-family:'Lato', sans-serif; font-size:0.78rem; color:var(--text-medium); }
+
+nav { background:white; box-shadow:0 2px 4px rgba(0,0,0,0.1); border-bottom:3px solid var(--primary); }
+nav .container { max-width:1200px; margin:0 auto; display:flex; justify-content:space-between; align-items:stretch; }
+.logo-section { padding:0.7rem 1.5rem; display:flex; align-items:center; }
+.logo { font-family:'Crimson Pro', serif; color:var(--primary); line-height:1.15; text-decoration:none; }
+.logo-main { display:block; font-size:1.05rem; font-weight:700; letter-spacing:0.2px; }
+.logo-sub { display:block; font-size:0.72rem; font-weight:400; color:var(--text-medium); font-family:'Lato',sans-serif; }
+nav ul { list-style:none; display:flex; margin:0; }
+nav ul li { display:flex; align-items:center; }
+nav a.navlink {
+    font-family:'Lato', sans-serif; font-size:0.92rem; font-weight:500; color:var(--text-medium);
+    text-decoration:none; padding:1.1rem 1.15rem; border-bottom:3px solid transparent; transition:all .2s;
+}
+nav a.navlink:hover { color:var(--primary); background:rgba(30,58,138,0.05); }
+nav a.navlink.active { color:var(--primary); font-weight:700; border-bottom-color:var(--secondary); }
+nav a.signout { font-family:'Lato',sans-serif; font-size:0.85rem; color:var(--text-medium); padding:1.1rem 1.5rem; text-decoration:none; }
+nav a.signout:hover { color:var(--accent); }
+.site-header { position:sticky; top:0; z-index:1000; }
+
+.hero { max-width:760px; margin:0 auto; padding:2.5rem 2rem 0; text-align:center; }
+.hero h1 { font-family:'Crimson Pro', serif; font-size:2.1rem; color:var(--primary); font-weight:700; }
+.hero p { font-family:'Lora',serif; font-size:1.02rem; color:var(--text-medium); margin-top:0.75rem; }
+
+.page { max-width:800px; margin:0 auto; padding:0 2rem; }
+
+.meeting-box {
+    background:white; padding:1.75rem; border-radius:16px; box-shadow:0 6px 20px var(--shadow);
+    margin:1.75rem 0 0; border-top:4px solid var(--primary);
+}
+.meeting-box h3 { font-family:'Crimson Pro', serif; font-size:1.4rem; color:var(--primary); margin-bottom:1.1rem; }
+.meeting-info { display:grid; gap:0.8rem; }
+.info-row { display:flex; gap:1rem; line-height:1.6; font-family:'Lato',sans-serif; font-size:0.92rem; flex-wrap:wrap; }
+.info-row strong { min-width:70px; color:var(--primary); }
+
+.month-select-row { display:flex; align-items:center; justify-content:center; margin-top:1.75rem; }
+
+.theme-filter { display:flex; gap:0.6rem; justify-content:center; flex-wrap:wrap; margin-top:1.75rem; }
+.theme-btn {
+    display:flex; align-items:center; gap:0.45rem; font-family:'Lato',sans-serif; font-size:0.85rem; font-weight:600;
+    padding:0.55rem 1.05rem; border-radius:50px; border:1.5px solid #D1D5DB; background:white; color:var(--text-medium);
+    cursor:pointer; transition:all .15s;
+}
+.theme-btn:hover { border-color:var(--secondary); }
+.theme-btn.active { background:var(--primary); border-color:var(--primary); color:white; }
+.theme-btn .icon { font-size:1rem; }
+
+.theme-pill {
+    display:inline-flex; align-items:center; gap:0.3rem; font-family:'Lato',sans-serif; font-size:0.72rem; font-weight:700;
+    text-transform:uppercase; letter-spacing:0.03em; color:var(--primary); background:var(--light-bg);
+    padding:0.2rem 0.6rem; border-radius:50px;
+}
+.month-dropdown { position:relative; }
+.month-dropdown-btn {
+    font-family:'Lato', sans-serif; font-size:0.9rem; font-weight:600; padding:0.6rem 1.1rem; border-radius:10px;
+    border:1.5px solid #D1D5DB; background:white; color:var(--text-dark); cursor:pointer;
+    display:flex; align-items:center; gap:0.5rem; min-width:180px; justify-content:space-between;
+}
+.month-dropdown-btn:hover { border-color:var(--secondary); }
+.month-dropdown-btn .caret { font-size:0.7rem; color:var(--text-medium); }
+.month-dropdown-panel {
+    display:none; position:absolute; top:calc(100% + 0.4rem); left:50%; transform:translateX(-50%);
+    background:white; border-radius:12px; box-shadow:0 8px 24px var(--shadow); border:1px solid #E5E7EB;
+    padding:0.9rem; z-index:50; width:280px;
+}
+.month-dropdown-panel.open { display:block; }
+.month-dropdown-actions { display:flex; justify-content:space-between; margin-bottom:0.7rem; padding-bottom:0.6rem; border-bottom:1px solid #F0F1F3; }
+.month-dropdown-actions button {
+    font-family:'Lato',sans-serif; font-size:0.78rem; font-weight:600; color:var(--primary);
+    background:none; border:none; cursor:pointer; padding:0;
+}
+.month-checkbox-grid { display:grid; grid-template-columns:1fr 1fr; gap:0.5rem 0.75rem; }
+.month-checkbox-grid label { display:flex; align-items:center; gap:0.4rem; font-family:'Lato',sans-serif; font-size:0.85rem; color:var(--text-dark); cursor:pointer; }
+.month-checkbox-grid input[type="checkbox"] { accent-color:var(--primary); cursor:pointer; }
+
+.filter-hint { text-align:center; font-family:'Lato',sans-serif; font-size:0.78rem; color:var(--text-medium); margin:0.75rem 0 0.5rem; }
+
+.month-group { margin-top:1.75rem; }
+.month-label {
+    font-family:'Crimson Pro', serif; font-size:1.35rem; color:var(--primary); font-weight:700;
+    padding-bottom:0.5rem; border-bottom:2px solid var(--secondary); margin-bottom:1rem;
+}
+
+.event-row {
+    background:white; border-radius:12px; padding:1.1rem 1.3rem; margin-bottom:0.9rem;
+    box-shadow:0 2px 8px var(--shadow); border-left:4px solid var(--accent);
+    display:flex; flex-direction:column; gap:0.4rem;
+}
+.event-top { display:flex; align-items:center; gap:0.7rem; flex-wrap:wrap; }
+.event-date { color:var(--accent); font-weight:700; font-size:0.82rem; font-family:'Lato',sans-serif; }
+.event-title { font-family:'Crimson Pro', serif; font-size:1.15rem; color:var(--text-dark); font-weight:700; }
+.event-responsibility { font-family:'Lato',sans-serif; font-size:0.85rem; color:var(--text-medium); }
+.event-responsibility strong { color:var(--text-dark); }
+.event-leader { font-family:'Lato',sans-serif; font-size:0.78rem; color:var(--text-medium); font-style:italic; }
+.event-signup { display:flex; align-items:center; gap:0.6rem 0.9rem; flex-wrap:wrap; margin-top:0.35rem; }
+.signup-btn { display:inline-flex; align-items:center; justify-content:center; min-height:46px; padding:0.6rem 1.6rem; border-radius:50px; background:var(--primary); color:#fff; border:2px solid var(--primary); font-family:'Lato',sans-serif; font-size:1rem; font-weight:700; text-decoration:none; }
+.signup-btn:focus-visible { background:#fff; color:var(--primary); }
+@media (hover:hover) { .signup-btn:hover { background:#fff; color:var(--primary); } }   /* phones keep the solid button after a tap */
+.signup-note { font-family:'Lato',sans-serif; font-size:0.78rem; color:var(--text-medium); }
+
+.no-results, .load-status { text-align:center; padding:2.5rem 1rem; font-family:'Lato',sans-serif; color:var(--text-medium); }
+.no-results { display:none; }
+.no-results.show { display:block; }
+
+.actions { max-width:1200px; margin:2rem auto 0; padding:0 2rem; display:flex; gap:0.9rem; justify-content:center; flex-wrap:wrap; }
+.btn { font-family:'Lato', sans-serif; font-weight:600; font-size:0.9rem; cursor:pointer; border-radius:50px; padding:0.7rem 1.5rem; border:2px solid transparent; text-decoration:none; display:inline-block; }
+.btn-outline { background:transparent; color:var(--primary); border-color:var(--primary); }
+.btn-outline:hover { background:var(--primary); color:white; }
+
+@media (max-width:640px){
+    .signup-btn { width:100%; }
+    .hero { padding:2rem 1.25rem 0; }
+    .hero h1 { font-size:1.6rem; }
+    .page { padding:0 1.25rem; }
+    nav .container { flex-wrap:wrap; }
+    .logo-section { padding:0.6rem 1rem; flex:1; min-width:200px; }
+    nav ul { flex-wrap:nowrap; width:100%; justify-content:flex-start; order:3; border-top:1px solid #F0F1F3; overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+    nav ul::-webkit-scrollbar { display:none; }
+    nav ul li { flex-shrink:0; }
+    nav a.navlink { padding:0.65rem 0.7rem; font-size:0.82rem; white-space:nowrap; }
+}
+
+/* Menu: never break a label across two lines; below 1180px the menu gets its own row */
+nav a.navlink, nav a.signout { white-space:nowrap; }
+@media (max-width:1180px) {
+    nav .container { flex-wrap:wrap; }
+    .logo-section { flex:1; min-width:200px; }
+    nav ul { width:100%; order:3; justify-content:flex-start; border-top:1px solid #F0F1F3; overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+    nav ul::-webkit-scrollbar { display:none; }
+    nav ul li { flex-shrink:0; }
+}
+</style>
+<script src="config.js"></script>
+<script src="session.js"></script>
+<script src="nav-toggle.js"></script>
+</head>
+<body>
+
+<div class="review-panel">
+    <div class="inner">
+        <span class="tag">Live</span>
+        <span class="note" id="loadNote">Loading the council calendar\u2026</span>
+    </div>
+</div>
+
+<header class="site-header">
+<nav>
+    <div class="container">
+        <div class="logo-section">
+            <a href="home.html" class="logo preserve-member">
+                <span class="logo-main">ST. LUKE KNIGHTS OF COLUMBUS</span>
+                <span class="logo-sub">Member Center · Council 14895</span>
+            </a>
+        </div>
+        <ul>
+            <li><a href="home.html" class="navlink preserve-member">Profile</a></li>
+            <li><a href="#" class="navlink active">Calendar</a></li>
+            <li><a href="prayers.html" class="navlink preserve-member">Prayers</a></li>
+            <li><a href="groups.html" class="navlink preserve-member">Groups</a></li>
+            <li><a href="membership-card.html" class="navlink preserve-member">KofC Card</a></li>
+            <li class="nav-whydues"><a href="why-dues.html" class="navlink preserve-member">Why Dues?</a></li>
+            <li><a href="verify-wizard.html" class="navlink preserve-member">Verify Data</a></li>
+        </ul>
+    </div>
+</nav>
+</header>
+
+<div class="hero">
+    <h1>Council Calendar</h1>
+    <p>Regular meetings and this year's events, month by month.</p>
+</div>
+
+<div class="page">
+    <div class="meeting-box">
+        <h3>Regular Council Meetings</h3>
+        <div class="meeting-info">
+            <div class="info-row"><strong>When:</strong><span>First Thursday of each month at 7:00 PM</span></div>
+            <div class="info-row"><strong>Where:</strong><span>Blessed Fr. Michael McGivney Room, St. Luke Catholic Church</span></div>
+        </div>
+    </div>
+
+    <div class="theme-filter" id="themeFilter">
+        <button class="theme-btn active" data-theme="All" onclick="filterTheme('All')"><span class="icon">&#9673;</span> All</button>
+        <button class="theme-btn" data-theme="Faith" onclick="filterTheme('Faith')"><span class="icon">&#9767;</span> Faith</button>
+        <button class="theme-btn" data-theme="Family" onclick="filterTheme('Family')"><span class="icon">&#128110;</span> Family</button>
+        <button class="theme-btn" data-theme="Community" onclick="filterTheme('Community')"><span class="icon">&#129309;</span> Community</button>
+        <button class="theme-btn" data-theme="Life" onclick="filterTheme('Life')"><span class="icon">&#10084;</span> Life</button>
+    </div>
+
+    <div class="month-select-row">
+        <div class="month-dropdown" id="monthDropdown">
+            <button class="month-dropdown-btn" id="monthDropdownBtn" onclick="toggleMonthDropdown()">
+                <span id="monthDropdownLabel">All Months</span> <span class="caret">&#9662;</span>
+            </button>
+            <div class="month-dropdown-panel" id="monthDropdownPanel">
+                <div class="month-dropdown-actions">
+                    <button type="button" onclick="setAllMonths(true)">Select All</button>
+                    <button type="button" onclick="setAllMonths(false)">Clear</button>
+                </div>
+                <div class="month-checkbox-grid" id="monthCheckboxGrid">
+                    <!-- populated once the sheet loads, in the order months actually appear -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <p class="filter-hint" id="filterHint"></p>
+
+    <div id="eventsContainer">
+        <p class="load-status" id="loadStatus">Loading events&hellip;</p>
+    </div>
+
+    <p class="no-results" id="noResults">No events match this filter right now &mdash; try "Select All."</p>
+
+    <div class="actions">
+        <a href="home.html" class="btn btn-outline preserve-member">Back to My Profile</a>
+    </div>
+</div>
+
+<script>
+const ACTIVITY_SHEET_URL = KOC_CONFIG.calendarCsvUrl;
+
+let EVENTS = [];
+let MONTH_ORDER = [];
+let currentTheme = 'All';
+
+/* The Sign-up Link column: accept only a real web address, so a stray word or a bad paste never becomes a broken or unsafe button. */
+function cleanSignupUrl(raw) {
+    let u = String(raw || '').trim();
+    if (!u || /\s/.test(u)) return '';
+    if (/^http:\/\//i.test(u)) u = 'https://' + u.slice(7);                       // always use the secure address
+    else if (!/^[a-z][a-z0-9+.-]*:/i.test(u) && /^[\w-]+(\.[\w-]+)+(\/|$)/.test(u)) u = 'https://' + u;   // "surveymonkey.com/r/ABC" typed without https://
+    try { const url = new URL(u); return url.protocol === 'https:' ? url.href : ''; } catch (e) { return ''; }
+}
+const attrEsc = s => String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+const THEME_ICON = { Faith: '&#9767;', Family: '&#128110;', Community: '&#129309;', Life: '&#10084;' };
+
+/* Minimal CSV parser that handles quoted fields with embedded commas/quotes */
+function parseCSV(text) {
+    const rows = [];
+    let row = [], field = '', inQuotes = false;
+    for (let i = 0; i < text.length; i++) {
+        const c = text[i], next = text[i + 1];
+        if (inQuotes) {
+            if (c === '"' && next === '"') { field += '"'; i++; }
+            else if (c === '"') { inQuotes = false; }
+            else { field += c; }
+        } else {
+            if (c === '"') inQuotes = true;
+            else if (c === ',') { row.push(field); field = ''; }
+            else if (c === '\r') { /* skip */ }
+            else if (c === '\n') { row.push(field); rows.push(row); row = []; field = ''; }
+            else { field += c; }
+        }
+    }
+    if (field.length || row.length) { row.push(field); rows.push(row); }
+    return rows.filter(r => r.length > 1 || r[0] !== '');
+}
+
+async function loadEvents() {
+    const loadNote = document.getElementById('loadNote');
+    const loadStatus = document.getElementById('loadStatus');
+    try {
+        const res = await fetch(ACTIVITY_SHEET_URL);
+        const text = await res.text();
+        const rows = parseCSV(text);
+        const headers = rows[0].map(h => h.trim());
+        const idx = (label) => headers.indexOf(label);
+        const signupCol = headers.findIndex(h => h.toLowerCase().replace(/[^a-z]/g, '') === 'signuplink');   // "Sign-up Link", "Signup link", etc.
+
+        EVENTS = rows.slice(1).map(r => ({
+            month: (r[idx('Month')] || '').trim(),
+            date: (r[idx('Date')] || '').trim(),
+            activity: (r[idx('Activity')] || '').trim(),
+            waysToHelp: (r[idx('Ways to Help')] || '').trim(),
+            leader: (r[idx('Leader')] || '').trim(),
+            type: (r[idx('Type')] || '').trim(),
+            signup: signupCol === -1 ? '' : cleanSignupUrl(r[signupCol]),
+        })).filter(e => e.activity);
+
+        MONTH_ORDER = [...new Set(EVENTS.map(e => e.month))];
+        const monthYears = computeMonthYears(EVENTS, MONTH_ORDER);
+
+        const withSignup = EVENTS.filter(e => e.signup).length;
+        loadNote.textContent = `Connected \u2014 ${EVENTS.length} events loaded from the council calendar` +
+            (signupCol === -1 ? ' (no "Sign-up Link" column found).' : ` (${withSignup} with a sign-up link).`);
+        loadStatus.remove();
+        buildMonthCheckboxes(monthYears);
+        applyFilters();
+    } catch (e) {
+        loadNote.textContent = 'Could not reach the calendar sheet \u2014 check sharing settings on the published sheet.';
+        loadStatus.textContent = 'Could not load events right now.';
+    }
+}
+
+const MONTH_INDEX = { January:1, February:2, March:3, April:4, May:5, June:6, July:7, August:8, September:9, October:10, November:11, December:12 };
+
+/* Parses a date string like "Friday, August 7, 2026" -> {year, monthIdx} or null if unparseable (TBD, blank, etc.) */
+function parseEventDate(dateStr) {
+    if (!dateStr) return null;
+    const cleaned = dateStr.replace(/^[A-Za-z]+,\s*/, ''); // strip leading weekday name
+    const d = new Date(cleaned);
+    if (isNaN(d.getTime())) return null;
+    return { year: d.getFullYear(), monthIdx: d.getMonth() + 1 };
+}
+
+/* Determines the actual calendar year for each fiscal-year month label (Aug 2026, Sep 2026, ..., Jun 2027),
+   using real parsed dates where available and inferring the rest from sequence order (year rolls over
+   whenever the calendar month number decreases going down the fiscal-year list). */
+function computeMonthYears(events, monthOrder) {
+    const years = {};
+    monthOrder.forEach(m => {
+        const found = events.find(e => e.month === m && parseEventDate(e.date));
+        if (found) years[m] = parseEventDate(found.date).year;
+    });
+    // forward-fill any months with no parseable date, using the previous month's inferred year
+    for (let i = 0; i < monthOrder.length; i++) {
+        const m = monthOrder[i];
+        if (years[m] !== undefined) continue;
+        if (i === 0) continue; // nothing to infer from yet; handled by backward-fill below
+        const prevMonth = monthOrder[i - 1];
+        const prevYear = years[prevMonth];
+        if (prevYear === undefined) continue;
+        years[m] = (MONTH_INDEX[m] > MONTH_INDEX[prevMonth]) ? prevYear : prevYear + 1;
+    }
+    // backward-fill in case the very first month(s) had no parseable date
+    for (let i = monthOrder.length - 1; i >= 0; i--) {
+        const m = monthOrder[i];
+        if (years[m] !== undefined) continue;
+        const nextMonth = monthOrder[i + 1];
+        const nextYear = years[nextMonth];
+        if (nextYear === undefined) continue;
+        years[m] = (MONTH_INDEX[m] < MONTH_INDEX[nextMonth]) ? nextYear : nextYear - 1;
+    }
+    return years;
+}
+
+function isMonthFullyPast(month, year) {
+    const today = new Date();
+    const currentYear = today.getFullYear();
+    const currentMonthIdx = today.getMonth() + 1;
+    if (year === undefined) return false; // if we genuinely can't tell, don't hide it
+    if (year < currentYear) return true;
+    if (year > currentYear) return false;
+    return MONTH_INDEX[month] < currentMonthIdx;
+}
+
+function buildMonthCheckboxes(monthYears) {
+    const grid = document.getElementById('monthCheckboxGrid');
+    grid.innerHTML = MONTH_ORDER.map(m => {
+        const checked = isMonthFullyPast(m, monthYears[m]) ? '' : 'checked';
+        return `<label><input type="checkbox" value="${m}" ${checked} onchange="applyFilters()"> ${m}</label>`;
+    }).join('');
+}
+
+function toggleMonthDropdown() {
+    document.getElementById('monthDropdownPanel').classList.toggle('open');
+}
+
+function setAllMonths(checked) {
+    document.querySelectorAll('#monthCheckboxGrid input[type="checkbox"]').forEach(cb => cb.checked = checked);
+    applyFilters();
+}
+
+function selectedMonths() {
+    return Array.from(document.querySelectorAll('#monthCheckboxGrid input[type="checkbox"]:checked')).map(cb => cb.value);
+}
+
+function updateMonthDropdownLabel(months) {
+    const label = document.getElementById('monthDropdownLabel');
+    if (months.length === 0) label.textContent = 'All Months';
+    else if (months.length === 1) label.textContent = months[0];
+    else if (months.length <= 3) label.textContent = months.map(m => m.slice(0,3)).join(', ');
+    else label.textContent = months.length + ' months selected';
+}
+
+function renderEvents() {
+    const months = selectedMonths();
+    const monthsToShow = months.length ? months : MONTH_ORDER;
+    const container = document.getElementById('eventsContainer');
+
+    let html = '';
+    let anyVisible = false;
+    monthsToShow.forEach(month => {
+        const monthEvents = EVENTS.filter(e =>
+            e.month === month && (currentTheme === 'All' || e.type === currentTheme)
+        );
+        if (!monthEvents.length) return;
+        anyVisible = true;
+        html += `<div class="month-group"><div class="month-label">${month}</div>`;
+        monthEvents.forEach(e => {
+            const pill = e.type ? `<span class="theme-pill">${THEME_ICON[e.type] || ''} ${e.type}</span>` : '';
+            html += `<div class="event-row">
+                <div class="event-top">${e.date ? `<span class="event-date">${e.date}</span>` : ''}${pill}</div>
+                <div class="event-title">${e.activity}</div>
+                ${e.waysToHelp ? `<div class="event-responsibility"><strong>Volunteers needed:</strong> ${e.waysToHelp}</div>` : ''}
+                ${e.leader ? `<div class="event-leader">Contact: ${e.leader}</div>` : ''}
+                ${e.signup ? `<div class="event-signup"><a class="signup-btn" href="${attrEsc(e.signup)}" target="_blank" rel="noopener noreferrer" aria-label="Sign up for ${attrEsc(e.activity)} (opens in a new tab)">Sign up</a><span class="signup-note">Opens in a new tab</span></div>` : ''}
+            </div>`;
+        });
+        html += `</div>`;
+    });
+
+    container.innerHTML = html;
+    document.getElementById('noResults').classList.toggle('show', !anyVisible);
+}
+
+function filterTheme(theme) {
+    currentTheme = theme;
+    document.querySelectorAll('.theme-btn').forEach(b => b.classList.toggle('active', b.dataset.theme === theme));
+    applyFilters();
+}
+
+function applyFilters() {
+    const months = selectedMonths();
+    updateMonthDropdownLabel(months);
+    const parts = [];
+    if (currentTheme !== 'All') parts.push(currentTheme + ' events');
+    if (months.length === 1) parts.push('in ' + months[0]);
+    else if (months.length > 1) parts.push('in ' + months.length + ' selected months');
+    document.getElementById('filterHint').textContent = parts.length ? ('Showing ' + parts.join(' ')) : 'Showing all events';
+    renderEvents();
+}
+
+document.addEventListener('click', (e) => {
+    const dropdown = document.getElementById('monthDropdown');
+    if (dropdown && !dropdown.contains(e.target)) {
+        document.getElementById('monthDropdownPanel').classList.remove('open');
+    }
+});
+
+window.addEventListener('DOMContentLoaded', loadEvents);
+
+/* Carry the logged-in member across pages via preserve-member links */
+(function () {
+    const memberParam = new URLSearchParams(window.location.search).get("member");
+    if (!memberParam) return;
+    document.querySelectorAll("a.preserve-member").forEach(a => {
+        const url = new URL(a.getAttribute("href"), window.location.href);
+        url.searchParams.set("member", memberParam);
+        a.setAttribute("href", url.pathname + url.search);
+    });
+})();
+</script>
+
+</body>
+</html>

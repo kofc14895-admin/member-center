@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verify Data — St. Luke Knights of Columbus Member Center</title>
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600;700&family=Lora:wght@400;500;600&family=Lato:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+    --primary: #1E3A8A;
+    --primary-light: #2563EB;
+    --secondary: #C5A572;
+    --secondary-light: #D4B583;
+    --accent: #B91C1C;
+    --light-bg: #F9FAFB;
+    --text-dark: #1F2937;
+    --text-medium: #6B7280;
+    --shadow: rgba(30, 58, 138, 0.15);
+    --green: #15803D;
+    --green-bg: #F0FDF4;
+    --amber: #92400E;
+    --amber-bg: #FEF3C7;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html { max-width:100%; }
+body { font-family:'Lora', serif; color:var(--text-dark); background:var(--light-bg); line-height:1.6; padding-bottom:4rem; }
+a { color:inherit; }
+
+.review-panel { background:#fff; border-bottom:2px dashed #9CA3AF; padding:0.9rem 1.5rem; }
+.review-panel .inner { max-width:600px; margin:0 auto; display:flex; align-items:center; gap:1rem; flex-wrap:wrap; }
+.review-panel .tag { font-family:'Lato', sans-serif; font-size:0.7rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; background:#374151; color:#fff; padding:0.3rem 0.6rem; border-radius:4px; }
+.review-panel label { font-family:'Lato',sans-serif; font-size:0.85rem; color:var(--text-medium); }
+.review-panel select { font-family:'Lato',sans-serif; font-size:0.9rem; padding:0.4rem 0.6rem; border-radius:6px; border:1.5px solid #D1D5DB; }
+.review-panel .note { font-family:'Lato',sans-serif; font-size:0.8rem; color:var(--text-medium); margin-left:auto; }
+
+nav { background:white; box-shadow:0 2px 4px rgba(0,0,0,0.1); border-bottom:3px solid var(--primary); }
+nav .container { max-width:1200px; margin:0 auto; display:flex; justify-content:space-between; align-items:stretch; }
+.logo-section { padding:0.7rem 1.5rem; display:flex; align-items:center; }
+.logo { font-family:'Crimson Pro', serif; color:var(--primary); line-height:1.15; text-decoration:none; }
+.logo-main { display:block; font-size:1.05rem; font-weight:700; }
+.logo-sub { display:block; font-size:0.72rem; color:var(--text-medium); font-family:'Lato',sans-serif; }
+nav ul { list-style:none; display:flex; margin:0; overflow-x:auto; scrollbar-width:none; }
+nav ul::-webkit-scrollbar { display:none; }
+nav ul li { display:flex; align-items:center; flex-shrink:0; }
+nav a.navlink { font-family:'Lato', sans-serif; font-size:0.92rem; font-weight:500; color:var(--text-medium); text-decoration:none; padding:1.1rem 1.15rem; border-bottom:3px solid transparent; white-space:nowrap; }
+nav a.navlink.active { color:var(--primary); font-weight:700; border-bottom-color:var(--secondary); }
+nav a.signout { font-family:'Lato',sans-serif; font-size:0.85rem; color:var(--text-medium); padding:1.1rem 1.5rem; text-decoration:none; flex-shrink:0; }
+.site-header { position:sticky; top:0; z-index:1000; }
+
+.wizard-shell { max-width:540px; margin:0 auto; padding:2rem 1.5rem 0; }
+
+/* Progress — dynamic, driven by JS */
+.progress-row { display:flex; align-items:center; gap:0.4rem; margin-bottom:0.5rem; }
+.progress-dot { flex:1; height:5px; border-radius:3px; background:#E5E7EB; transition:background .3s; }
+.progress-dot.done { background:var(--secondary); opacity:0.6; }
+.progress-dot.active { background:var(--secondary); }
+.progress-label { font-family:'Lato',sans-serif; font-size:0.75rem; color:var(--text-medium); text-align:center; margin-bottom:1.5rem; }
+
+.wizard-panel { background:white; border-radius:16px; padding:2rem 1.75rem; box-shadow:0 4px 15px var(--shadow); display:none; }
+.wizard-panel.active { display:block; animation:fadeIn .2s ease; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(6px);} to{opacity:1;transform:translateY(0);} }
+
+.wizard-panel h1 { font-family:'Crimson Pro', serif; font-size:1.7rem; color:var(--primary); font-weight:700; text-align:center; }
+.wizard-panel .sub { font-family:'Lato',serif; font-size:1rem; color:#4B5563; text-align:center; margin-top:0.6rem; line-height:1.5; }
+.wizard-panel h2 { font-family:'Crimson Pro', serif; font-size:1.3rem; color:var(--primary); font-weight:700; margin-bottom:0.25rem; }
+.step-sub { font-family:'Lato',sans-serif; font-size:1rem; line-height:1.6; color:#4B5563; margin-bottom:1.1rem; }
+
+.welcome-icon { text-align:center; margin-bottom:1rem; }
+.welcome-icon img { max-width:120px; max-height:120px; width:auto; height:auto; }
+
+/* Status choice */
+.status-choice { display:flex; flex-direction:column; gap:0.7rem; }
+.status-option { display:flex; align-items:flex-start; gap:0.75rem; padding:0.9rem 1rem; border-radius:10px; border:1.5px solid #E5E7EB; cursor:pointer; transition:all .15s; }
+.status-option:hover { border-color:var(--secondary); }
+.status-option.selected { border-color:var(--secondary); background:#FFFBEB; }
+.status-option input[type="radio"] { margin-top:0.25rem; accent-color:var(--primary); flex-shrink:0; }
+.opt-title { font-family:'Lato',sans-serif; font-weight:700; font-size:1rem; color:var(--text-dark); }
+.opt-desc { font-family:'Lato',sans-serif; font-size:0.92rem; color:#4B5563; margin-top:0.15rem; }
+
+/* Contact fields */
+.field-row { display:grid; grid-template-columns:100px 1fr; gap:0.6rem; padding:0.5rem 0; align-items:center; border-bottom:1px solid #F3F4F6; }
+.field-row:last-of-type { border-bottom:none; }
+.field-row label { font-family:'Lato',sans-serif; font-size:0.9rem; color:#4B5563; }
+.field-row input { font-family:'Lora',serif; font-size:1rem; padding:0.6rem 0.7rem; border:1.5px solid #E5E7EB; border-radius:8px; width:100%; }
+.field-row input:focus { outline:none; border-color:var(--primary); }
+
+/* Dues */
+.dues-box { background:var(--light-bg); border-radius:10px; padding:1rem 1.2rem; margin-bottom:1.1rem; }
+.dues-row { display:flex; justify-content:space-between; padding:0.35rem 0; font-family:'Lato',sans-serif; font-size:0.9rem; border-bottom:1px solid #E5E7EB; }
+.dues-row:last-child { border-bottom:none; }
+.dues-row .val { font-weight:700; }
+.dues-row .val.owed { color:var(--accent); }
+.pay-btn { display:block; width:100%; text-align:center; background:var(--secondary); color:white; font-family:'Lato',sans-serif; font-weight:700; font-size:0.95rem; padding:0.75rem; border-radius:10px; text-decoration:none; margin-bottom:1rem; }
+.dispute-link { background:none; border:none; font-family:'Lato',sans-serif; font-size:0.95rem; font-weight:600; color:var(--text-medium); text-decoration:underline; cursor:pointer; padding:0; display:block; margin-bottom:0.5rem; }
+.dispute-box { display:none; margin-top:0.75rem; }
+.dispute-box.open { display:block; }
+.dispute-box textarea { width:100%; min-height:72px; font-family:'Lora',serif; font-size:0.9rem; padding:0.65rem; border:1.5px solid #D1D5DB; border-radius:8px; resize:vertical; }
+
+/* Result */
+.result-icon { text-align:center; font-size:2.8rem; margin-bottom:0.75rem; }
+.result-box { border-radius:12px; padding:1rem 1.2rem; margin:1.1rem 0; font-family:'Lato',sans-serif; font-size:0.88rem; line-height:1.5; }
+.result-box.confirmed { background:var(--green-bg); color:#166534; border-left:3px solid var(--green); }
+.result-box.flagged { background:var(--amber-bg); color:var(--amber); border-left:3px solid #D97706; }
+.result-box.leaving { background:#FEF2F2; color:#991B1B; border-left:3px solid var(--accent); }
+
+/* Actions */
+.wizard-actions { display:flex; justify-content:space-between; gap:0.9rem; margin-top:1.5rem; }
+.wizard-actions.single { justify-content:center; }
+.btn { font-family:'Lato', sans-serif; font-weight:600; font-size:0.9rem; cursor:pointer; border-radius:50px; padding:0.75rem 1.6rem; border:2px solid transparent; text-decoration:none; display:inline-block; }
+.btn-primary { background:var(--secondary); color:white; }
+.btn-primary:hover { background:var(--secondary-light); }
+.btn-ghost { background:none; border-color:#D1D5DB; color:var(--text-medium); }
+.btn-ghost:hover { border-color:var(--text-medium); }
+.btn-danger { background:none; border-color:var(--accent); color:var(--accent); }
+
+@media (max-width:600px){
+    .wizard-shell { padding:1.25rem 1rem 0; }
+    .wizard-panel { padding:1.5rem 1.1rem; }
+    .field-row { grid-template-columns:1fr; gap:0.2rem; }
+    nav .container { flex-wrap:wrap; }
+    .logo-section { padding:0.6rem 1rem; flex:1; }
+    nav ul { width:100%; order:3; border-top:1px solid #F0F1F3; }
+    nav a.navlink { padding:0.65rem 0.7rem; font-size:0.82rem; }
+}
+
+/* Changed-circumstances screens */
+.btn:disabled { opacity:0.45; cursor:default; }
+.status-option input[type="checkbox"] { margin-top:0.25rem; accent-color:var(--primary); flex-shrink:0; width:18px; height:18px; }
+.wizard-textarea { width:100%; min-height:90px; font-family:'Lora',serif; font-size:1rem; padding:0.7rem; border:1.5px solid #D1D5DB; border-radius:8px; resize:vertical; }
+.circ-error { font-family:'Lato',sans-serif; font-size:0.9rem; color:var(--accent); margin-top:0.9rem; min-height:0; }
+.circ-error:empty { display:none; }
+.info-callout { background:#EFF6FF; border-left:3px solid var(--primary); border-radius:8px; padding:0.85rem 1rem; margin:0.4rem 0 1.1rem; font-family:'Lato',sans-serif; font-size:0.95rem; line-height:1.5; color:var(--text-dark); }
+
+/* Menu: never break a label across two lines; below 1180px the menu gets its own row */
+nav a.navlink, nav a.signout { white-space:nowrap; }
+@media (max-width:1180px) {
+    nav .container { flex-wrap:wrap; }
+    .logo-section { flex:1; min-width:200px; }
+    nav ul { width:100%; order:3; justify-content:flex-start; border-top:1px solid #F0F1F3; overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+    nav ul::-webkit-scrollbar { display:none; }
+    nav ul li { flex-shrink:0; }
+}
+.dispute-link:hover { color:var(--primary); }
+</style>
+<script src="config.js"></script>
+<script src="session.js"></script>
+<script src="nav-toggle.js"></script>
+</head>
+<body>
+
+<header class="site-header">
+<nav>
+    <div class="container">
+        <div class="logo-section">
+            <a href="#" class="logo">
+                <span class="logo-main">ST. LUKE KNIGHTS OF COLUMBUS</span>
+                <span class="logo-sub">Member Center · Council 14895</span>
+            </a>
+        </div>
+        <ul>
+            <li><a href="home.html" class="navlink preserve-member">Profile</a></li>
+            <li><a href="calendar.html" class="navlink preserve-member">Calendar</a></li>
+            <li><a href="prayers.html" class="navlink preserve-member">Prayers</a></li>
+            <li><a href="groups.html" class="navlink preserve-member">Groups</a></li>
+            <li><a href="membership-card.html" class="navlink preserve-member">KofC Card</a></li>
+            <li class="nav-whydues"><a href="why-dues.html" class="navlink preserve-member">Why Dues?</a></li>
+            <li><a href="#" class="navlink active">Verify Data</a></li>
+        </ul>
+    </div>
+</nav>
+</header>
+
+<div class="wizard-shell">
+    <div class="progress-row" id="progressRow"></div>
+    <p class="progress-label" id="progressLabel"></p>
+
+    <!-- Step 1: Welcome -->
+    <div class="wizard-panel active" id="panel-welcome">
+        <div class="welcome-icon"><img src="council-logo.png" alt="St. Luke Knights of Columbus, Council 14895" onerror="this.parentElement.style.display='none'"></div>
+        <h1>Welcome, <span id="welcomeName"></span></h1>
+        <p class="sub">Thank you for your service as a Knight. We're taking a minute to make sure our records are accurate for every member.</p>
+        <p class="sub" id="firstVisitNote" style="margin-top:0.75rem; font-weight:700; display:none;">Since this is your first visit to the new Member Center, let's start by checking your information. It takes about two minutes.</p>
+        <p class="sub" style="margin-top:0.75rem; font-size:0.82rem;">Not you? <a href="landing.html" style="color:inherit;">Sign in with your own email</a> before continuing.</p>
+        <div class="wizard-actions" style="margin-top:1.75rem;">
+            <button class="btn btn-ghost" onclick="openChanged()">My circumstances<br>have changed</button>
+            <button class="btn btn-primary" onclick="goTo('purpose')">Get Started</button>
+        </div>
+    </div>
+
+    <!-- Step 1b: Dues purpose — shown to everyone -->
+    <div class="wizard-panel" id="panel-purpose">
+        <h2>A quick refresher before we begin</h2>
+        <p class="step-sub" style="margin-top:0.75rem;">Dues aren't a membership fee in the ordinary sense — they're the mechanism that turns individual membership into collective charity. That's true whether you're able to attend every event or just able to contribute in the form of dues and donations.</p>
+        <p class="step-sub">The vast majority of your dues are used to fund the charitable work we do in our parish and community and to meet the unexpected needs of our brothers and their families. The balance covers the everyday costs of running the council and our per-capita contribution to the State and Supreme Councils that keep us connected to the broader Knights of Columbus family.</p>
+        <p class="step-sub" style="font-weight:700; color:var(--text-dark);">We hope you see — and are proud of — the positive impact we make on our parish and fellow knights. Thank you again!</p>
+        <div class="wizard-actions single" style="margin-top:1.5rem;">
+            <button class="btn btn-primary" onclick="goTo('contact')">Continue</button>
+        </div>
+    </div>
+
+    <!-- Changed circumstances: What's changed? -->
+    <div class="wizard-panel" id="panel-changed">
+        <h2>What's changed?</h2>
+        <p class="step-sub">Choose the one that fits best.</p>
+        <div class="status-choice" id="changedChoices">
+            <label class="status-option" onclick="selectCircumstance('moved', this)">
+                <input type="radio" name="circumstance">
+                <div>
+                    <div class="opt-title">I've moved out of the area</div>
+                    <div class="opt-desc">Moving away from St. Luke. (Moved nearby? Just update your address on your Profile.)</div>
+                </div>
+            </label>
+            <label class="status-option" id="optStepBack" onclick="selectCircumstance('stepback', this)">
+                <input type="radio" name="circumstance">
+                <div>
+                    <div class="opt-title">I need to step back for a while</div>
+                    <div class="opt-desc">You stay a member. Let us know what's going on and we'll stay in touch.</div>
+                </div>
+            </label>
+            <label class="status-option" onclick="selectCircumstance('withdraw', this)">
+                <input type="radio" name="circumstance">
+                <div>
+                    <div class="opt-title">I want to withdraw from the Knights</div>
+                    <div class="opt-desc">Supreme requires a signed request. We'll show you how.</div>
+                </div>
+            </label>
+            <label class="status-option" onclick="selectCircumstance('other', this)">
+                <input type="radio" name="circumstance">
+                <div>
+                    <div class="opt-title">Something else</div>
+                    <div class="opt-desc">Tell us in your own words and someone will follow up.</div>
+                </div>
+            </label>
+        </div>
+        <div class="wizard-actions" style="margin-top:1.5rem;">
+            <button class="btn btn-ghost" onclick="backFromChanged()">Back</button>
+            <button class="btn btn-primary" id="changedContinueBtn" onclick="continueFromChanged()" disabled>Continue</button>
+        </div>
+    </div>
+
+    <!-- I've moved -->
+    <div class="wizard-panel" id="panel-moved">
+        <h2>Moving out of the area</h2>
+        <div class="info-callout">
+            <strong>Moved but staying nearby?</strong> You don't need this. Just update your address on your Profile.
+            <div><button class="btn btn-ghost" style="margin-top:0.7rem;" onclick="goToProfile()">Update my address on my Profile</button></div>
+        </div>
+        <p class="step-sub">If you're moving away from St. Luke, enter your new address so council mail reaches you. Leave it blank if you don't have it yet.</p>
+        <p class="step-sub" style="font-size:0.92rem;">Currently on file: <strong id="movedCurrentAddr"></strong></p>
+        <div class="field-row"><label for="mAddress">New Address</label><input type="text" id="mAddress"></div>
+        <div class="field-row"><label for="mCity">City</label><input type="text" id="mCity"></div>
+        <div class="field-row"><label for="mState">State</label><input type="text" id="mState" maxlength="2" style="text-transform:uppercase;width:70px;"></div>
+        <div class="field-row"><label for="mZip">Zip</label><input type="text" id="mZip"></div>
+
+        <p class="step-sub" style="margin-top:1.4rem; color:var(--text-dark);"><strong>Would you like to join a Knights of Columbus council near your new home?</strong></p>
+        <div class="status-choice" id="transferChoices">
+            <label class="status-option" onclick="selectTransfer('Yes', this)"><input type="radio" name="transfer"><div><div class="opt-title">Yes</div></div></label>
+            <label class="status-option" onclick="selectTransfer('No', this)"><input type="radio" name="transfer"><div><div class="opt-title">No</div></div></label>
+            <label class="status-option" onclick="selectTransfer('Not sure yet', this)"><input type="radio" name="transfer"><div><div class="opt-title">Not sure yet</div></div></label>
+        </div>
+        <div id="transferWhereBox" style="display:none; margin-top:1rem;">
+            <div class="field-row"><label for="mWhere">Where are you moving?</label><input type="text" id="mWhere" placeholder="City, or parish if you know it"></div>
+            <p class="step-sub" style="font-size:0.92rem; margin-top:0.6rem;">The council you join starts the transfer. We'll note your interest and can help you find one.</p>
+        </div>
+        <p class="circ-error" id="err-moved"></p>
+        <div class="wizard-actions">
+            <button class="btn btn-ghost" onclick="goTo('changed')">Back</button>
+            <button class="btn btn-primary" id="btn-moved" onclick="submitMoved()">Submit</button>
+        </div>
+    </div>
+
+    <!-- Stepping back -->
+    <div class="wizard-panel" id="panel-stepback">
+        <h2>Stepping back</h2>
+        <p class="step-sub">Thanks for letting us know. Stepping back doesn't change your membership. You're still a Knight, and you're welcome back at any meeting or event. Annual dues still apply.</p>
+        <p class="step-sub" style="color:var(--text-dark);"><strong>What's going on? Choose any that apply.</strong></p>
+        <div class="status-choice" id="stepbackReasons">
+            <label class="status-option"><input type="checkbox" value="Family or work" onchange="updateReasons()"><div><div class="opt-title">Family or work</div></div></label>
+            <label class="status-option"><input type="checkbox" value="Health" onchange="updateReasons()"><div><div class="opt-title">Health</div></div></label>
+            <label class="status-option"><input type="checkbox" value="Dues or cost" onchange="updateReasons()"><div><div class="opt-title">Dues or cost</div><div class="opt-desc">We'd like to talk about it. Please don't let dues keep you away.</div></div></label>
+            <label class="status-option"><input type="checkbox" value="Other" onchange="updateReasons()"><div><div class="opt-title">Other</div></div></label>
+        </div>
+        <label class="step-sub" for="stepbackNote" style="display:block; margin:1.1rem 0 0.4rem;">Anything else you'd like us to know? (optional)</label>
+        <textarea id="stepbackNote" class="wizard-textarea"></textarea>
+        <p class="step-sub" style="margin-top:1rem;">Our <strong>Retention Chair</strong> will give you a call in the next few weeks.</p>
+        <p class="circ-error" id="err-stepback"></p>
+        <div class="wizard-actions">
+            <button class="btn btn-ghost" onclick="goTo('changed')">Back</button>
+            <button class="btn btn-primary" id="btn-stepback" onclick="submitStepBack()">Submit</button>
+        </div>
+    </div>
+
+    <!-- Withdraw -->
+    <div class="wizard-panel" id="panel-withdraw">
+        <h2>Withdrawing from the Knights</h2>
+        <p class="step-sub">We're sorry to see you go, and grateful for your service.</p>
+        <p class="step-sub">Supreme requires a <strong>personal, signed request</strong> to withdraw. Clicking here can't count as your signature. Choose one or both ways to take care of it:</p>
+        <div class="status-choice">
+            <label class="status-option" id="wdLetterOpt"><input type="checkbox" id="wdLetter" onchange="updateWithdraw()">
+                <div><div class="opt-title">Print a letter I can sign</div><div class="opt-desc">We'll fill in your name and member number. Sign it and return it to the council.</div></div>
+            </label>
+            <label class="status-option" id="wdContactOpt"><input type="checkbox" id="wdContact" onchange="updateWithdraw()">
+                <div><div class="opt-title">Have someone from the council contact me</div><div class="opt-desc">We'll reach out and help with the signed request.</div></div>
+            </label>
+        </div>
+        <p class="circ-error" id="err-withdraw"></p>
+        <div class="wizard-actions" style="margin-top:1.5rem;">
+            <button class="btn btn-ghost" onclick="goTo('changed')">Back</button>
+            <button class="btn btn-danger" id="btn-withdraw" onclick="submitWithdraw()" disabled>Submit Request</button>
+        </div>
+    </div>
+
+    <!-- Something else -->
+    <div class="wizard-panel" id="panel-other">
+        <h2>Tell us what's changed</h2>
+        <p class="step-sub">Describe your situation in your own words. Someone from the council will follow up with you.</p>
+        <textarea id="otherNote" class="wizard-textarea" oninput="document.getElementById('btn-other').disabled = !this.value.trim()"></textarea>
+        <p class="circ-error" id="err-other"></p>
+        <div class="wizard-actions">
+            <button class="btn btn-ghost" onclick="goTo('changed')">Back</button>
+            <button class="btn btn-primary" id="btn-other" onclick="submitOther()" disabled>Submit</button>
+        </div>
+    </div>
+
+    <!-- Step 3: Contact Info (only if staying) -->
+    <div class="wizard-panel" id="panel-contact">
+        <h2>Verify your Contact Info</h2>
+        <p class="step-sub">Review your information below. If you spot anything missing or out of date, correct it and we'll save your changes. Type in your preferred name if it's blank (e.g., Bob).</p>
+        <div class="field-row"><label>Preferred Name</label><input type="text" id="wPreferred" placeholder="e.g., Bob" oninput="contactChanged()"></div>
+        <div class="field-row"><label>Wife's Name</label><input type="text" id="wWife" autocapitalize="words" placeholder="e.g., Mary (leave blank if it doesn't apply)" oninput="contactChanged()"></div>
+        <div class="field-row"><label>Address</label><input type="text" id="wAddress" oninput="contactChanged()"></div>
+        <div class="field-row"><label>City</label><input type="text" id="wCity" oninput="contactChanged()"></div>
+        <div class="field-row"><label>State</label><input type="text" id="wState" maxlength="2" style="text-transform:uppercase;width:60px;" oninput="contactChanged()"></div>
+        <div class="field-row"><label>Zip</label><input type="text" id="wZip" oninput="contactChanged()"></div>
+        <div class="field-row"><label>Phone</label><input type="text" id="wPhone" oninput="contactChanged()"></div>
+        <div class="field-row"><label>Email</label><input type="text" id="wEmail" oninput="contactChanged()"></div>
+        <div class="wizard-actions">
+            <button class="btn btn-ghost" onclick="goTo('purpose')">Back</button>
+            <button class="btn btn-primary" id="contactContinueBtn" onclick="continueFromContact()">Data is Correct</button>
+        </div>
+    </div>
+
+    <!-- Step 4: Directory Opt-In -->
+    <div class="wizard-panel" id="panel-directory">
+        <h2>Member Directory Option</h2>
+        <p class="step-sub">Under <strong>Groups</strong>, the Member Center has a directory with the names, phone numbers, and email addresses of members who choose to be included. Only members signed in to the Member Center can see the directory, and the council doesn't share it outside the council.</p>
+        <p class="step-sub" style="margin-bottom:1.25rem;">Would you like to appear in the member directory?</p>
+        <div class="status-choice">
+            <label class="status-option selected" onclick="selectDirectory(true)">
+                <input type="radio" name="directory" value="yes" checked>
+                <div>
+                    <div class="opt-title">Yes — include me in the directory</div>
+                    <div class="opt-desc">Other members signed in to the Member Center will see your name, phone, and email in the directory.</div>
+                </div>
+            </label>
+            <label class="status-option" onclick="selectDirectory(false)">
+                <input type="radio" name="directory" value="no">
+                <div>
+                    <div class="opt-title">No — keep me out of the directory</div>
+                    <div class="opt-desc">You won't appear in the directory. Council officers can still reach you through your membership record.</div>
+                </div>
+            </label>
+        </div>
+        <div class="wizard-actions" style="margin-top:1.5rem;">
+            <button class="btn btn-ghost" onclick="goTo('contact')">Back</button>
+            <button class="btn btn-primary" onclick="continueFromDirectory()">Continue</button>
+        </div>
+    </div>
+
+    <!-- Step 5: Dues Check (only if staying) -->
+    <div class="wizard-panel" id="panel-dues">
+        <h2>Verify your Dues Balance</h2>
+        <p class="step-sub">If the balance shown is correct, click <strong>Data is Correct</strong>. You can also make a payment now, or let us know if something looks wrong.</p>
+        <div class="dues-box">
+            <div class="dues-row"><span>Status</span><span class="val" id="wDuesStatus">—</span></div>
+            <div class="dues-row"><span>Paid Through</span><span class="val" id="wPaidThrough">—</span></div>
+        </div>
+        <a href="#" class="pay-btn" id="payNowBtn" style="display:none;" onclick="handlePayNow(event)">Thanks for Clicking to Pay &rarr;</a>
+        <p class="pay-note" id="payNote" style="display:none; font-family:'Lato',sans-serif; font-size:0.8rem; color:var(--text-medium); margin:-0.5rem 0 0.8rem; text-align:center;">You'll return here after paying to complete the wizard.</p>
+        <button class="dispute-link" id="disputeToggle" onclick="toggleDispute()">Something looks wrong with my dues &rarr;</button>
+        <div class="dispute-box" id="disputeBox">
+            <textarea id="disputeNote" placeholder="Tell us what looks wrong — someone from the council will follow up." oninput="updateDuesBtn()"></textarea>
+        </div>
+        <div class="wizard-actions">
+            <button class="btn btn-ghost" onclick="goTo('contact')">Back</button>
+            <button class="btn btn-primary" id="duesContinueBtn" onclick="continueFromDues()">Data is Correct</button>
+        </div>
+    </div>
+
+    <!-- Step 5: Result -->
+    <div class="wizard-panel" id="panel-result">
+        <div class="result-icon" id="resultIcon">&#9989;</div>
+        <h1 id="resultTitle">You're all set</h1>
+        <p class="sub" id="resultSub"></p>
+        <div class="result-box confirmed" id="resultBox"></div>
+        <div class="wizard-actions single">
+            <div id='resultActions'></div>
+        </div>
+        <p id="resultNav" style="display:none; font-family:'Lato',sans-serif; font-size:0.82rem; color:var(--text-medium); text-align:center; margin-top:1.25rem; line-height:1.6;">You're all set — feel free to click Continue and explore your profile. The quick links at the top let you check your membership card, calendar, and more. You can click <strong>Verify Data</strong> anytime to run through this again.</p>
+    </div>
+</div>
+
+<script>
+const VERIFY_ENDPOINT_URL = KOC_CONFIG.endpoint;
+const SHEET_ID = KOC_CONFIG.sheetId;
+const DB_GID = KOC_CONFIG.gids.membership;
+
+/* ── Live data fetch ── */
+async function fetchLiveMember(memberNumber) {
+    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${DB_GID}`;
+    const res = await fetch(url);
+    const text = await res.text();
+    const json = JSON.parse(text.match(/setResponse\(([\s\S]*)\);?\s*$/)[1]);
+    const cols = json.table.cols.map(c => (c.label || '').trim().replace(/[\u2018\u2019]/g, "'"));
+    const idx = label => cols.indexOf(label);
+    const cell = (row, label) => { const c = row.c[idx(label)]; return c ? (c.v !== null && c.v !== undefined ? c.v : '') : ''; };
+    const memberNum = String(memberNumber).replace(/^0+/, '');
+    for (const row of json.table.rows) {
+        if (String(cell(row, 'Member Number')).replace(/^0+/, '') === memberNum) {
+            const lastDues = cell(row, 'Last Yr Paid');
+            const duesRaw = cell(row, 'Outstanding Dues');
+            const duesStr = String(duesRaw === null || duesRaw === undefined ? '' : duesRaw).trim();
+            const duesNum = parseFloat(duesStr.replace(/[^0-9.]/g, '')) || 0;
+            const outstandingDues = (typeof duesRaw === 'number') ? duesRaw
+                : ((/^\(.*\)$/.test(duesStr) || duesStr.startsWith('-')) ? -duesNum : duesNum); // credits are negative
+            const duesYear = lastDues ? parseInt(String(lastDues).match(/\d{4}/)?.[0] || 0) : 0;
+            const owed = outstandingDues > 0;
+            return {
+                memberNumber: String(cell(row, 'Member Number')),
+                firstName:    String(cell(row, 'First Name') || '').trim(),
+                lastName:     String(cell(row, 'Last Name') || '').trim(),
+                nickname:     String(cell(row, 'Preferred Name') || '').trim(),
+                wifeName:     String(cell(row, "Wife's Name") || '').trim(),
+                address1:     String(cell(row, 'Street Address') || '').trim(),
+                city:         String(cell(row, 'City') || '').trim(),
+                stateAbbr:    String(cell(row, 'State') || '').trim(),
+                zip:          String(cell(row, 'Postal Code') || '').trim(),
+                phone:        String(cell(row, 'phone') || '').trim(),
+                email:        String(cell(row, 'email') || '').trim(),
+                duesStatus:   owed ? '$' + outstandingDues.toFixed(2) + ' outstanding' : 'Current',
+                paidThrough:  duesYear || 'Unknown',
+                owed:         owed ? 1 : 0,
+                tier:         String(cell(row, 'Membership Tier') || '').trim(),
+            };
+        }
+    }
+    throw new Error('Member not found');
+}
+
+async function apiPost(params) {
+    const res = await fetch(VERIFY_ENDPOINT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(Object.assign({ token: Session.token() }, params))
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    return await res.json();
+}
+
+/* ── Member from URL param ── */
+const MEMBER_NUMBER = Session.pageMember() || '';
+let CURRENT_MEMBER = null;
+
+// Wizard state
+let currentMember = null;
+let memberStatus = 'stay'; // 'stay' (normal wizard) or 'changed' (circumstances path)
+let circumstance = null;    // moved / stepback / withdraw / other
+let transferChoice = null;
+let duesDisputed = false;
+
+// Progress configuration per panel
+const PANELS_FULL = ['welcome', 'purpose', 'contact', 'directory', 'dues', 'result'];
+const PANELS_CURRENT = ['welcome', 'purpose', 'contact', 'directory', 'result']; // skip dues if no balance
+
+function currentFlow() {
+    if (memberStatus === 'changed') return ['welcome', 'changed', circumstance || 'moved', 'result'];
+    return currentMember.owed === 0 ? PANELS_CURRENT : PANELS_FULL;
+}
+
+function goTo(panelId) {
+    document.querySelectorAll('.wizard-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('panel-' + panelId).classList.add('active');
+    updateProgress(panelId);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function updateProgress(activePanelId) {
+    const flow = currentFlow();
+    const idx = flow.indexOf(activePanelId);
+    const row = document.getElementById('progressRow');
+    row.innerHTML = '';
+    flow.forEach((p, i) => {
+        const dot = document.createElement('div');
+        dot.className = 'progress-dot' + (i < idx ? ' done' : (i === idx ? ' active' : ''));
+        row.appendChild(dot);
+    });
+    if (activePanelId === 'welcome') {
+        document.getElementById('progressLabel').textContent = '';
+    } else {
+        document.getElementById('progressLabel').textContent = `Step ${idx} of ${flow.length - 1}`;
+    }
+}
+
+function loadMember(m) {
+    currentMember = m;
+    const welcomeName = document.getElementById('welcomeName');
+    if (welcomeName) welcomeName.textContent = (m.nickname || titleCase(m.firstName) || '') + ' ' + titleCase(m.lastName || '');
+    const wPreferred = document.getElementById('wPreferred'); if (wPreferred) wPreferred.value = m.nickname || '';
+    const wWife = document.getElementById('wWife'); if (wWife) wWife.value = m.wifeName || '';
+    const wAddress = document.getElementById('wAddress'); if (wAddress) wAddress.value = m.address1;
+    const wCity = document.getElementById('wCity'); if (wCity) wCity.value = m.city;
+    const wState = document.getElementById('wState'); if (wState) wState.value = m.stateAbbr;
+    const wZip = document.getElementById('wZip'); if (wZip) wZip.value = m.zip;
+    const wPhone = document.getElementById('wPhone'); if (wPhone) wPhone.value = m.phone;
+    const wEmail = document.getElementById('wEmail'); if (wEmail) wEmail.value = m.email;
+
+    originalContact = {
+        preferred: m.nickname || '',
+        wife: m.wifeName || '',
+        address: m.address1,
+        city: m.city,
+        state: m.stateAbbr,
+        zip: m.zip,
+        phone: m.phone,
+        email: m.email,
+    };
+
+    const btn = document.getElementById('contactContinueBtn');
+    if (btn) btn.textContent = 'Data is Correct';
+    const wDuesStatus = document.getElementById('wDuesStatus');
+    if (wDuesStatus) { wDuesStatus.textContent = m.duesStatus; wDuesStatus.style.color = m.owed > 0 ? 'var(--accent)' : 'var(--text-dark)'; }
+    const wPaidThrough = document.getElementById('wPaidThrough');
+    if (wPaidThrough) wPaidThrough.textContent = m.paidThrough;
+
+    const payBtn = document.getElementById('payNowBtn');
+    const payNote = document.getElementById('payNote');
+    if (payBtn && payNote) {
+        if (m.owed > 0) {
+            payBtn.style.display = 'block';
+            payBtn.textContent = 'Thanks for Clicking to Pay \u2192';
+            payNote.style.display = 'block';
+        } else {
+            payBtn.style.display = 'none';
+            payNote.style.display = 'none';
+        }
+    }
+
+    memberStatus = 'stay';
+    duesDisputed = false;
+    directoryOptIn = true;
+    resetCircumstances();
+    const disputeBox = document.getElementById('disputeBox'); if (disputeBox) disputeBox.classList.remove('open');
+    const disputeNote = document.getElementById('disputeNote'); if (disputeNote) disputeNote.value = '';
+    const disputeToggle = document.getElementById('disputeToggle'); if (disputeToggle) disputeToggle.textContent = 'Something looks wrong with my dues \u2192';
+    const duesContinueBtn = document.getElementById('duesContinueBtn'); if (duesContinueBtn) duesContinueBtn.textContent = 'Data is Correct';
+    const rn = document.getElementById('resultNav'); if (rn) rn.style.display = 'none';
+
+    goTo('welcome');
+}
+
+// Track original contact values to detect changes
+let originalContact = {};
+
+function contactChanged() {
+    const current = {
+        preferred: document.getElementById('wPreferred').value,
+        wife: document.getElementById('wWife').value,
+        address: document.getElementById('wAddress').value,
+        city: document.getElementById('wCity').value,
+        state: document.getElementById('wState').value,
+        zip: document.getElementById('wZip').value,
+        phone: document.getElementById('wPhone').value,
+        email: document.getElementById('wEmail').value,
+    };
+    const changed = Object.keys(current).some(k => current[k] !== (originalContact[k] || ''));
+    const btn = document.getElementById('contactContinueBtn');
+    if (btn) btn.textContent = changed ? 'Save & Continue' : 'Data is Correct';
+}
+
+let enteredFromProfile = false; // true when opened from the Profile page's "My circumstances have changed" link
+
+const CIRC_PANELS = ['#panel-changed', '#panel-moved', '#panel-stepback', '#panel-withdraw', '#panel-other'];
+
+// Clear every choice on the circumstances screens
+function resetCircumstances() {
+    circumstance = null;
+    transferChoice = null;
+    CIRC_PANELS.forEach(sel => {
+        document.querySelectorAll(sel + ' .status-option').forEach(o => o.classList.remove('selected'));
+        document.querySelectorAll(sel + ' input[type=radio], ' + sel + ' input[type=checkbox]').forEach(i => i.checked = false);
+        document.querySelectorAll(sel + ' input[type=text], ' + sel + ' textarea').forEach(i => i.value = '');
+        document.querySelectorAll(sel + ' .circ-error').forEach(e => e.textContent = '');
+    });
+    const where = document.getElementById('transferWhereBox'); if (where) where.style.display = 'none';
+    ['changedContinueBtn', 'btn-withdraw', 'btn-other'].forEach(id => { const b = document.getElementById(id); if (b) b.disabled = true; });
+}
+
+// Enter "What's changed?" with nothing pre-selected — he has to choose
+function openChanged() {
+    memberStatus = 'changed';
+    resetCircumstances();
+    goTo('changed');
+}
+
+function backFromChanged() {
+    memberStatus = 'stay';
+    if (enteredFromProfile) {
+        window.location.href = 'home.html?member=' + encodeURIComponent(MEMBER_NUMBER);
+        return;
+    }
+    goTo('welcome');
+}
+
+function selectCircumstance(val, el) {
+    circumstance = val;
+    document.querySelectorAll('#changedChoices .status-option').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+    document.getElementById('changedContinueBtn').disabled = false;
+}
+
+function continueFromChanged() {
+    if (!circumstance) return;
+    if (circumstance === 'moved') {
+        const m = currentMember || {};
+        const parts = [m.address1, m.city, [m.stateAbbr, m.zip].filter(Boolean).join(' ')].filter(Boolean);
+        document.getElementById('movedCurrentAddr').textContent = parts.length ? parts.join(', ') : 'No address on file';
+    }
+    goTo(circumstance);
+}
+
+function goToProfile() {
+    window.location.href = 'home.html?member=' + encodeURIComponent(MEMBER_NUMBER);
+}
+
+function selectTransfer(val, el) {
+    transferChoice = val;
+    document.querySelectorAll('#transferChoices .status-option').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+    document.getElementById('transferWhereBox').style.display = val === 'Yes' ? 'block' : 'none';
+}
+
+function updateReasons() {
+    document.querySelectorAll('#stepbackReasons .status-option').forEach(o =>
+        o.classList.toggle('selected', o.querySelector('input').checked));
+}
+
+function updateWithdraw() {
+    const letter = document.getElementById('wdLetter').checked;
+    const contact = document.getElementById('wdContact').checked;
+    document.getElementById('wdLetterOpt').classList.toggle('selected', letter);
+    document.getElementById('wdContactOpt').classList.toggle('selected', contact);
+    document.getElementById('btn-withdraw').disabled = !(letter || contact);
+}
+
+
+let directoryOptIn = true; // default yes
+
+function selectDirectory(val) {
+    directoryOptIn = val;
+    document.querySelectorAll('#panel-directory .status-option').forEach(o => o.classList.remove('selected'));
+    document.querySelector(`input[value="${val ? 'yes' : 'no'}"]`).checked = true;
+    document.querySelector(`input[value="${val ? 'yes' : 'no'}"]`).closest('.status-option').classList.add('selected');
+}
+
+async function continueFromDirectory() {
+    // Save directory preference via apiPost
+    try {
+        await apiPost({
+            action: 'saveContact',
+            memberNumber: currentMember.memberNumber,
+            memberName: currentMember.firstName + ' ' + currentMember.lastName,
+            fields: JSON.stringify({ directoryOptIn: directoryOptIn ? 'Yes' : 'No' })
+        });
+    } catch(e) {
+        console.warn('Directory opt-in save failed:', e.message);
+    }
+    if (currentMember.owed === 0) {
+        showResult();
+    } else {
+        goTo('dues');
+    }
+}
+
+async function continueFromContact() {
+    const btn = document.getElementById('contactContinueBtn');
+    const changed = btn.textContent === 'Save & Continue';
+
+    if (changed) {
+        btn.disabled = true;
+        btn.textContent = 'Saving…';
+        try {
+            const fields = {
+                nickname:  document.getElementById('wPreferred').value,
+                wifeName:  document.getElementById('wWife').value,
+                address1:  document.getElementById('wAddress').value,
+                city:      document.getElementById('wCity').value,
+                stateAbbr: document.getElementById('wState').value,
+                zip:       document.getElementById('wZip').value,
+                phone:     document.getElementById('wPhone').value,
+                email:     document.getElementById('wEmail').value,
+            };
+            await apiPost({
+                action: 'saveContact',
+                memberNumber: currentMember.memberNumber,
+                memberName: currentMember.firstName + ' ' + currentMember.lastName,
+                fields: JSON.stringify(fields)
+            });
+        } catch (e) {
+            // Non-blocking — log attempt, continue anyway
+            console.warn('Contact save failed:', e.message);
+        }
+        btn.disabled = false;
+    }
+
+    goTo('directory');
+}
+
+function handlePayNow(e) {
+    e.preventDefault();
+    // Set flag so pay-dues.html knows to send them back to the wizard result on completion
+    sessionStorage.setItem('wizardPayReturn', '1');
+    sessionStorage.setItem('wizardMemberNumber', currentMember.memberNumber || '');
+
+    // Brief thanks message before leaving
+    const payBtn = document.getElementById('payNowBtn');
+    const payNote = document.getElementById('payNote');
+    payBtn.textContent = 'Taking you to payment options\u2026';
+    payBtn.style.opacity = '0.7';
+    payNote.textContent = 'You\u2019ll be returned here automatically after paying.';
+
+    setTimeout(() => {
+        window.location.href = 'pay-dues.html?member=' + currentMember.memberNumber + '&from=wizard';
+    }, 800);
+}
+
+// Returning from pay-dues.html? (URL flag from the Return button, or session flag set on the way out)
+function consumePayReturn() {
+    const params = new URLSearchParams(window.location.search);
+    const fromPay = params.get('paid') === '1' || sessionStorage.getItem('wizardPayReturn') === '1';
+    if (!fromPay) return false;
+    sessionStorage.removeItem('wizardPayReturn');
+    // Drop ?paid=1 from the address bar so a refresh doesn't replay the result
+    params.delete('paid');
+    history.replaceState(null, '', window.location.pathname + '?' + params.toString());
+    return true;
+}
+
+function toggleDispute() {
+    const box = document.getElementById('disputeBox');
+    const isOpen = box.classList.toggle('open');
+    document.getElementById('disputeToggle').textContent = isOpen
+        ? 'Never mind, dues look right \u2190'
+        : 'Something looks wrong with my dues \u2192';
+    updateDuesBtn();
+    if (isOpen) document.getElementById('disputeNote').focus();
+}
+
+function updateDuesBtn() {
+    const open = document.getElementById('disputeBox').classList.contains('open');
+    const hasText = document.getElementById('disputeNote').value.trim().length > 0;
+    document.getElementById('duesContinueBtn').textContent = (open && hasText) ? 'Submit & Continue' : 'Data is Correct';
+}
+
+function continueFromDues() {
+    const open = document.getElementById('disputeBox').classList.contains('open');
+    const note = document.getElementById('disputeNote').value.trim();
+    duesDisputed = open && note.length > 0;
+    showResult();
+}
+
+function titleCase(s) {
+    return String(s || '').toLowerCase().replace(/\b[a-z]/g, c => c.toUpperCase());
+}
+function properName(m) {
+    return [titleCase(m.firstName), titleCase(m.lastName)].filter(Boolean).join(' ');
+}
+function escHtml(s) {
+    return String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+}
+
+// Settings from the Assumptions tab: the council mailing address for the withdrawal letter, and whether the
+// "I need to step back for a while" choice is offered (row "Show step back option": No / Off / False / Hide turns it off;
+// a missing row or anything else leaves it on).
+let RETURN_ADDRESS = '';
+async function loadReturnAddress() {
+    try {
+        const url = `https://docs.google.com/spreadsheets/d/${KOC_CONFIG.assumptionsSheetId}/gviz/tq?tqx=out:json&gid=${KOC_CONFIG.gids.assumptions}`;
+        const text = await (await fetch(url)).text();
+        const json = JSON.parse(text.match(/setResponse\(([\s\S]*)\);?\s*$/)[1]);
+        const find = test => json.table.rows.find(r => { const c = r.c[0]; const label = c && (c.v || c.f); return label && test(String(label).trim().toLowerCase()); });
+        const val = row => { const cell = row && row.c[1]; return cell ? String(cell.v != null ? cell.v : (cell.f || '')).trim() : ''; };
+        RETURN_ADDRESS = val(find(l => l.startsWith('dues check mail to')));
+        const stepRow = find(l => l.replace(/[^a-z]/g, '').startsWith('showstepback'));
+        if (stepRow && /^(no|n|off|false|hide|hidden|0)$/i.test(val(stepRow))) {
+            const opt = document.getElementById('optStepBack'); if (opt) opt.style.display = 'none';
+        }
+    } catch (e) { RETURN_ADDRESS = ''; }
+}
+
+// One call: the Apps Script logs it, updates the sheet, and emails the right officers
+async function reportCircumstance(type, details, fields) {
+    const data = await apiPost({
+        action: 'reportCircumstance',
+        memberNumber: currentMember.memberNumber,
+        memberName: properName(currentMember),
+        type: type,
+        details: JSON.stringify(details),
+        fields: fields ? JSON.stringify(fields) : ''
+    });
+    if (!data || !data.success) throw new Error((data && data.error) || 'Could not send');
+    rememberWizardHandled();
+    return data;
+}
+/* Remember on this device that the member has dealt with the wizard, so the Profile doesn't send him straight back
+   (a "moved / step back / something else" report doesn't stamp Wizard Completed on the sheet). */
+function rememberWizardHandled() {
+    try { localStorage.setItem('mcWizardDone_' + String(currentMember.memberNumber).replace(/^0+/, ''), String(Date.now())); } catch (e) {}
+}
+
+async function runSubmit(type, work) {
+    const btn = document.getElementById('btn-' + type);
+    const err = document.getElementById('err-' + type);
+    const label = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Sending\u2026';
+    err.textContent = '';
+    try {
+        await work();
+    } catch (e) {
+        console.warn('Circumstance report failed:', e.message);
+        btn.disabled = false;
+        btn.textContent = label;
+        err.innerHTML = 'That didn\u2019t go through. Please try again, or email <a href="mailto:' + KOC_CONFIG.emails.council + '" style="color:inherit;">' + KOC_CONFIG.emails.council + '</a>.';
+    }
+}
+
+const PROFILE_BTN = () => '<a href="home.html?member=' + encodeURIComponent(currentMember.memberNumber) + '" class="btn btn-primary">Continue to My Profile</a>';
+
+function circumstanceResult({ icon, title, sub, boxClass, box, actions }) {
+    document.getElementById('resultIcon').textContent = icon;
+    document.getElementById('resultTitle').textContent = title;
+    document.getElementById('resultSub').textContent = sub;
+    const b = document.getElementById('resultBox');
+    b.className = 'result-box ' + boxClass;
+    b.innerHTML = box;
+    document.getElementById('resultActions').innerHTML = actions;
+    const rn = document.getElementById('resultNav'); if (rn) rn.style.display = 'none';
+    goTo('result');
+}
+
+function submitMoved() {
+    runSubmit('moved', async () => {
+        const v = id => document.getElementById(id).value.trim();
+        const addr = { address1: v('mAddress'), city: v('mCity'), stateAbbr: v('mState').toUpperCase(), zip: v('mZip') };
+        const hasAddr = Object.values(addr).some(Boolean);
+        const newAddress = hasAddr
+            ? [addr.address1, addr.city, [addr.stateAbbr, addr.zip].filter(Boolean).join(' ')].filter(Boolean).join(', ')
+            : '';
+        const fields = {};
+        Object.keys(addr).forEach(k => { if (addr[k]) fields[k] = addr[k]; });
+        const transfer = transferChoice || 'Not answered';
+        await reportCircumstance('moved', { newAddress, transfer, where: v('mWhere') }, hasAddr ? fields : null);
+        circumstanceResult({
+            icon: '\u{1F3E0}',
+            title: 'Thanks \u2014 we\u2019ve got it',
+            sub: hasAddr ? 'Your new address is saved.' : 'Thanks for letting us know. You can add your new address anytime on your Profile.',
+            boxClass: 'confirmed',
+            box: transfer === 'Yes'
+                ? 'We\u2019ve noted that you\u2019d like to join a council near your new home. Someone from the council will be in touch to help.'
+                : 'Your record has been updated. You\u2019re still a member of Council 14895.',
+            actions: PROFILE_BTN()
+        });
+    });
+}
+
+function submitStepBack() {
+    runSubmit('stepback', async () => {
+        const reasons = [...document.querySelectorAll('#stepbackReasons input:checked')].map(i => i.value);
+        const note = document.getElementById('stepbackNote').value.trim();
+        await reportCircumstance('stepback', { reasons, note });
+        circumstanceResult({
+            icon: '\u{1F91D}',
+            title: 'Thanks for letting us know',
+            sub: 'You\u2019re still a member, and you\u2019re welcome back anytime.',
+            boxClass: 'confirmed',
+            box: 'Our Retention Chair will give you a call in the next few weeks.' +
+                 (reasons.includes('Dues or cost') ? ' We\u2019ll talk about dues then, too.' : ''),
+            actions: PROFILE_BTN()
+        });
+    });
+}
+
+function submitWithdraw() {
+    const letter = document.getElementById('wdLetter').checked;
+    const contact = document.getElementById('wdContact').checked;
+    if (letter) openLetter(); // open before any waiting, so the browser doesn't block the window
+    runSubmit('withdraw', async () => {
+        await reportCircumstance('withdraw', { letter, contact });
+        const parts = [];
+        if (letter) parts.push('Please sign the letter and hand it to the Grand Knight or any council officer' +
+            (RETURN_ADDRESS ? ', or mail it to:<br><span style="white-space:pre-line;">' + escHtml(RETURN_ADDRESS) + '</span>' : '.') +
+            '<br><button class="btn btn-ghost" style="margin-top:0.75rem;" onclick="openLetter()">Print the letter again</button>');
+        if (contact) parts.push('Someone from the council will contact you to help with the signed request.');
+        circumstanceResult({
+            icon: '\u{1F4EC}',
+            title: 'Request received',
+            sub: 'Your membership doesn\u2019t change until Supreme receives your signed request.',
+            boxClass: 'leaving',
+            box: parts.join('<hr style="border:none;border-top:1px solid rgba(0,0,0,0.1);margin:0.9rem 0;">'),
+            actions: PROFILE_BTN()
+        });
+    });
+}
+
+function submitOther() {
+    runSubmit('other', async () => {
+        await reportCircumstance('other', { note: document.getElementById('otherNote').value.trim() });
+        circumstanceResult({
+            icon: '\u{1F4EC}',
+            title: 'Thanks \u2014 we\u2019ve got it from here',
+            sub: 'Someone from the council will follow up with you.',
+            boxClass: 'flagged',
+            box: 'Your note has been passed along.',
+            actions: PROFILE_BTN()
+        });
+    });
+}
+
+function openLetter() {
+    const name = escHtml(properName(currentMember));
+    const num = escHtml(currentMember.memberNumber);
+    const today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    const returnTo = 'Please hand this signed letter to the Grand Knight or any council officer' +
+        (RETURN_ADDRESS ? ', or mail it to:\n' + escHtml(RETURN_ADDRESS) : '.');
+    const doc = `<!DOCTYPE html><html><head><title>Withdrawal Request \u2014 ${name}</title><style>
+        body { font-family: Georgia, 'Times New Roman', serif; max-width: 640px; margin: 48px auto; padding: 0 24px; line-height: 1.7; color: #111; font-size: 17px; }
+        .sig { margin-top: 52px; } .line { border-bottom: 1px solid #000; width: 340px; max-width: 100%; height: 30px; }
+        .label { font-size: 14px; color: #444; }
+        .note { margin-top: 48px; padding-top: 12px; border-top: 1px solid #bbb; font-size: 14px; color: #333; white-space: pre-line; }
+        .printbtn { font-size: 16px; padding: 10px 22px; margin-bottom: 28px; cursor: pointer; }
+        @media print { .noprint { display: none; } }
+    </style></head><body>
+        <div class="noprint"><button class="printbtn" onclick="window.print()">Print this letter</button></div>
+        <p>${today}</p>
+        <p>Grand Knight<br>St. Luke Knights of Columbus, Council #14895</p>
+        <p>I, ${name}, member number ${num}, request to withdraw my membership in the Knights of Columbus.</p>
+        <div class="sig"><div class="line"></div><div class="label">Signature</div></div>
+        <div class="sig"><div class="line"></div><div class="label">Date</div></div>
+        <p style="margin-top:28px;">Printed name: ${name}<br>Member number: ${num}</p>
+        <p style="margin-top:28px;">cc: Retention Chair, Council #14895</p>
+        <div class="note">${returnTo}</div>
+    </body></html>`;
+    const win = window.open('', '_blank');
+    if (!win) return; // blocked — the result screen offers "Print the letter again"
+    win.document.write(doc);
+    win.document.close();
+}
+
+async function completeWizard(outcome, notes) {
+    try {
+        await apiPost({
+            action: 'completeWizard',
+            memberNumber: currentMember.memberNumber,
+            memberName: currentMember.firstName + ' ' + currentMember.lastName,
+            outcome: outcome,
+            notes: notes || ''
+        });
+        rememberWizardHandled();
+    } catch (e) {
+        console.warn('Wizard completion log failed:', e.message);
+    }
+}
+
+function showResult(paidNow) {
+    const icon = document.getElementById('resultIcon');
+    const title = document.getElementById('resultTitle');
+    const sub = document.getElementById('resultSub');
+    const box = document.getElementById('resultBox');
+
+    if (duesDisputed) {
+        icon.textContent = '\u{1F4EC}';
+        title.textContent = "Thanks \u2014 we've got it from here";
+        sub.textContent = "Your contact info has been updated. Someone from the council will follow up on your dues question.";
+        box.className = 'result-box flagged';
+        box.textContent = 'Dues question flagged for follow-up. Everything else has been recorded.';
+        completeWizard('Flagged', document.getElementById('disputeNote').value.trim());
+        document.getElementById('resultActions').innerHTML = '<a href="home.html?member=' + currentMember.memberNumber + '" class="btn btn-primary">Continue to My Profile</a>';
+        document.getElementById('resultNav').style.display = 'block';
+    } else {
+        icon.textContent = paidNow ? '\u{1F3C6}' : '\u2705';
+        title.textContent = paidNow ? "Thanks for paying!" : "You're all set";
+        sub.textContent = paidNow
+            ? "Your payment is on its way. Your dues record will be updated once it clears."
+            : "Thanks for taking a minute to confirm your info.";
+        box.className = 'result-box confirmed';
+        box.textContent = paidNow
+            ? 'Payment submitted. Your record has been marked verified as of today.'
+            : 'Your record has been marked verified as of today. See you at the next meeting!';
+        completeWizard(paidNow ? 'Confirmed - Paid' : 'Confirmed', '');
+        document.getElementById('resultActions').innerHTML = '<a href="home.html?member=' + currentMember.memberNumber + '" class="btn btn-primary">Continue to My Profile</a>';
+        document.getElementById('resultNav').style.display = 'block';
+    }
+
+    goTo('result');
+}
+
+async function init() {
+    Session.renew();
+    if (!MEMBER_NUMBER) {
+        window.location.href = 'landing.html';
+        return;
+    }
+
+    if (new URLSearchParams(window.location.search).get('first') === '1') document.getElementById('firstVisitNote').style.display = 'block';
+
+    // Show loading state
+    const welcomeSpan = document.getElementById('welcomeName');
+    if (welcomeSpan) welcomeSpan.textContent = '\u2026';
+
+    try {
+        const settingsReady = loadReturnAddress();
+        CURRENT_MEMBER = await fetchLiveMember(MEMBER_NUMBER);
+        loadMember(CURRENT_MEMBER);
+        const cameFromProfile = new URLSearchParams(window.location.search).get('path') === 'changed';
+        if (cameFromProfile && !new URLSearchParams(window.location.search).get('paid')) {
+            await settingsReady;
+            enteredFromProfile = true;
+            openChanged();
+        } else if (consumePayReturn()) {
+            // Contact + directory were completed before they left to pay — finish with dues confirmed
+            memberStatus = 'stay';
+            duesDisputed = false;
+            showResult(true); // true = came from payment
+        }
+    } catch (e) {
+        document.getElementById('panel-welcome').querySelector('h1').textContent = 'Could not load your profile';
+        document.getElementById('panel-welcome').querySelector('.sub').textContent = 'Please try refreshing the page. If the problem persists, contact a data administrator.';
+    }
+}
+
+window.addEventListener('DOMContentLoaded', init);
+
+/* Carry the logged-in member across pages via preserve-member links */
+(function () {
+    const memberParam = new URLSearchParams(window.location.search).get("member");
+    if (!memberParam) return;
+    document.querySelectorAll("a.preserve-member").forEach(a => {
+        try {
+            const url = new URL(a.getAttribute("href"), window.location.href);
+            url.searchParams.set("member", memberParam);
+            a.setAttribute("href", url.pathname + url.search);
+        } catch(e) {}
+    });
+})();
+</script>
+
+</body>
+</html>

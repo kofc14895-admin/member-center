@@ -1,0 +1,1542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Profile — St. Luke Knights of Columbus Member Center</title>
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600;700&family=Lora:wght@400;500;600&family=Lato:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+    --primary: #1E3A8A;
+    --primary-light: #2563EB;
+    --secondary: #C5A572;
+    --secondary-light: #D4B583;
+    --accent: #B91C1C;
+    --light-bg: #F9FAFB;
+    --text-dark: #1F2937;
+    --text-medium: #6B7280;
+    --shadow: rgba(30, 58, 138, 0.15);
+    --green: #15803D;
+    --green-bg: #F0FDF4;
+    --amber: #B45309;
+    --amber-bg: #FFFBEB;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html { max-width:100%; }
+body { font-family:'Lora', serif; color:var(--text-dark); background:var(--light-bg); line-height:1.6; padding-bottom:4rem; }
+a { color:inherit; }
+:focus-visible { outline:3px solid var(--primary-light); outline-offset:2px; }
+.field-value { overflow-wrap:break-word; word-break:break-word; }
+.field-value.empty { color:var(--text-medium); font-style:italic; }
+
+/* Mockup-only review panel */
+.review-panel { background:#fff; border-bottom:2px dashed #9CA3AF; padding:0.9rem 1.5rem; }
+.review-panel .inner { max-width:1200px; margin:0 auto; display:flex; align-items:center; gap:1rem; flex-wrap:wrap; }
+.demo-controls { display:flex; align-items:center; gap:1rem; flex-wrap:wrap; }
+.review-panel .tag { font-family:'Lato', sans-serif; font-size:0.7rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; background:#374151; color:#fff; padding:0.3rem 0.6rem; border-radius:4px; }
+.review-panel label { font-family:'Lato', sans-serif; font-size:0.85rem; color:var(--text-medium); }
+.review-panel select { font-family:'Lato', sans-serif; font-size:0.9rem; padding:0.4rem 0.6rem; border-radius:6px; border:1.5px solid #D1D5DB; background:#fff; width:100%; max-width:340px; }
+.review-panel .note { font-family:'Lato', sans-serif; font-size:0.8rem; color:var(--text-medium); margin-left:auto; }
+
+/* Nav */
+nav { background:white; box-shadow:0 2px 4px rgba(0,0,0,0.1); border-bottom:3px solid var(--primary); }
+nav .container { max-width:1200px; margin:0 auto; display:flex; justify-content:space-between; align-items:stretch; flex-wrap:wrap; }
+.logo-section { padding:0.7rem 1.5rem; display:flex; align-items:center; }
+.logo { font-family:'Crimson Pro', serif; color:var(--primary); line-height:1.15; text-decoration:none; }
+.logo-main { display:block; font-size:1.05rem; font-weight:700; }
+.logo-sub { display:block; font-size:0.72rem; color:var(--text-medium); font-family:'Lato',sans-serif; }
+nav ul { list-style:none; display:flex; margin:0; flex-wrap:wrap; }
+nav ul li { display:flex; align-items:center; }
+nav a.navlink { font-family:'Lato', sans-serif; font-size:0.92rem; font-weight:500; color:var(--text-medium); text-decoration:none; padding:1.1rem 1.15rem; border-bottom:3px solid transparent; transition:all .2s; }
+nav a.navlink:hover { color:var(--primary); background:rgba(30,58,138,0.05); }
+nav a.navlink.active { color:var(--primary); font-weight:700; border-bottom-color:var(--secondary); }
+nav a.signout { font-family:'Lato',sans-serif; font-size:0.85rem; color:var(--text-medium); padding:1.1rem 1.5rem; text-decoration:none; }
+
+/* Page shell */
+.page { max-width:1000px; margin:0 auto; padding:0 1.5rem; }
+.not-logged-in { max-width:500px; margin:4rem auto; padding:0 1.5rem; text-align:center; }
+.not-logged-in h1 { font-family:'Crimson Pro', serif; font-size:1.8rem; color:var(--primary); font-weight:700; }
+.not-logged-in p { font-family:'Lato',sans-serif; font-size:0.95rem; color:var(--text-medium); margin:0.75rem 0 1.5rem; }
+.greeting-line { font-family:'Crimson Pro', serif; font-size:1.3rem; font-weight:700; color:var(--primary); margin-top:2rem; }
+
+/* Unified identity card — name/badge, tone message, verify action, one visual unit */
+.identity-card { background:white; border-radius:16px; box-shadow:0 4px 15px var(--shadow); margin-top:0.9rem; padding:1.5rem 1.75rem; }
+.identity-top { display:flex; align-items:center; gap:1rem 1.25rem; flex-wrap:wrap; }
+.rolodex-id { flex:1; min-width:170px; }
+.rolodex-name { font-family:'Crimson Pro', serif; font-size:1.5rem; font-weight:700; color:var(--text-dark); }
+.rolodex-meta { font-family:'Lato',sans-serif; font-size:0.85rem; color:var(--text-medium); margin-top:0.25rem; }
+.rolodex-positions { margin-top:0.5rem; }
+.position-pill { display:inline-block; background:var(--light-bg); color:var(--primary); border-radius:50px; padding:0.2rem 0.75rem; margin-right:0.4rem; margin-top:0.3rem; font-family:'Lato',sans-serif; font-size:0.75rem; font-weight:600; }
+.rolodex-badge { font-family:'Lato',sans-serif; font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; padding:0.4rem 0.9rem; border-radius:50px; white-space:nowrap; }
+.rolodex-badge.tone-good { background:var(--green-bg); color:var(--green); }
+.rolodex-badge.tone-warm { background:var(--amber-bg); color:var(--amber); }
+.rolodex-badge.tone-neutral { background:#F3F4F6; color:var(--text-medium); }
+.rolodex-badge.tone-exempt { background:#FBF6EC; color:#8A6D2F; }
+.identity-message { font-family:'Lora',serif; font-size:0.95rem; color:var(--text-dark); margin-top:1rem; }
+.identity-footer { margin-top:1rem; padding-top:0.9rem; border-top:1px dashed #E5E7EB; display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap; }
+.confirm-row-inline { display:flex; align-items:center; gap:0.6rem; flex-wrap:wrap; }
+.verified-text { font-family:'Lato',sans-serif; font-size:0.8rem; color:var(--text-medium); }
+.verify-link { background:none; border:none; color:var(--primary); text-decoration:underline; font-family:'Lato',sans-serif; font-size:0.8rem; cursor:pointer; padding:0; }
+.verify-link:disabled { color:var(--text-medium); text-decoration:none; cursor:default; }
+.confirm-status { font-family:'Lato',sans-serif; font-size:0.8rem; color:var(--text-medium); }
+.confirm-status.ok { color:var(--green); font-weight:600; }
+.confirm-status.err { color:var(--accent); font-weight:600; }
+.flag-jump { color:var(--amber) !important; }
+
+.btn { font-family:'Lato', sans-serif; font-weight:600; font-size:0.85rem; cursor:pointer; border-radius:50px; padding:0.55rem 1.2rem; border:2px solid transparent; transition:all .2s; }
+.btn-primary { background:var(--secondary); color:white; }
+.btn-primary:hover { background:var(--secondary-light); }
+.btn-outline { background:transparent; color:var(--primary); border-color:var(--primary); }
+.btn-outline:hover { background:var(--primary); color:white; }
+.btn-outline:disabled { opacity:0.55; cursor:default; }
+.btn-text { background:none; border:none; color:var(--primary); text-decoration:underline; font-family:'Lato',sans-serif; font-size:0.85rem; cursor:pointer; padding:0; }
+
+/* Sections */
+.sections { display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; margin-top:1.5rem; }
+@media (max-width:800px){ .sections { grid-template-columns:1fr; } }
+.section-card { background:white; border-radius:16px; padding:1.75rem; box-shadow:0 4px 15px var(--shadow); }
+.section-card.full { grid-column:1 / -1; }
+.section-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem; }
+.section-head h2 { font-family:'Crimson Pro', serif; font-size:1.2rem; color:var(--primary); font-weight:700; }
+.section-tag { font-family:'Lato',sans-serif; font-size:0.68rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-medium); background:#F3F4F6; padding:0.25rem 0.6rem; border-radius:4px; }
+.section-note { font-family:'Lato',sans-serif; font-size:0.78rem; color:var(--text-medium); margin:0 0 1.1rem; }
+.empty-banner { font-family:'Lato',sans-serif; font-size:0.85rem; color:#8A6D2F; background:var(--amber-bg); border-left:3px solid var(--amber); border-radius:6px; padding:0.75rem 1rem; margin-bottom:1rem; }
+
+.field-row { display:grid; grid-template-columns:120px 1fr; gap:0.75rem; padding:0.65rem 0; border-bottom:1px solid #F0F1F3; align-items:center; }
+.field-row:last-child { border-bottom:none; }
+.field-label { font-family:'Lato',sans-serif; font-size:0.76rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-medium); }
+.field-row input { font-family:'Lora',serif; font-size:0.92rem; padding:0.5rem 0.6rem; border:1.5px solid #D1D5DB; border-radius:6px; width:100%; }
+.directory-row { grid-template-columns:1fr; }
+.checkbox-label { display:flex; align-items:center; gap:0.6rem; font-family:'Lato',sans-serif; font-size:0.88rem; color:var(--text-dark); cursor:pointer; }
+.checkbox-label input[type="checkbox"] { width:auto; flex-shrink:0; accent-color:var(--primary); cursor:pointer; }
+.edit-actions { display:flex; gap:0.75rem; margin-top:1.1rem; }
+.edit-hint { font-family:'Lato',sans-serif; font-size:0.76rem; color:var(--text-medium); margin-top:0.5rem; }
+
+.dues-current { color:var(--green); font-weight:700; }
+.dues-owed { color:var(--accent); font-weight:700; }
+.pay-prompt { margin-top:1.25rem; }
+.btn-pay { width:100%; padding:0.8rem; font-size:0.9rem; }
+
+/* Flag — single entry point, category selector with a catch-all */
+.verify-choice { display:flex; align-items:center; justify-content:center; gap:1.25rem; flex-wrap:wrap; margin-top:1.25rem; }
+.flag-form { display:none; margin-top:1.25rem; padding-top:1.1rem; border-top:1px dashed #E5E7EB; text-align:left; }
+.flag-form.open { display:block; }
+.flag-form label { font-family:'Lato',sans-serif; font-size:0.78rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-medium); display:block; margin-bottom:0.4rem; }
+.flag-form select { font-family:'Lato',sans-serif; font-size:0.92rem; padding:0.55rem 0.7rem; border-radius:8px; border:1.5px solid #D1D5DB; width:100%; max-width:280px; margin-bottom:0.9rem; }
+.flag-form textarea { width:100%; min-height:80px; font-family:'Lora',serif; font-size:0.9rem; padding:0.7rem; border:1.5px solid #D1D5DB; border-radius:8px; resize:vertical; }
+.flag-confirm { display:none; margin-top:0.9rem; padding:0.85rem 1rem; background:var(--green-bg); border-left:3px solid var(--green); border-radius:6px; font-family:'Lato',sans-serif; font-size:0.85rem; color:#166534; text-align:left; }
+.flag-confirm.open { display:block; }
+
+.circumstances-link { text-align:center; margin-top:2rem; }
+.circumstances-link a { font-family:'Lato',sans-serif; font-size:0.9rem; color:var(--text-medium); text-decoration:underline; }
+.circumstances-link a:hover { color:var(--accent); }
+
+.page-footer { max-width:1000px; margin:2.5rem auto 0; padding:0 1.5rem; text-align:center; }
+.page-footer p { font-family:'Lato',sans-serif; font-size:0.8rem; color:var(--text-medium); margin-bottom:0.75rem; }
+.data-refresh { font-size:0.72rem !important; color:#9CA3AF !important; margin-bottom:0.5rem !important; }
+.remove-link { font-family:'Lato',sans-serif; font-size:0.8rem; color:#9CA3AF; text-decoration:underline; background:none; border:none; cursor:pointer; }
+.remove-link:hover { color:var(--accent); }
+
+.modal-overlay { display:none; position:fixed; inset:0; background:rgba(31,41,55,0.55); z-index:2000; align-items:center; justify-content:center; padding:1.5rem; }
+.modal-overlay.open { display:flex; }
+.modal { background:white; border-radius:16px; max-width:440px; width:100%; padding:2rem; box-shadow:0 20px 50px rgba(0,0,0,0.25); }
+.modal h3 { font-family:'Crimson Pro', serif; color:var(--accent); font-size:1.3rem; margin-bottom:0.9rem; }
+.modal p { font-family:'Lora',serif; font-size:0.95rem; color:var(--text-dark); margin-bottom:0.8rem; }
+.modal .fine { font-family:'Lato',sans-serif; font-size:0.8rem; color:var(--text-medium); margin-bottom:1.25rem; }
+.modal-actions { display:flex; gap:0.75rem; justify-content:flex-end; }
+.btn-danger { background:var(--accent); color:white; }
+.btn-danger:hover { background:#991B1B; }
+.btn-ghost { background:none; border:2px solid #D1D5DB; color:var(--text-medium); }
+.btn-ghost:hover { border-color:var(--text-medium); }
+.status-option { border:1.5px solid #E5E7EB; border-radius:12px; padding:1rem 1.1rem; margin-bottom:0.9rem; }
+.status-option h4 { font-family:'Crimson Pro', serif; font-size:1.05rem; color:var(--primary); margin-bottom:0.3rem; }
+.status-option-desc { font-family:'Lato',sans-serif; font-size:0.85rem; color:var(--text-medium); margin-bottom:0.7rem; }
+.modal .status-option-desc { font-size:0.85rem; color:var(--text-medium); margin-bottom:0.7rem; }
+.btn-full { width:100%; text-align:center; }
+.status-request-status { font-family:'Lato',sans-serif; font-size:0.82rem; margin-bottom:0.5rem; min-height:1.2em; }
+.modal .status-request-status { font-size:0.82rem; margin-bottom:0.5rem; }
+
+@media (max-width:640px){
+    nav .container { flex-wrap:wrap; }
+    .logo-section { padding:0.6rem 1rem; flex:1; min-width:200px; }
+    .logo-main { font-size:0.95rem; }
+    nav ul { flex-wrap:nowrap; width:100%; justify-content:flex-start; order:3; border-top:1px solid #F0F1F3; overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+    nav ul::-webkit-scrollbar { display:none; }
+    nav ul li { flex-shrink:0; }
+    nav a.navlink { padding:0.65rem 0.7rem; font-size:0.82rem; white-space:nowrap; }
+    nav a.signout { padding:0.6rem 1rem; font-size:0.8rem; }
+    .review-panel { padding:0.7rem 1rem; }
+    .review-panel select { max-width:100%; }
+    .page, .section-card.full { padding-left:1rem; padding-right:1rem; }
+    .greeting-line { margin-top:1.25rem; font-size:1.15rem; }
+    .rolodex, .section-card { padding:1.25rem; }
+    .field-row { grid-template-columns:1fr; gap:0.15rem; }
+    .modal-actions { flex-direction:column-reverse; }
+    .modal-actions .btn { width:100%; }
+}
+.site-header { position:sticky; top:0; z-index:1000; }
+
+/* Menu: never break a label across two lines; below 1180px the menu gets its own row */
+nav a.navlink, nav a.signout { white-space:nowrap; }
+@media (max-width:1180px) {
+    nav .container { flex-wrap:wrap; }
+    .logo-section { flex:1; min-width:200px; }
+    nav ul { width:100%; order:3; justify-content:flex-start; border-top:1px solid #F0F1F3; overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+    nav ul::-webkit-scrollbar { display:none; }
+    nav ul li { flex-shrink:0; }
+}
+.dues-flag-link { font-family:'Lato',sans-serif; font-size:0.9rem; color:var(--text-medium); text-decoration:underline; }
+.dues-flag-link:hover { color:var(--primary); }
+/* Announcement banner */
+.ann-banner { margin-top:0.9rem; background:#FFFDF7; border-radius:16px; box-shadow:0 4px 15px var(--shadow); border-left:6px solid var(--secondary); overflow:hidden; animation:annIn .35s ease; }
+.ann-banner[hidden] { display:none; }
+@keyframes annIn { from { opacity:0; } to { opacity:1; } }
+@media (prefers-reduced-motion: reduce) { .ann-banner { animation:none; } }
+.ann-item { display:flex; gap:0.9rem; align-items:flex-start; padding:1.05rem 1.2rem; }
+.ann-item + .ann-item { border-top:1px solid #EFE7D6; }
+.ann-icon { flex:none; width:42px; height:42px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.3rem; background:#fff; box-shadow:0 0 0 1.5px #E8DCC0; }
+.ann-body { flex:1; min-width:0; }
+.ann-label { font-family:'Lato',sans-serif; font-size:0.72rem; font-weight:700; letter-spacing:0.07em; text-transform:uppercase; color:var(--text-medium); }
+.ann-text { font-family:'Lora',serif; font-size:1.08rem; line-height:1.45; color:var(--text-dark); margin-top:0.15rem; font-weight:500; overflow-wrap:break-word; }
+.ann-text b { font-weight:600; color:var(--primary); }
+.ann-actions { margin-top:0.7rem; }
+.ann-btn { display:inline-flex; align-items:center; justify-content:center; min-height:46px; padding:0.55rem 1.5rem; border-radius:50px; background:var(--primary); color:#fff; border:2px solid var(--primary); font-family:'Lato',sans-serif; font-size:1rem; font-weight:700; text-decoration:none; }
+@media (hover:hover) { .ann-btn:hover { background:#fff; color:var(--primary); } }
+.ann-btn:focus-visible { background:#fff; color:var(--primary); }
+@media (max-width:640px) { .ann-btn { width:100%; } .ann-item { padding:1rem; gap:0.75rem; } }
+.help-block { text-align:center; margin-top:2.5rem; padding-top:1.75rem; border-top:1px dashed #D1D5DB; }
+.help-title { font-family:'Crimson Pro',serif; font-size:1.2rem; font-weight:700; color:var(--primary); }
+.help-text { font-family:'Lato',sans-serif; font-size:0.9rem; color:var(--text-medium); margin-top:0.3rem; }
+.help-actions { display:flex; gap:0.7rem; justify-content:center; flex-wrap:wrap; margin-top:1rem; }
+.help-btn { display:inline-flex; align-items:center; justify-content:center; min-height:46px; padding:0.55rem 1.3rem; border-radius:50px; border:2px solid var(--primary); background:#fff; color:var(--primary); font-family:'Lato',sans-serif; font-size:0.95rem; font-weight:700; text-decoration:none; }
+@media (hover:hover) { .help-btn:hover { background:var(--primary); color:#fff; } }
+.help-btn:focus-visible { background:var(--primary); color:#fff; }
+@media (max-width:640px) { .help-btn { width:100%; max-width:320px; } }
+.quiet-signout { text-align:center; margin-top:2.5rem; }
+.quiet-signout-link { background:none; border:none; padding:0.3rem; font-family:'Lato',sans-serif; font-size:0.82rem; color:#9CA3AF; text-decoration:underline; cursor:pointer; }
+.quiet-signout-link:hover { color:var(--text-medium); }
+.signout-confirm { max-width:440px; margin:0 auto; background:white; border:1.5px solid #E5E7EB; border-radius:12px; padding:1rem 1.2rem; text-align:left; }
+.signout-confirm p { font-family:'Lato',sans-serif; font-size:0.92rem; color:var(--text-dark); line-height:1.55; }
+.signout-confirm-actions { display:flex; gap:1rem; align-items:center; justify-content:flex-end; margin-top:0.9rem; flex-wrap:wrap; }
+.signout-confirm-go { background:none; border:none; font-family:'Lato',sans-serif; font-size:0.9rem; color:var(--text-medium); text-decoration:underline; cursor:pointer; padding:0.4rem; }
+.signout-confirm-go:hover { color:var(--accent); }
+
+/* Member photo */
+.mc-avatar { width:var(--s,56px); height:var(--s,56px); border-radius:50%; flex:none; object-fit:cover; display:block; background:#E8EDFB; box-shadow:0 0 0 2px #fff, 0 0 0 3px #D1D5DB; }
+.mc-avatar.initials { display:flex; align-items:center; justify-content:center; font-family:'Crimson Pro',serif; font-weight:700; color:var(--primary); font-size:calc(var(--s,56px) * 0.4); line-height:1; }
+.photo-slot { flex:none; background:none; border:none; padding:0; border-radius:50%; cursor:pointer; }
+.photo-slot:disabled { cursor:default; }
+.photo-actions { display:flex; align-items:center; gap:0.5rem 0.9rem; flex-wrap:wrap; }
+.photo-hint { font-family:'Lato',sans-serif; font-size:0.85rem; color:var(--text-medium); flex-basis:100%; }
+.ph-overlay { position:fixed; inset:0; background:rgba(17,24,39,0.55); display:none; align-items:center; justify-content:center; padding:1rem; z-index:2000; }
+.ph-overlay.open { display:flex; }
+.ph-sheet { position:relative; background:white; border-radius:20px; max-width:420px; width:100%; max-height:100%; overflow-y:auto; padding:1.75rem 1.5rem 1.4rem; text-align:center; box-shadow:0 20px 50px rgba(0,0,0,0.3); }
+.ph-sheet h2 { font-family:'Crimson Pro',serif; font-size:1.6rem; color:var(--primary); line-height:1.2; }
+.ph-sheet p { font-family:'Lato',sans-serif; font-size:1rem; color:var(--text-dark); margin-top:0.7rem; }
+.ph-sheet p.small { font-size:0.88rem; color:var(--text-medium); }
+.ph-preview { margin:1.2rem 0 0.4rem; display:flex; justify-content:center; }
+.ph-big { display:flex; align-items:center; justify-content:center; text-align:center; width:100%; margin-top:0.8rem; min-height:54px; font-family:'Lato',sans-serif; font-size:1.1rem; font-weight:700; border-radius:50px; border:2px solid var(--primary); cursor:pointer; padding:0.7rem 1rem; }
+.ph-big.main { background:var(--primary); color:#fff; }
+.ph-big.alt { background:#fff; color:var(--primary); }
+.ph-big.ghost { background:#fff; color:var(--text-medium); border-color:#D1D5DB; }
+.ph-big[hidden] { display:none; }
+.ph-big:disabled { opacity:0.6; cursor:default; }
+.ph-linkish { margin-top:0.9rem; background:none; border:none; font-family:'Lato',sans-serif; font-size:0.95rem; color:var(--text-medium); text-decoration:underline; cursor:pointer; padding:0.5rem; }
+.ph-vh { position:absolute; width:1px; height:1px; opacity:0; overflow:hidden; pointer-events:none; }
+.ph-step { display:none; } .ph-step.on { display:block; }
+</style>
+<script src="config.js"></script>
+<script src="session.js"></script>
+<script src="nav-toggle.js"></script>
+</head>
+<body>
+
+<header class="site-header">
+<div class="review-panel" id="reviewPanel" style="display:none;">
+    <div class="inner">
+        <span class="tag">Live</span>
+        <span class="demo-controls" id="demoControls">
+            <label for="memberSelect">Browse as a member (admin):</label>
+            <select id="memberSelect" onchange="browseAs(this.value)"></select>
+        </span>
+        <span class="note" id="memberNote">Choose a member to see his live record.</span>
+    </div>
+</div>
+
+<nav>
+    <div class="container">
+        <div class="logo-section">
+            <a href="home.html" class="logo preserve-member">
+                <span class="logo-main">ST. LUKE KNIGHTS OF COLUMBUS</span>
+                <span class="logo-sub">Member Center · Council 14895</span>
+            </a>
+        </div>
+        <ul>
+            <li><a href="home.html" class="navlink active">Profile</a></li>
+            <li><a href="calendar.html" class="navlink preserve-member">Calendar</a></li>
+            <li><a href="prayers.html" class="navlink preserve-member">Prayers</a></li>
+            <li><a href="groups.html" class="navlink preserve-member">Groups</a></li>
+            <li><a href="membership-card.html" class="navlink preserve-member">KofC Card</a></li>
+            <li class="nav-whydues"><a href="why-dues.html" class="navlink preserve-member">Why Dues?</a></li>
+            <li><a href="verify-wizard.html" class="navlink preserve-member">Verify Data</a></li>
+        </ul>
+    </div>
+</nav>
+</header>
+
+<div class="not-logged-in" id="notLoggedIn" style="display:none;">
+    <h1>Please sign in</h1>
+    <p>Sign in to the Member Center to view this page.</p>
+    <a href="landing.html" class="btn btn-primary">Sign in</a>
+</div>
+
+<div class="page" id="mainContent" style="display:none;">
+
+    <p class="greeting-line" id="greetingLine">Welcome back, Daniel</p>
+
+    <section class="ann-banner" id="annBanner" role="region" aria-label="Announcements" hidden></section>
+
+    <div class="identity-card">
+        <div class="identity-top">
+            <button type="button" class="photo-slot" id="photoSlot" aria-label="Change my photo"></button>
+            <div class="rolodex-id">
+                <div class="rolodex-name" id="rxName">Daniel R. Fitzgerald</div>
+                <div class="rolodex-meta">Member #<span id="rxId">0142</span></div>
+                <div class="rolodex-positions" id="rxPositions" style="display:none;"></div>
+            </div>
+            <span class="rolodex-badge tone-good" id="rxBadge">Core Member</span>
+        </div>
+        <p class="identity-message" id="statusMessage">You're all set. Thank you for staying active in council life.</p>
+        <div class="identity-footer">
+            <span class="verified-text" id="verifiedText">Not yet verified</span>
+            <div class="photo-actions" id="photoActions">
+                <span class="photo-hint" id="photoHint">Add a photo so other members can recognize you.</span>
+                <button type="button" class="btn btn-outline" id="photoBtn">Add my photo</button>
+                <button type="button" class="btn-text" id="photoRemoveLink" hidden>Remove photo</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="sections">
+        <div class="section-card">
+            <div class="section-head"><h2>Dues Profile</h2><span class="section-tag">Read only</span></div>
+            <div class="field-row"><span class="field-label">Dues Status</span><span class="field-value" id="duesValue">Current</span></div>
+            <div class="field-row"><span class="field-label">Paid Through</span><span class="field-value" id="paidThroughValue">2026</span></div>
+            <div class="pay-prompt" id="payPrompt" style="display:none;">
+                <button class="btn btn-primary btn-pay" id="payDuesBtn" onclick="goToPayDues()">Thanks for Clicking to Pay &rarr;</button>
+            </div>
+            <div style="margin-top:0.75rem;">
+                <button class="btn-text dues-flag-link" onclick="toggleFlag()">My dues/membership data doesn't look right</button>
+            </div>
+            <div class="flag-form" id="flagForm">
+                <label for="flagCategory">What's this about?</label>
+                <select id="flagCategory">
+                    <option value="Membership">Membership (degree, years of service, role)</option>
+                    <option value="Dues">Dues (status, amount owed, payment history)</option>
+                    <option value="Other">Something else</option>
+                </select>
+                <textarea id="flagText" placeholder="Tell us what looks wrong — someone from the council will follow up."></textarea>
+                <p class="edit-hint" id="flagStatus"></p>
+                <div class="edit-actions">
+                    <button class="btn btn-primary" id="submitFlagBtn" onclick="submitFlag()">Send to a data administrator</button>
+                    <button class="btn btn-outline" onclick="toggleFlag()">Cancel</button>
+                </div>
+            </div>
+            <div class="flag-confirm" id="flagConfirm">Thanks — someone from the council will follow up with you directly.</div>
+        </div>
+
+        <div class="section-card">
+            <div class="section-head"><h2>Membership Profile</h2><span class="section-tag">Read only</span></div>
+            <div class="field-row"><span class="field-label">Member Status</span><span class="field-value" id="memberStatusValue">Active</span></div>
+            <div class="field-row"><span class="field-label">Degree</span><span class="field-value" id="degreeValue">Third Degree</span></div>
+            <div class="field-row"><span class="field-label">Years of Service</span><span class="field-value" id="yosValue">14 years</span></div>
+            <div class="field-row"><span class="field-label">Council Role</span><span class="field-value" id="roleValue">Member</span></div>
+        </div>
+    </div>
+
+    <div class="section-card full" style="margin-top:1.5rem;">
+        <div class="section-head">
+            <h2>Contact Profile</h2>
+            <button class="btn btn-outline" id="editToggleBtn" onclick="toggleEdit()">Update</button>
+        </div>
+        <p class="section-note">Add a preferred name if you go by something else — that's what shows in your greeting. Legal name issues go through Flag an Issue below.</p>
+        <div class="empty-banner" id="emptyBanner" style="display:none;">Your contact info is empty — worth filling in so data administrators and brothers can reach you.</div>
+        <div id="viewMode">
+            <div class="field-row"><span class="field-label">Preferred Name</span><span class="field-value" id="profileNickname">Not on file</span></div>
+            <div class="field-row"><span class="field-label">Wife's Name</span><span class="field-value" id="profileWife">&mdash;</span></div>
+            <div class="field-row"><span class="field-label">Address 1</span><span class="field-value" id="profileAddress1">4218 Birchwood Ln</span></div>
+            <div class="field-row"><span class="field-label">City</span><span class="field-value" id="profileCity">Indianapolis</span></div>
+            <div class="field-row"><span class="field-label">State</span><span class="field-value" id="profileState">IN</span></div>
+            <div class="field-row"><span class="field-label">Zip Code</span><span class="field-value" id="profileZip">46228</span></div>
+            <div class="field-row"><span class="field-label">Phone</span><span class="field-value" id="profilePhone">Not on file</span></div>
+            <div class="field-row"><span class="field-label">Email</span><span class="field-value" id="profileEmail">Not on file</span></div>
+            <div class="field-row"><span class="field-label">Member Directory</span><span class="field-value" id="profileDirectory">Not listed</span></div>
+        </div>
+        <div id="editMode" style="display:none;">
+            <div class="field-row"><label class="field-label" for="editNickname">Preferred Name</label><input type="text" id="editNickname" placeholder="What you go by"></div>
+            <div class="field-row"><label class="field-label" for="editWife">Wife's Name</label><input type="text" id="editWife" autocapitalize="words" placeholder="e.g., Mary (leave blank if it doesn't apply)"></div>
+            <div class="field-row"><label class="field-label" for="editAddress1">Address 1</label><input type="text" id="editAddress1"></div>
+            <div class="field-row"><label class="field-label" for="editCity">City</label><input type="text" id="editCity"></div>
+            <div class="field-row"><label class="field-label" for="editState">State</label>
+                <select id="editState">
+                    <option value="">Select&hellip;</option>
+                    <option>AL</option><option>AK</option><option>AZ</option><option>AR</option><option>CA</option><option>CO</option><option>CT</option><option>DE</option><option>DC</option><option>FL</option><option>GA</option><option>HI</option><option>ID</option><option>IL</option><option>IN</option><option>IA</option><option>KS</option><option>KY</option><option>LA</option><option>ME</option><option>MD</option><option>MA</option><option>MI</option><option>MN</option><option>MS</option><option>MO</option><option>MT</option><option>NE</option><option>NV</option><option>NH</option><option>NJ</option><option>NM</option><option>NY</option><option>NC</option><option>ND</option><option>OH</option><option>OK</option><option>OR</option><option>PA</option><option>RI</option><option>SC</option><option>SD</option><option>TN</option><option>TX</option><option>UT</option><option>VT</option><option>VA</option><option>WA</option><option>WV</option><option>WI</option><option>WY</option>
+                </select>
+            </div>
+            <div class="field-row"><label class="field-label" for="editZip">Zip Code</label><input type="text" id="editZip"></div>
+            <div class="field-row"><label class="field-label" for="editPhone">Phone</label><input type="text" id="editPhone"></div>
+            <div class="field-row"><label class="field-label" for="editEmail">Email</label><input type="text" id="editEmail"></div>
+            <div class="field-row directory-row">
+                <label class="checkbox-label" for="editDirectory">
+                    <input type="checkbox" id="editDirectory">
+                    Add me to the Member Directory found on this portal
+                </label>
+            </div>
+            <div class="edit-actions">
+                <button class="btn btn-primary" id="saveContactBtn" onclick="saveContactChanges()">Save changes</button>
+                <button class="btn btn-outline" onclick="toggleEdit()">Cancel</button>
+            </div>
+            <p class="edit-hint" id="saveStatus">Saving updates your profile right away and logs the change for a data administrator to double-check against the source records.</p>
+        </div>
+    </div>
+
+    <div class="circumstances-link">
+        <a href="verify-wizard.html?path=changed" class="preserve-member">My circumstances have changed</a>
+    </div>
+
+    <div class="help-block" id="helpBlock">
+        <div class="help-title">Questions, problems or ideas?</div>
+        <p class="help-text">Send us a note. We read every one.</p>
+        <div class="help-actions">
+            <a class="help-btn" data-kind="help" href="#">Ask for help</a>
+            <a class="help-btn" data-kind="bug" href="#">Report a problem</a>
+            <a class="help-btn" data-kind="idea" href="#">Suggest an idea</a>
+        </div>
+    </div>
+
+    <div class="quiet-signout">
+        <button type="button" class="quiet-signout-link" id="quietSignoutLink" onclick="toggleSignoutConfirm(true)">Sign out of this device</button>
+        <div class="signout-confirm" id="signoutConfirm" role="dialog" aria-labelledby="signoutConfirmTitle" hidden>
+            <p><strong id="signoutConfirmTitle">Sign out of this device?</strong> You'll need an emailed code to sign in again. If this is your own phone or computer, there's no need &mdash; just close the page.</p>
+            <div class="signout-confirm-actions">
+                <button type="button" class="btn btn-primary" onclick="toggleSignoutConfirm(false)">Stay signed in</button>
+                <button type="button" class="signout-confirm-go" onclick="Session.signOut()">Sign out</button>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="page-footer">
+    <p>St. Luke Knights of Columbus, Council 14895 · Indianapolis, IN · <span data-koc-email></span></p>
+    <p class="data-refresh" id="dataRefreshLine"></p>
+</div>
+
+<div class="ph-overlay" id="phOverlay" role="dialog" aria-modal="true" aria-labelledby="phTitle">
+  <div class="ph-sheet">
+    <div class="ph-step" id="phPick">
+        <h2 id="phTitle">Add your photo</h2>
+        <p>Choose a clear photo of your face, or take one now.</p>
+        <p class="small">Your photo will be shown to other signed-in members of the council.</p>
+        <label class="ph-big main" for="phCam">Take a photo</label>
+        <label class="ph-big alt" for="phFile">Choose from my photos</label>
+        <input type="file" id="phCam" class="ph-vh" accept="image/*" capture="user">
+        <input type="file" id="phFile" class="ph-vh" accept="image/*">
+        <button type="button" class="ph-linkish" data-ph-close>Cancel</button>
+    </div>
+    <div class="ph-step" id="phPreview">
+        <h2>Is this the one?</h2>
+        <div class="ph-preview" id="phPreviewBox"></div>
+        <p class="small">This is how other members will see you.</p>
+        <button type="button" class="ph-big main" id="phUse">Use this photo</button>
+        <label class="ph-big alt" for="phFile">Choose a different photo</label>
+    </div>
+    <div class="ph-step" id="phSaved">
+        <h2>Your photo is saved</h2>
+        <div class="ph-preview" id="phSavedBox"></div>
+        <p class="small">Other members will now see it on the Groups page.</p>
+        <button type="button" class="ph-big main" data-ph-close>Done</button>
+    </div>
+    <div class="ph-step" id="phRemove">
+        <h2>Remove your photo?</h2>
+        <p id="phRemoveMsg">Other members will see your initials instead.</p>
+        <button type="button" class="ph-big main" data-ph-close>Keep my photo</button>
+        <button type="button" class="ph-big ghost" id="phRemoveGo">Remove photo</button>
+    </div>
+    <div class="ph-step" id="phError">
+        <h2 id="phErrTitle">That photo didn't work</h2>
+        <p id="phErrMsg">Please try a different photo. A picture taken with your phone's camera works best.</p>
+        <button type="button" class="ph-big main" id="phRetry" hidden>Try again</button>
+        <label class="ph-big alt" for="phFile">Choose a different photo</label>
+        <button type="button" class="ph-linkish" data-ph-close>Cancel</button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+/* Full original tone messages — restored, this is what got lost in the first restructure pass */
+const states = {
+    "Core Member, Current": { friendlyLabel:"Member In Good Standing", tone:"tone-good", msg:"You're all set. Thank you for staying active in council life." },
+    "Core Member, Payment Due": { friendlyLabel:"Active, Payment Due", tone:"tone-warm", msg:"Your dues are due for this cycle. Pay anytime below — thanks for being part of the council." },
+    "Contributing Member, Payment Past Due": { friendlyLabel:"Active, Payment Past Due", tone:"tone-warm", msg:"You're a bit behind on dues — thanks for staying involved. Pay anytime below." },
+    "Contributing Member, Payment Overdue": { friendlyLabel:"Active, Payment Overdue", tone:"tone-warm", msg:"You're a bit behind on dues — thanks for staying involved. Pay anytime below." },
+    "Member, Active/Severely Overdue": { friendlyLabel:"Member, Severly Overdue", tone:"tone-warm", msg:"You're a bit behind on dues, but we see you around — thanks for staying involved. Pay anytime below." },
+    "Long-time Member, Inactive/Severely Overdue": { friendlyLabel:"Long-time Member, Severly Overdue", tone:"tone-good", msg:"You've been part of this council a long time. Please reach out for assistance if dues are a barrier." },
+    "Member, Inactive and Severely Overdue": { friendlyLabel:"Associate, Inactive", tone:"tone-neutral", msg:"We don't show any dues activity yet. If you're still interested in the council, we'd love to hear from you." },
+    "Member, No record of dues payments": { friendlyLabel:"Status Unknown", tone:"tone-neutral", msg:"We haven't seen recent activity or payment from you. If you'd like to stay a member, we're here — reach out anytime." },
+    "Member, No dues data": { friendlyLabel:"Records Incomplete", tone:"tone-neutral", msg:"We don't have complete records on file for you yet. Flag this below so a data administrator can take a look — nothing is being held against you." },
+    "Clergy": { friendlyLabel:"Clergy", tone:"tone-exempt", msg:"Thank you for your continued guidance to our council." }
+};
+const DEFAULT_TIER = "Member, No dues data";
+
+function fullName(m) { return [m.firstName, m.lastName].filter(Boolean).join(' ') + (m.suffix ? ' ' + m.suffix : ''); }
+
+const DEMO_NICKNAMES = { 'Christopher':'Chris', 'Nicholas':'Nick', 'Matthew':'Matt', 'Gabriel':'Gabe', 'Michael':'Mike', 'William':'Bill', 'Robert':'Bob', 'Thomas':'Tom', 'Andrew':'Andy' };
+function casualFirstName(m) { return m.nickname || DEMO_NICKNAMES[m.firstName] || m.firstName; }
+
+let CURRENT_MEMBER = null;
+
+function applyMember(indexOrMember) {
+    const m = (indexOrMember !== null && typeof indexOrMember === 'object') ? indexOrMember : null;
+    if (!m) return;
+    CURRENT_MEMBER = m;
+    const cfg = states[m.state] || states[DEFAULT_TIER];
+    const name = fullName(m);
+
+    document.getElementById('greetingLine').textContent = 'Welcome back, ' + casualFirstName(m);
+    document.getElementById('rxName').textContent = name;
+    document.getElementById('rxId').textContent = m.memberNumber;
+    ensurePhotoFor(m.memberNumber);
+    renderPhotoUI();
+
+    const badge = document.getElementById('rxBadge');
+    badge.textContent = cfg.friendlyLabel || m.state || DEFAULT_TIER;
+    badge.className = 'rolodex-badge ' + cfg.tone;
+
+    document.getElementById('statusMessage').textContent = cfg.msg;
+
+    document.getElementById('verifiedText').textContent = m.lastVerified ? ('Last verified ' + m.lastVerified) : 'Not yet verified';
+    const vbs = document.getElementById('verifyBoxStatus'); if (vbs) vbs.textContent = m.lastVerified ? ('Confirmed as of ' + m.lastVerified + '.') : 'Not yet verified.';
+
+    const nickEl = document.getElementById('profileNickname');
+    const a1 = document.getElementById('profileAddress1');
+    const cityEl = document.getElementById('profileCity');
+    const phoneEl = document.getElementById('profilePhone');
+    const emailEl = document.getElementById('profileEmail');
+    const allEmpty = !m.nickname && !m.address1 && !m.city && !m.phone && !m.email;
+    document.getElementById('emptyBanner').style.display = allEmpty ? 'block' : 'none';
+    const emptyText = allEmpty ? '—' : null;
+
+    nickEl.textContent = m.nickname || emptyText || 'Not on file — add yours';
+    nickEl.classList.toggle('empty', !m.nickname);
+    document.getElementById('editNickname').value = m.nickname || '';
+    document.getElementById('profileWife').textContent = m.wifeName || '\u2014';   // blank is often right: single, widowed, clergy
+    document.getElementById('editWife').value = m.wifeName || '';
+
+    a1.textContent = m.address1 || emptyText || 'Not on file — add yours';
+    a1.classList.toggle('empty', !m.address1);
+    cityEl.textContent = m.city || emptyText || 'Not on file — add yours';
+    cityEl.classList.toggle('empty', !m.city);
+    document.getElementById('profileState').textContent = m.stateAbbr || '—';
+    document.getElementById('profileZip').textContent = m.zip || '—';
+    document.getElementById('editAddress1').value = m.address1 || '';
+    document.getElementById('editCity').value = m.city || '';
+    document.getElementById('editState').value = m.stateAbbr || '';
+    document.getElementById('editZip').value = m.zip || '';
+
+    phoneEl.textContent = m.phone || emptyText || 'Not on file — add yours';
+    phoneEl.classList.toggle('empty', !m.phone);
+    emailEl.textContent = m.email || emptyText || 'Not on file — add yours';
+    emailEl.classList.toggle('empty', !m.email);
+    document.getElementById('editPhone').value = m.phone || '';
+    document.getElementById('editEmail').value = m.email || '';
+
+    const isListed = String(m.directoryOptIn || '').trim().toLowerCase() === 'yes';
+    document.getElementById('profileDirectory').textContent = isListed ? 'Listed' : 'Not listed';
+    document.getElementById('editDirectory').checked = isListed;
+
+    document.getElementById('memberStatusValue').textContent = memberStatusLabel(m.councilStatus);
+    document.getElementById('degreeValue').textContent = m.degree || 'Not on file';
+    document.getElementById('yosValue').textContent = (m.yrsSvc !== null ? m.yrsSvc : '?') + ' years';
+    document.getElementById('roleValue').textContent = m.clergy ? 'Clergy' : 'Member';
+
+    const duesEl = document.getElementById('duesValue');
+    const payPrompt = document.getElementById('payPrompt');
+    const payBtn = document.getElementById('payDuesBtn');
+    duesEl.classList.remove('dues-current', 'dues-owed');
+    payPrompt.style.display = 'none';
+    if (m.clergy) {
+        duesEl.textContent = 'Exempt';
+        duesEl.classList.add('dues-current');
+    } else {
+        const owedRaw = (m.outstandingDues === null || m.outstandingDues === undefined) ? '' : String(m.outstandingDues);
+        let owed = parseFloat(owedRaw.replace(/[^0-9.\-]/g, ''));
+        if (/^\s*\(.*\)\s*$/.test(owedRaw)) owed = -Math.abs(owed); // e.g. ($25.00) is a credit, not money owed
+        if (!isNaN(owed) && owed > 0) {
+            duesEl.textContent = '$' + owed.toFixed(2) + ' owed';
+            duesEl.classList.add('dues-owed');
+            payBtn.textContent = 'Thanks for Clicking to Pay →';
+            payPrompt.style.display = 'block';
+        } else if (m.state === 'Member, Inactive and Severely Overdue' || m.state === 'Member, No dues data') {
+            duesEl.textContent = 'No payment on record';
+            duesEl.classList.add('dues-owed');
+            payBtn.textContent = 'Thanks for Clicking to Pay →';
+            payPrompt.style.display = 'block';
+        } else {
+            duesEl.textContent = 'Current';
+            duesEl.classList.add('dues-current');
+        }
+    }
+    document.getElementById('paidThroughValue').textContent = m.clergy ? 'N/A — Exempt' : (typeof m.lastYrPaid === 'number' ? m.lastYrPaid : 'None on file');
+
+    document.getElementById('viewMode').style.display = 'block';
+    document.getElementById('editMode').style.display = 'none';
+    document.getElementById('editToggleBtn').style.display = 'inline-block';
+    document.getElementById('flagForm').classList.remove('open');
+    document.getElementById('flagConfirm').classList.remove('open');
+    const cb = document.getElementById('confirmBtn'); if (cb) { cb.disabled = false; cb.textContent = '\u2713 My data looks good'; }
+    const confirmStatusEl = document.getElementById('confirmStatus');
+    if (confirmStatusEl) { confirmStatusEl.textContent = ''; confirmStatusEl.className = 'confirm-status'; }
+
+    updatePositionsLine(m.memberNumber);
+}
+
+/* Council Member Status as the member sees it. Blank means Active; internal
+   shorthand gets friendlier wording; anything else shows exactly as written. */
+const MEMBER_STATUS_LABELS = {
+    '': 'Active',
+    'active': 'Active',
+    'current': 'Active',
+    'move alert': 'Active \u00b7 Move reported',
+};
+function memberStatusLabel(raw) {
+    const s = String(raw == null ? '' : raw).trim();
+    const friendly = MEMBER_STATUS_LABELS[s.toLowerCase()];
+    return friendly !== undefined ? friendly : s;
+}
+
+/* Quiet sign-out (bottom of Profile only) with a confirmation */
+function toggleSignoutConfirm(open) {
+    document.getElementById('signoutConfirm').hidden = !open;
+    document.getElementById('quietSignoutLink').hidden = open;
+}
+
+function toggleEdit() {
+    const view = document.getElementById('viewMode');
+    const edit = document.getElementById('editMode');
+    const btn = document.getElementById('editToggleBtn');
+    const editing = edit.style.display !== 'none';
+    view.style.display = editing ? 'block' : 'none';
+    edit.style.display = editing ? 'none' : 'block';
+    btn.style.display = editing ? 'inline-block' : 'none';
+    if (!editing) {
+        const status = document.getElementById('saveStatus');
+        status.textContent = 'Saving updates your profile right away and logs the change for a data administrator to double-check against the source records.';
+        status.style.color = '';
+    }
+}
+
+function toggleFlag() {
+    document.getElementById('flagForm').classList.toggle('open');
+    document.getElementById('flagConfirm').classList.remove('open');
+    document.getElementById('flagStatus').textContent = '';
+}
+
+async function submitFlag() {
+    if (!CURRENT_MEMBER) return;
+    const category = document.getElementById('flagCategory').value;
+    const text = document.getElementById('flagText').value.trim();
+    const status = document.getElementById('flagStatus');
+    const btn = document.getElementById('submitFlagBtn');
+
+    if (!text) {
+        status.textContent = 'Add a note describing the issue before sending.';
+        status.className = 'edit-hint';
+        status.style.color = 'var(--accent)';
+        return;
+    }
+
+    btn.disabled = true;
+    status.textContent = 'Sending\u2026';
+    status.style.color = '';
+
+    try {
+        const params = { action: 'logChange', memberNumber: CURRENT_MEMBER.memberNumber, memberName: fullName(CURRENT_MEMBER), type: 'Flag', category: category, field: 'General', newValue: text };
+        const data = await apiPost(params);
+        btn.disabled = false;
+        if (data.success) {
+            document.getElementById('flagForm').classList.remove('open');
+            document.getElementById('flagConfirm').classList.add('open');
+            document.getElementById('flagText').value = '';
+            status.textContent = '';
+        } else {
+            status.textContent = data.error || 'Could not send \u2014 try again.';
+            status.style.color = 'var(--accent)';
+        }
+    } catch (e) {
+        btn.disabled = false;
+        status.textContent = 'Could not reach the log endpoint \u2014 try again.';
+        status.style.color = 'var(--accent)';
+    }
+}
+
+
+function mailtoFallback(action) {
+    if (!CURRENT_MEMBER) return 'mailto:' + KOC_CONFIG.emails.council;
+    const subject = encodeURIComponent('Portal issue \u2014 ' + fullName(CURRENT_MEMBER) + ' #' + CURRENT_MEMBER.memberNumber);
+    const body = encodeURIComponent(
+        'Action that failed: ' + action + '\n' +
+        'Member: ' + fullName(CURRENT_MEMBER) + ' (#' + CURRENT_MEMBER.memberNumber + ')\n' +
+        'Time: ' + new Date().toString() + '\n' +
+        'Device: ' + navigator.userAgent
+    );
+    return 'mailto:' + KOC_CONFIG.emails.council + '?subject=' + subject + '&body=' + body;
+}
+
+/* ---------- Help / problem / idea email ----------
+   Opens the member's own email app with a note already started.
+   Who it goes to comes from the Assumptions tab, so it can change without touching this page:
+     1. the "Help email" row (one address, or several separated by commas)
+     2. otherwise the first address in the "Data Administrator email" row
+     3. otherwise the council address that is already in the page footer */
+let FEEDBACK_TO = KOC_CONFIG.emails.council;
+const FEEDBACK_KINDS = {
+    help: { subject: 'Member Center \u2014 Help request',  intro: 'I need help with:\n\n\n' },
+    bug:  { subject: 'Member Center \u2014 Problem report', intro: 'What I was trying to do:\n\n\nWhat happened instead:\n\n\n' },
+    idea: { subject: 'Member Center \u2014 Suggestion',     intro: 'My idea:\n\n\nHow it would help:\n\n\n' }
+};
+function emailsIn(text) {
+    return String(text || '').split(/[,;\s]+/).filter(a => /^[A-Za-z0-9._+-]+@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}$/.test(a));
+}
+async function loadHelpEmail() {
+    try {
+        let list = emailsIn(await fetchAssumptionsRow('help email'));
+        if (!list.length) list = emailsIn(await fetchAssumptionsRow('data administrator email')).slice(0, 1);
+        if (list.length) FEEDBACK_TO = list.join(',');
+    } catch (e) { /* keep the council address */ }
+    document.querySelectorAll('.help-btn').forEach(a => { a.href = feedbackHref(a.dataset.kind, true); });
+}
+function feedbackWho() {
+    const sess = Session.read() || {};
+    const own = CURRENT_MEMBER && isOwnProfile();
+    const name = own ? fullName(CURRENT_MEMBER) : (sess.firstName || '');
+    const num = sess.memberNumber || (CURRENT_MEMBER && CURRENT_MEMBER.memberNumber) || '';
+    return (name ? name + ' ' : '') + (num ? '(#' + String(num).replace(/^0+/, '') + ')' : '');
+}
+function feedbackHref(kind, plain) {
+    const k = FEEDBACK_KINDS[kind] || FEEDBACK_KINDS.help;
+    if (plain) return 'mailto:' + FEEDBACK_TO + '?subject=' + encodeURIComponent(k.subject);
+    const body = 'Hello,\n\n' + k.intro +
+        '\u2014 Please leave the lines below so we can help \u2014\n' +
+        'Member: ' + feedbackWho() + '\n' +
+        'Page: Profile\n' +
+        'Time: ' + new Date().toString() + '\n' +
+        'Device: ' + navigator.userAgent;
+    return 'mailto:' + FEEDBACK_TO + '?subject=' + encodeURIComponent(k.subject) + '&body=' + encodeURIComponent(body.replace(/\n/g, '\r\n'));
+}
+document.querySelectorAll('.help-btn').forEach(a => {
+    a.href = feedbackHref(a.dataset.kind, true);                            // a working link from the start
+    a.addEventListener('click', () => { a.href = feedbackHref(a.dataset.kind); });   // filled in with details the moment it's tapped
+});
+window.addEventListener('DOMContentLoaded', loadHelpEmail);
+
+/* ---------- Announcement banner ----------
+   Up to MAX_TYPED announcements typed on the sheet's "Announcements" tab, plus an automatic
+   "Next event" line taken from the Calendar. Anything that can't be read is simply left out. */
+const ANN_MAX_TYPED = 2;              // typed announcements shown at once (keeps the profile card on screen)
+const ANN_NEXT_EVENT_DAYS = 60;       // the automatic Next event line only appears when the event is this close
+const ANN_CALENDAR_CSV = KOC_CONFIG.calendarCsvUrl;
+const ANN_TYPES = {
+    event:  { icon: '\uD83D\uDCC5', label: 'Event' },
+    need:   { icon: '\uD83D\uDE4B', label: 'We need you' },
+    prayer: { icon: '\uD83D\uDE4F', label: 'Prayer' },
+    notice: { icon: '\u2139\uFE0F', label: 'Notice' }
+};
+const ANN_MONTHS = { jan:0, feb:1, mar:2, apr:3, may:4, jun:5, jul:6, aug:7, sep:8, sept:8, oct:9, nov:10, dec:11 };
+
+/* A real https web address, or nothing (same rule as the calendar's sign-up links). */
+function annCleanLink(raw) {
+    let u = String(raw || '').trim();
+    if (!u || /\s/.test(u)) return '';
+    if (/^http:\/\//i.test(u)) u = 'https://' + u.slice(7);
+    else if (!/^[a-z][a-z0-9+.-]*:/i.test(u) && /^[\w-]+(\.[\w-]+)+(\/|$)/.test(u)) u = 'https://' + u;
+    try { const url = new URL(u); return url.protocol === 'https:' ? url.href : ''; } catch (e) { return ''; }
+}
+/* "Saturday, October 17, 2026", "Oct 17 2026", "October 17-18, 2026", "10/17/2026", "2026-10-17" -> that day at midnight (first day of a range). */
+function annParseDay(text) {
+    const t = String(text || '').trim();
+    let m = t.match(/([A-Za-z]{3,9})\.?\s+(\d{1,2})(?:st|nd|rd|th)?(?:\s*(?:-|\u2013|\u2014|to)\s*\d{1,2})?,?\s+(\d{4})/);
+    if (m) { const mo = ANN_MONTHS[m[1].toLowerCase().slice(0, 4)] ?? ANN_MONTHS[m[1].toLowerCase().slice(0, 3)]; if (mo !== undefined) return annMakeDay(+m[3], mo, +m[2]); }
+    m = t.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+    if (m) return annMakeDay(+m[3], +m[1] - 1, +m[2]);
+    m = t.match(/(\d{4})-(\d{2})-(\d{2})/);
+    if (m) return annMakeDay(+m[1], +m[2] - 1, +m[3]);
+    return null;
+}
+function annMakeDay(y, mo, d) { const x = new Date(y, mo, d); return (x.getFullYear() === y && x.getMonth() === mo && x.getDate() === d && y >= 2020) ? x : null; }
+/* A Google Sheets date cell ("Date(2026,9,1)") or typed text. Returns {blank:true}, {date}, or {bad:true}. */
+function annSheetDate(cell) {
+    const v = cell && cell.v;
+    if (v === null || v === undefined || String(v).trim() === '') return { blank: true };
+    const g = String(v).match(/^Date\((\d+),(\d+),(\d+)/);
+    if (g) return { date: new Date(+g[1], +g[2], +g[3]) };
+    const d = annParseDay(v);
+    return d ? { date: d } : { bad: true };
+}
+function annToday() { const t = new Date(); return new Date(t.getFullYear(), t.getMonth(), t.getDate()); }
+
+async function annFetchTyped() {
+    const url = `https://docs.google.com/spreadsheets/d/${KOC_CONFIG.announcementsSheetId}/gviz/tq?tqx=out:json&headers=1&gid=${KOC_CONFIG.gids.announcements}&tq=` + encodeURIComponent('select *');
+    const m = (await (await fetch(url)).text()).match(/setResponse\(([\s\S]*)\);?\s*$/);
+    const t = m && JSON.parse(m[1]) && JSON.parse(m[1]).table;
+    if (!t || !t.cols || !t.rows) return [];                                   // no Announcements tab yet
+    const labels = t.cols.map(c => String(c.label || '').toLowerCase().replace(/[^a-z]/g, ''));
+    const at = n => labels.indexOf(n);
+    const iMsg = at('message'), iType = at('type'), iLink = at('link'), iFrom = at('showfrom'), iThru = at('showthrough');
+    if (iMsg === -1 || iType === -1) return [];                                // not the Announcements tab: never show it
+    const today = annToday(), out = [];
+    t.rows.forEach(r => {
+        const c = r.c || [];
+        const message = String((c[iMsg] && c[iMsg].v) || '').trim();
+        if (!message) return;
+        const from = iFrom === -1 ? { blank: true } : annSheetDate(c[iFrom]);
+        const thru = iThru === -1 ? { blank: true } : annSheetDate(c[iThru]);
+        if (from.bad || thru.bad) return;                                       // an unreadable date never shows (so nothing gets stuck on)
+        if (from.date && from.date > today) return;                             // not yet
+        if (thru.date && thru.date < today) return;                             // expired
+        const type = String((c[iType] && c[iType].v) || '').trim().toLowerCase();
+        const rawLink = iLink === -1 ? '' : String((c[iLink] && c[iLink].v) || '');
+        const kind = ANN_TYPES[type] ? type : 'notice';
+        out.push({ type: kind, message, link: annCleanLink(rawLink),
+                   to: kind === 'need' ? emailsIn(rawLink.replace(/^\s*mailto:/i, '')).join(',') : '' });   // Need: an email address in Link says who gets the replies
+    });
+    return out.slice(0, ANN_MAX_TYPED);
+}
+
+function annCsv(text) {
+    const rows = []; let row = [], f = '', q = false;
+    for (let i = 0; i < text.length; i++) {
+        const ch = text[i], nx = text[i + 1];
+        if (q) { if (ch === '"' && nx === '"') { f += '"'; i++; } else if (ch === '"') q = false; else f += ch; }
+        else if (ch === '"') q = true;
+        else if (ch === ',') { row.push(f); f = ''; }
+        else if (ch === '\r') { /* skip */ }
+        else if (ch === '\n') { row.push(f); rows.push(row); row = []; f = ''; }
+        else f += ch;
+    }
+    if (f.length || row.length) { row.push(f); rows.push(row); }
+    return rows;
+}
+async function annFetchNextEvent() {
+    const rows = annCsv(await (await fetch(ANN_CALENDAR_CSV)).text());
+    if (rows.length < 2) return null;
+    const heads = rows[0].map(h => h.trim());
+    const iAct = heads.indexOf('Activity'), iDate = heads.indexOf('Date');
+    const iLink = heads.findIndex(h => h.toLowerCase().replace(/[^a-z]/g, '') === 'signuplink');
+    if (iAct === -1 || iDate === -1) return null;
+    const today = annToday(), limit = new Date(today); limit.setDate(limit.getDate() + ANN_NEXT_EVENT_DAYS);
+    let best = null;
+    rows.slice(1).forEach(r => {
+        const name = (r[iAct] || '').trim(), day = annParseDay(r[iDate]);
+        if (!name || !day || day < today || day > limit) return;
+        if (!best || day < best.day) best = { name, day, link: iLink === -1 ? '' : annCleanLink(r[iLink]) };
+    });
+    return best;
+}
+function annDayWords(day) {
+    const diff = Math.round((day - annToday()) / 86400000);
+    if (diff === 0) return 'Today';
+    if (diff === 1) return 'Tomorrow';
+    return day.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+}
+
+function annCanHelpHref(message, to) {
+    const short = message.length > 70 ? message.slice(0, 67).trim() + '\u2026' : message;
+    const body = 'Hello,\n\nI can help with this:\n\u201C' + message + '\u201D\n\nThe best way or time to reach me:\n\n\n' +
+        '\u2014 Please leave the lines below \u2014\nMember: ' + feedbackWho() + '\nPage: Profile announcement\nTime: ' + new Date().toString();
+    return 'mailto:' + (to || FEEDBACK_TO) + '?subject=' + encodeURIComponent('I can help \u2014 ' + short) + '&body=' + encodeURIComponent(body.replace(/\n/g, '\r\n'));
+}
+function annItem(meta, textNodes, action) {
+    const el = document.createElement('div'); el.className = 'ann-item';
+    const icon = document.createElement('div'); icon.className = 'ann-icon'; icon.setAttribute('aria-hidden', 'true'); icon.textContent = meta.icon;
+    const body = document.createElement('div'); body.className = 'ann-body';
+    const label = document.createElement('div'); label.className = 'ann-label'; label.textContent = meta.label;
+    const text = document.createElement('div'); text.className = 'ann-text'; textNodes.forEach(n => text.appendChild(n));
+    body.append(label, text);
+    if (action) {
+        const wrap = document.createElement('div'); wrap.className = 'ann-actions';
+        const a = document.createElement('a'); a.className = 'ann-btn'; a.textContent = action.text; a.href = action.href;
+        if (action.newTab) { a.target = '_blank'; a.rel = 'noopener noreferrer'; }
+        if (action.refresh) a.addEventListener('click', () => { a.href = action.refresh(); });
+        wrap.appendChild(a); body.appendChild(wrap);
+    }
+    el.append(icon, body);
+    return el;
+}
+const annText = s => document.createTextNode(s);
+
+async function loadBanner() {
+    const [typed, next] = await Promise.all([annFetchTyped().catch(() => []), annFetchNextEvent().catch(() => null)]);
+    const box = document.getElementById('annBanner');
+    box.textContent = '';
+    if (next) {
+        const strong = document.createElement('b'); strong.textContent = next.name;
+        box.appendChild(annItem({ icon: ANN_TYPES.event.icon, label: 'Next event' }, [strong, annText(' \u2014 ' + annDayWords(next.day))],
+            next.link ? { text: 'Sign up', href: next.link, newTab: true } : null));
+    }
+    typed.forEach(a => {
+        const meta = ANN_TYPES[a.type]; let action = null;
+        if (a.type === 'need') action = { text: 'I Can Help', href: annCanHelpHref(a.message, a.to), refresh: () => annCanHelpHref(a.message, a.to) };   // emails the address in Link, else the administrator
+        else if (a.link) action = { text: a.type === 'event' ? 'Sign up' : 'Learn more', href: a.link, newTab: true };
+        box.appendChild(annItem(meta, [annText(a.message)], action));
+    });
+    box.hidden = !box.children.length;
+}
+window.addEventListener('DOMContentLoaded', loadBanner);
+                 // after the page has loaded, look up who it goes to
+
+function showUnreachableError(statusEl, action) {
+    statusEl.innerHTML = 'Could not reach the server \u2014 this usually means something on your device (like a content blocker in Safari) is blocking it, not a problem with your info. ' +
+        '<a href="' + mailtoFallback(action) + '" style="color:inherit;text-decoration:underline;">Email a data administrator</a> and we\u2019ll sort it out directly.';
+    statusEl.style.color = 'var(--accent)';
+}
+
+async function saveContactChanges() {
+    if (!CURRENT_MEMBER) return;
+    const btn = document.getElementById('saveContactBtn');
+    const status = document.getElementById('saveStatus');
+
+    const newFields = {
+        nickname: document.getElementById('editNickname').value.trim(),
+        wifeName: document.getElementById('editWife').value.trim(),
+        address1: document.getElementById('editAddress1').value.trim(),
+        city: document.getElementById('editCity').value.trim(),
+        stateAbbr: document.getElementById('editState').value.trim(),
+        zip: document.getElementById('editZip').value.trim(),
+        phone: document.getElementById('editPhone').value.trim(),
+        email: document.getElementById('editEmail').value.trim(),
+        directoryOptIn: document.getElementById('editDirectory').checked ? 'Yes' : 'No',
+    };
+
+    btn.disabled = true;
+    status.textContent = 'Saving\u2026';
+    status.style.color = '';
+
+    try {
+        const params = { action: 'saveContact', memberNumber: CURRENT_MEMBER.memberNumber, memberName: fullName(CURRENT_MEMBER), fields: JSON.stringify(newFields) };
+        const data = await apiPost(params);
+        btn.disabled = false;
+
+        if (data.success) {
+            Object.assign(CURRENT_MEMBER, newFields);
+            const today = new Date().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+            CURRENT_MEMBER.lastVerified = today;
+
+            let msg = data.changed && data.changed.length ? ('Saved: ' + data.changed.join(', ') + '.') : 'No changes to save.';
+            if (data.skipped && data.skipped.length) {
+                msg += ' (' + data.skipped.join(', ') + ' not saved \u2014 that column doesn\u2019t exist in the sheet yet.)';
+            }
+            status.textContent = msg;
+            status.style.color = 'var(--green)';
+
+            applyMember(CURRENT_MEMBER);
+        } else {
+            status.textContent = data.error || 'Could not save \u2014 try again.';
+            status.style.color = 'var(--accent)';
+        }
+    } catch (e) {
+        btn.disabled = false;
+        showUnreachableError(status, 'Contact Profile save');
+    }
+}
+function goToPayDues() {
+    if (!CURRENT_MEMBER) return;
+    window.location.href = 'pay-dues.html?member=' + encodeURIComponent(CURRENT_MEMBER.memberNumber);
+}
+
+
+
+/* Admin "Browse as a member": the list is loaded live from the sheet only in admin
+   mode, so no member data is stored in this page. */
+async function initMemberSelect() {
+    const select = document.getElementById('memberSelect');
+    select.innerHTML = '<option value="">Loading members\u2026</option>';
+    try {
+        const text = await (await fetch(GVIZ_URL)).text();
+        const json = JSON.parse(text.match(/setResponse\(([\s\S]*)\);?\s*$/)[1]);
+        const cols = json.table.cols.map(c => (c.label || '').trim().replace(/[\u2018\u2019]/g, "'"));
+        const val = (row, label) => { const i = cols.indexOf(label); const c = i === -1 ? null : row.c[i]; return c ? (c.v != null ? c.v : c.f) : null; };
+        const people = json.table.rows.map(r => ({
+            num: String(val(r, 'Member Number') || '').trim(),
+            first: titleCase(val(r, 'First Name')), last: titleCase(val(r, 'Last Name')), suffix: val(r, 'Suffix') || ''
+        })).filter(p => p.num).sort((a, b) => (a.last + ' ' + a.first).localeCompare(b.last + ' ' + b.first));
+        select.innerHTML = '<option value="">Choose a member\u2026</option>';
+        let letter = '', group = null;
+        people.forEach(p => {
+            const L = (p.last || '?').charAt(0).toUpperCase();
+            if (L !== letter) { letter = L; group = document.createElement('optgroup'); group.label = L; select.appendChild(group); }
+            const opt = document.createElement('option');
+            opt.value = p.num;
+            opt.textContent = `${p.last}, ${p.first}${p.suffix ? ' ' + p.suffix : ''} \u2014 #${p.num}`;
+            group.appendChild(opt);
+        });
+        const current = new URLSearchParams(window.location.search).get('member');
+        if (current) {
+            const match = people.find(p => p.num.replace(/^0+/, '') === current.replace(/^0+/, ''));
+            if (match) select.value = match.num;
+        }
+    } catch (e) {
+        select.innerHTML = '<option value="">Could not load the member list</option>';
+    }
+}
+
+async function browseAs(num) {
+    if (!num) return;
+    const note = document.getElementById('memberNote');
+    if (note) note.textContent = 'Loading #' + num + '\u2026';
+    try {
+        const live = await fetchLiveMember(num);
+        if (!live) { if (note) note.textContent = 'Could not find #' + num + ' in the sheet.'; return; }
+        applyMember(live);
+        showMainContent();
+        if (note) note.textContent = 'Showing #' + num + ', live from the sheet.';
+    } catch (e) {
+        if (note) note.textContent = 'Could not reach the sheet \u2014 try again.';
+    }
+}
+
+/* ---- Live wiring: real sheet fetch, classification, login handoff, verified write-back ---- */
+const SHEET_ID = KOC_CONFIG.sheetId;
+const SHEET_GID = KOC_CONFIG.gids.membership; // St Luke KOC Membership DB tab
+const ASSUMPTIONS_GID = KOC_CONFIG.gids.assumptions; // Assumptions tab
+const TIER_MESSAGES_GID = KOC_CONFIG.gids.tierMessages; // Tier Messages tab
+const GVIZ_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${SHEET_GID}`;
+const GVIZ_ASSUMPTIONS_URL = `https://docs.google.com/spreadsheets/d/${KOC_CONFIG.assumptionsSheetId}/gviz/tq?tqx=out:json&gid=${ASSUMPTIONS_GID}`;
+const GVIZ_TIER_MESSAGES_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${TIER_MESSAGES_GID}`;
+const VERIFY_ENDPOINT_URL = KOC_CONFIG.endpoint;
+const DEGREE_MAP = {'1st':'First Degree','2nd':'Second Degree','3rd':'Third Degree'};
+
+async function fetchAssumptionsRow(labelPrefix) {
+    const res = await fetch(GVIZ_ASSUMPTIONS_URL);
+    const text = await res.text();
+    const match = text.match(/setResponse\(([\s\S]*)\);?\s*$/);
+    if (!match) throw new Error('Unexpected sheet response');
+    const json = JSON.parse(match[1]);
+    const row = json.table.rows.find(r => {
+        const label = r.c[0] && (r.c[0].v || r.c[0].f);
+        return label && String(label).trim().toLowerCase().startsWith(labelPrefix);
+    });
+    if (!row) return null;
+    for (const idx of [1, 2]) {
+        const cell = row.c[idx];
+        if (cell && (cell.v !== null && cell.v !== undefined)) return cell.v;
+        if (cell && cell.f) return cell.f;
+    }
+    return null;
+}
+
+async function loadDataRefreshLine() {
+    const el = document.getElementById('dataRefreshLine');
+    try {
+        const raw = await fetchAssumptionsRow('data last refreshed on');
+        el.textContent = raw ? ('Data last updated ' + formatGvizDate(raw) + ' (manual refresh).') : '';
+    } catch (e) {
+        el.textContent = ''; // quiet fail — this is a nice-to-have, not core to the page
+    }
+}
+
+async function loadTierMessages() {
+    // Pulls member-facing wording from the sheet's Tier Messages tab, overriding
+    // the hardcoded defaults in `states`. Tone/card/ribbon behavior always stays
+    // in code — this only ever touches the .msg text for tiers already known here.
+    try {
+        const res = await fetch(GVIZ_TIER_MESSAGES_URL);
+        const text = await res.text();
+        const match = text.match(/setResponse\(([\s\S]*)\);?\s*$/);
+        if (!match) return;
+        const json = JSON.parse(match[1]);
+        const cols = json.table.cols.map(c => (c.label || '').trim().replace(/[\u2018\u2019]/g, "'"));
+        const idx = (label) => cols.indexOf(label);
+        const cell = (row, label) => {
+            const i = idx(label);
+            if (i === -1) return null;
+            const c = row.c[i];
+            if (!c) return null;
+            return (c.v !== null && c.v !== undefined) ? c.v : c.f;
+        };
+
+        let changed = false;
+        json.table.rows.forEach(row => {
+            const tier = (cell(row, 'Membership Tier') || '').toString().trim();
+            const msg = (cell(row, 'Home Page Message') || '').toString().trim();
+            const friendly = (cell(row, 'Friendly Label') || '').toString().trim();
+            if (tier && states[tier]) {
+                if (msg) { states[tier].msg = msg; changed = true; }
+                if (friendly) { states[tier].friendlyLabel = friendly; changed = true; }
+            }
+        });
+
+        if (changed && CURRENT_MEMBER) applyMember(CURRENT_MEMBER); // re-render with sheet wording
+    } catch (e) {
+        // quiet fail — hardcoded defaults in `states` remain in effect
+    }
+}
+
+function titleCase(s) {
+    return (s || '').toString().replace(/\w\S*/g, t => t.charAt(0).toUpperCase() + t.slice(1).toLowerCase());
+}
+
+function formatGvizDate(v) {
+    if (v === null || v === undefined) return null;
+    const s = String(v);
+    const m = s.match(/^Date\((\d+),(\d+),(\d+)/);
+    if (m) {
+        const d = new Date(parseInt(m[1]), parseInt(m[2]), parseInt(m[3]));
+        return d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    }
+    return s;
+}
+
+async function fetchLiveMember(memberNumber) {
+    const res = await fetch(GVIZ_URL);
+    const text = await res.text();
+    const match = text.match(/setResponse\(([\s\S]*)\);?\s*$/);
+    if (!match) throw new Error('Unexpected sheet response');
+    const json = JSON.parse(match[1]);
+    const cols = json.table.cols.map(c => (c.label || '').trim().replace(/[\u2018\u2019]/g, "'"));
+    const idx = (label) => cols.indexOf(label);
+    const cell = (row, label) => {
+        const c = row.c[idx(label)];
+        if (!c) return null;
+        return (c.v !== null && c.v !== undefined) ? c.v : c.f;
+    };
+
+    const row = json.table.rows.find(r => String(cell(r, 'Member Number')).replace(/^0+/, '') === String(memberNumber).replace(/^0+/, ''));
+    if (!row) return null;
+
+    const clergyRaw = cell(row, 'Clergy?');
+    const degreeRaw = (cell(row, 'Degree Level') || '').toString().trim();
+    const lastYrPaidRaw = cell(row, 'Last Yr Paid');
+    const lastYrPaid = (typeof lastYrPaidRaw === 'number') ? lastYrPaidRaw : (parseInt(lastYrPaidRaw) || null);
+    const tier = (cell(row, 'Membership Tier') || '').toString().trim() || DEFAULT_TIER;
+
+    return {
+        memberNumber: cell(row, 'Member Number'),
+        firstName: titleCase(cell(row, 'First Name')),
+        lastName: titleCase(cell(row, 'Last Name')),
+        suffix: cell(row, 'Suffix'),
+        nickname: cell(row, 'Preferred Name'),
+        wifeName: cell(row, "Wife's Name"),
+        directoryOptIn: cell(row, 'Directory Opt-In'),
+        degree: DEGREE_MAP[degreeRaw] || degreeRaw || null,
+        yrsSvc: parseInt(cell(row, 'YRS SVC')) || null,
+        clergy: clergyRaw === 'Yes',
+        state: tier,
+        address1: titleCase(cell(row, 'Street Address')),
+        city: titleCase(cell(row, 'City')),
+        stateAbbr: cell(row, 'State'),
+        zip: cell(row, 'Postal Code'),
+        email: cell(row, 'email'),
+        phone: cell(row, 'phone'),
+        lastVerified: formatGvizDate(cell(row, 'Member Last Verify Date')),
+        outstandingDues: cell(row, 'Outstanding Dues'),
+        lastYrPaid: lastYrPaid,
+        councilStatus: cell(row, 'Council Member Status'),
+        wizardCompleted: idx('Wizard Completed') === -1 ? undefined : cell(row, 'Wizard Completed'),   // undefined = the column isn't there (the gate then does nothing)
+    };
+}
+
+function isOwnerMode() {
+    return Session.adminTools();   // a signed-in Data Administrator who has switched tools on (?admin=on)
+}
+function showMainContent() {
+    document.getElementById('notLoggedIn').style.display = 'none';
+    document.getElementById('mainContent').style.display = 'block';
+}
+function showNotLoggedIn() {
+    document.getElementById('mainContent').style.display = 'none';
+    document.getElementById('notLoggedIn').style.display = 'block';
+}
+
+/* ---------- First visit starts with the Verify Data wizard ----------
+   A signed-in member whose "Wizard Completed" is blank is sent to the wizard once per visit, before the Profile is shown.
+   It never traps anyone: it only fires on the plain Profile address (not when returning from the wizard or when an
+   administrator is viewing a member), only once per browser visit, and not at all for an administrator with tools on. */
+const WIZARD_GATE_SUPPRESS_DAYS = 7;   // after finishing the wizard or reporting a change on this device, don't ask again for this long
+function startsWithWizard(m) {
+    try {
+        if (isOwnerMode()) return false;                                            // administrator with tools on (so you can test the Profile)
+        if (m.wizardCompleted === undefined) return false;                          // the sheet has no such column: never redirect
+        const sess = Session.read(); if (!sess) return false;
+        const digits = x => String(x == null ? '' : x).replace(/^0+/, '');
+        if (digits(sess.memberNumber) !== digits(m.memberNumber)) return false;     // looking at someone else's profile
+        if (new URLSearchParams(window.location.search).has('member')) return false;   // coming back from the wizard, or an administrator's link
+        if (String(m.wizardCompleted == null ? '' : m.wizardCompleted).trim() !== '') return false;   // already done
+        const status = String(m.councilStatus == null ? '' : m.councilStatus).trim().toLowerCase();
+        if (status && status !== 'active') return false;                            // Move Alert, Withdrawal Pending and the like: leave alone
+        if (sessionStorage.getItem('mcWizardGate')) return false;                   // already offered this visit
+        const handled = +localStorage.getItem('mcWizardDone_' + digits(m.memberNumber)) || 0;
+        if (Date.now() - handled < WIZARD_GATE_SUPPRESS_DAYS * 86400000) return false;
+        sessionStorage.setItem('mcWizardGate', '1');
+        return true;
+    } catch (e) { return false; }
+}
+
+async function tryLiveLogin() {
+    const memberNumber = Session.pageMember();
+    const note = document.getElementById('memberNote');
+    const owner = isOwnerMode();
+
+
+    if (!memberNumber) {
+        if (!owner) showNotLoggedIn();
+        return;
+    }
+
+    if (note) note.textContent = 'Loading your live record\u2026';
+    try {
+        const live = await fetchLiveMember(memberNumber);
+        if (live && startsWithWizard(live)) { window.location.replace('verify-wizard.html?first=1'); return; }
+        if (live) {
+            try { applyMember(live); } catch(applyErr) { console.error('applyMember error:', applyErr); }
+            showMainContent();
+            if (note) note.textContent = 'Logged in live \u2014 record #' + memberNumber + ' pulled straight from the sheet just now.';
+            recordLoginOncePerSession(memberNumber);
+        } else if (owner) {
+            if (note) note.textContent = 'Could not find member #' + memberNumber + ' in the live sheet \u2014 showing snapshot data below instead.';
+        } else {
+            showNotLoggedIn();
+        }
+    } catch (e) {
+        if (owner) {
+            if (note) note.textContent = 'Could not reach the live sheet \u2014 showing snapshot data below instead.';
+        } else {
+            showNotLoggedIn();
+        }
+    }
+}
+
+/**
+ * Records one login per browser tab session, not per page load — refreshing
+ * Home or navigating back to it within the same visit won't inflate the
+ * count. Fire-and-forget: failures here are silent since this is an
+ * engagement metric, not something that should ever block the page.
+ */
+function recordLoginOncePerSession(memberNumber) {
+    const flagKey = 'loginRecorded_' + memberNumber;
+    if (sessionStorage.getItem(flagKey)) return;
+    sessionStorage.setItem(flagKey, '1');
+
+    const params = { 'action': 'recordLogin', 'memberNumber': memberNumber };
+    apiPost(params).catch(() => {}); // silent — non-critical
+}
+
+async function apiPost(params) {
+    const res = await fetch(VERIFY_ENDPOINT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(Object.assign({ token: Session.token() }, params))
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    return await res.json();
+}
+
+/* ================= Member photo =================
+   The photo lives on the sheet's Photos tab (small JPEG text). Pages read it like
+   everything else; saving and removing go through the Apps Script. */
+const PHOTO_W = 160;   // saved photos are shrunk to this many pixels square
+const GVIZ_PHOTOS_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&headers=1&sheet=Photos`;
+let MY_PHOTO = null;        // the photo being shown (base64 text, no prefix) or null
+let PHOTO_FOR = null;       // which member MY_PHOTO belongs to
+let PHOTO_PENDING = null;   // chosen but not yet saved
+
+const noZeros = n => String(n == null ? '' : n).trim().replace(/^0+/, '');
+const isB64 = v => typeof v === 'string' && /^\/9j\/[A-Za-z0-9+\/]+={0,2}$/.test(v);
+const photoSrc = b64 => 'data:image/jpeg;base64,' + b64;
+function initialsOf(name) {
+    const p = String(name || '').replace(/[^A-Za-z .'-]/g, '').split(/\s+/).filter(Boolean);
+    if (!p.length) return '?';
+    return (p[0][0] + (p.length > 1 ? p[p.length - 1][0] : '')).toUpperCase();
+}
+function avatarHtml(name, photo, size) {
+    return isB64(photo)
+        ? `<img class="mc-avatar" style="--s:${size}px" src="${photoSrc(photo)}" alt="">`
+        : `<div class="mc-avatar initials" style="--s:${size}px" aria-hidden="true">${initialsOf(name)}</div>`;
+}
+function photoOverride(n) { try { return sessionStorage.getItem('mcPhoto_' + noZeros(n)); } catch (e) { return null; } }
+function setPhotoOverride(n, b64) { try { sessionStorage.setItem('mcPhoto_' + noZeros(n), b64 || '-'); } catch (e) {} }
+
+function isOwnProfile() {
+    const s = Session.read();
+    return !!(s && CURRENT_MEMBER && noZeros(s.memberNumber) === noZeros(CURRENT_MEMBER.memberNumber));
+}
+
+function ensurePhotoFor(memberNumber) {
+    const key = noZeros(memberNumber).replace(/[^0-9A-Za-z]/g, '');
+    if (!key || PHOTO_FOR === key) return;
+    PHOTO_FOR = key;
+    MY_PHOTO = null;
+    loadPhoto(key);
+}
+/* Reading the Photos tab. Asking Google for "just this member's row" (a where-filter) turned out to be unreliable on the live
+   sheet, so this uses only plain requests: first a light list of member numbers, then just that one row's photo (by position).
+   If anything about that doesn't work, it falls back to reading the whole tab, exactly the way the Groups page does. */
+async function gvizPhotoRows(query) {
+    const res = await fetch(GVIZ_PHOTOS_URL + '&tq=' + encodeURIComponent(query));
+    const m = (await res.text()).match(/setResponse\(([\s\S]*)\);?\s*$/);
+    const json = m ? JSON.parse(m[1]) : null;
+    return (json && json.table && json.table.rows) || null;      // null = Google rejected the request
+}
+const photoCell = (row, i) => (row && row.c && row.c[i] && row.c[i].v) || null;
+async function findPhoto(key) {
+    try {
+        const keys = await gvizPhotoRows('select A');
+        if (keys) {
+            const idx = keys.findIndex(r => noZeros(photoCell(r, 0)) === key);
+            if (idx === -1) return null;                          // no photo for this member
+            const one = await gvizPhotoRows('select A, B limit 1 offset ' + idx);
+            if (one && one[0] && noZeros(photoCell(one[0], 0)) === key) { const v = photoCell(one[0], 1); return isB64(v) ? v : null; }
+        }
+    } catch (e) { /* fall through to the whole-tab read */ }
+    const all = await gvizPhotoRows('select A, B');
+    const row = all && all.find(r => noZeros(photoCell(r, 0)) === key);
+    const v = photoCell(row, 1);
+    return isB64(v) ? v : null;
+}
+async function loadPhoto(key) {
+    try {
+        const ov = photoOverride(key);          // a change made earlier in this visit wins (the sheet can lag a moment)
+        MY_PHOTO = ov !== null ? (ov === '-' ? null : ov) : await findPhoto(key);   // no Photos tab yet, or no row: initials
+    } catch (e) { MY_PHOTO = null; }
+    if (PHOTO_FOR === key) renderPhotoUI();
+}
+
+function renderPhotoUI() {
+    if (!CURRENT_MEMBER) return;
+    const own = isOwnProfile();
+    const has = isB64(MY_PHOTO);
+    const slot = document.getElementById('photoSlot');
+    slot.innerHTML = avatarHtml(fullName(CURRENT_MEMBER), MY_PHOTO, 88);
+    slot.disabled = !own;
+    document.getElementById('photoBtn').style.display = own ? '' : 'none';
+    document.getElementById('photoBtn').textContent = has ? 'Change photo' : 'Add my photo';
+    document.getElementById('photoHint').style.display = (own && !has) ? '' : 'none';
+    document.getElementById('photoRemoveLink').hidden = !(has && (own || Session.adminTools()));
+    document.getElementById('photoActions').style.display = (own || has) ? '' : 'none';
+}
+
+/* --- sheet --- */
+const phOverlay = document.getElementById('phOverlay');
+function phStep(id) { document.querySelectorAll('.ph-step').forEach(x => x.classList.toggle('on', x.id === id)); phOverlay.classList.add('open'); }
+function phClose() { phOverlay.classList.remove('open'); }
+function phError(title, msg, canRetry) {
+    document.getElementById('phErrTitle').textContent = title;
+    document.getElementById('phErrMsg').textContent = msg;
+    document.getElementById('phRetry').hidden = !canRetry;
+    phStep('phError');
+}
+document.querySelectorAll('[data-ph-close]').forEach(b => b.addEventListener('click', phClose));
+phOverlay.addEventListener('click', e => { if (e.target === phOverlay) phClose(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') phClose(); });
+document.getElementById('photoBtn').addEventListener('click', () => phStep('phPick'));
+document.getElementById('photoSlot').addEventListener('click', () => { if (isOwnProfile()) phStep('phPick'); });
+document.getElementById('photoRemoveLink').addEventListener('click', () => {
+    document.getElementById('phRemoveMsg').textContent = isOwnProfile()
+        ? 'Other members will see your initials instead.'
+        : 'This member will show with initials instead of a photo.';
+    phStep('phRemove');
+});
+
+function loadImageFile(file) {
+    return new Promise((resolve, reject) => {
+        const url = URL.createObjectURL(file);
+        const img = new Image();
+        img.onload = () => { URL.revokeObjectURL(url); resolve(img); };
+        img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('unreadable')); };
+        img.src = url;
+    });
+}
+/* Shrink to a small square. Tall photos are cropped toward the top so faces aren't cut off. */
+async function shrinkPhoto(file) {
+    const img = await loadImageFile(file);
+    const w = img.naturalWidth, h = img.naturalHeight;
+    if (!w || !h) throw new Error('empty');
+    const side = Math.min(w, h);
+    const sx = (w - side) / 2;
+    const sy = h > w ? (h - side) * 0.2 : 0;
+    const c = document.createElement('canvas'); c.width = c.height = PHOTO_W;
+    const g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, PHOTO_W, PHOTO_W);
+    g.imageSmoothingQuality = 'high'; g.drawImage(img, sx, sy, side, side, 0, 0, PHOTO_W, PHOTO_W);
+    for (const q of [0.8, 0.65, 0.5]) {
+        const b64 = c.toDataURL('image/jpeg', q).replace(/^data:image\/jpeg;base64,/, '');
+        if (isB64(b64) && b64.length <= 40000) return b64;
+    }
+    throw new Error('too big');
+}
+async function onPhotoChosen(input) {
+    const f = input.files && input.files[0];
+    if (!f) return;
+    try {
+        PHOTO_PENDING = await shrinkPhoto(f);
+        document.getElementById('phPreviewBox').innerHTML = avatarHtml('', PHOTO_PENDING, 160);
+        const useBtn = document.getElementById('phUse'); useBtn.disabled = false; useBtn.textContent = 'Use this photo';
+        phStep('phPreview');
+    } catch (e) {
+        phError("That photo didn't work", "Please try a different photo. A picture taken with your phone's camera works best.", false);
+    }
+}
+['phFile', 'phCam'].forEach(id => {
+    const inp = document.getElementById(id);
+    inp.addEventListener('click', () => { inp.value = ''; });   // lets the same photo be picked again
+    inp.addEventListener('change', () => onPhotoChosen(inp));
+});
+
+async function savePhotoNow() {
+    if (!CURRENT_MEMBER || !PHOTO_PENDING) return;
+    const useBtn = document.getElementById('phUse');
+    useBtn.disabled = true; useBtn.textContent = 'Saving\u2026';
+    try {
+        const data = await apiPost({ action: 'savePhoto', memberNumber: CURRENT_MEMBER.memberNumber, memberName: fullName(CURRENT_MEMBER), photo: PHOTO_PENDING });
+        if (data && data.success) {
+            MY_PHOTO = PHOTO_PENDING; PHOTO_FOR = noZeros(CURRENT_MEMBER.memberNumber);
+            setPhotoOverride(CURRENT_MEMBER.memberNumber, MY_PHOTO);
+            renderPhotoUI();
+            document.getElementById('phSavedBox').innerHTML = avatarHtml('', MY_PHOTO, 120);
+            phStep('phSaved');
+        } else {
+            phError("Your photo wasn't saved", (data && data.error) || 'Please try again.', true);
+        }
+    } catch (e) {
+        phError("Your photo wasn't saved", "We couldn't reach the server. Please check your connection and try again.", true);
+    }
+}
+document.getElementById('phUse').addEventListener('click', savePhotoNow);
+document.getElementById('phRetry').addEventListener('click', savePhotoNow);
+
+document.getElementById('phRemoveGo').addEventListener('click', async () => {
+    if (!CURRENT_MEMBER) return;
+    const go = document.getElementById('phRemoveGo'); go.disabled = true; go.textContent = 'Removing\u2026';
+    try {
+        const data = await apiPost({ action: 'removePhoto', memberNumber: CURRENT_MEMBER.memberNumber, memberName: fullName(CURRENT_MEMBER) });
+        if (data && data.success) {
+            MY_PHOTO = null; setPhotoOverride(CURRENT_MEMBER.memberNumber, null);
+            renderPhotoUI(); phClose();
+        } else {
+            document.getElementById('phRemoveMsg').textContent = (data && data.error) || 'Could not remove the photo. Please try again.';
+        }
+    } catch (e) {
+        document.getElementById('phRemoveMsg').textContent = "We couldn't reach the server. Please try again.";
+    }
+    go.disabled = false; go.textContent = 'Remove photo';
+});
+
+async function confirmInfo() {
+    const btn = document.getElementById('confirmBtn'); if (!btn) return;
+    const status = document.getElementById('confirmStatus');
+    if (!CURRENT_MEMBER) return;
+
+    if (!VERIFY_ENDPOINT_URL || VERIFY_ENDPOINT_URL.includes('PASTE_YOUR')) {
+        status.textContent = 'Not wired yet \u2014 deploy verify-endpoint.gs and paste its URL into VERIFY_ENDPOINT_URL.';
+        status.className = 'confirm-status err';
+        return;
+    }
+
+    btn.disabled = true;
+    status.textContent = 'Saving\u2026';
+    status.className = 'confirm-status';
+
+    try {
+        const params = { memberNumber: CURRENT_MEMBER.memberNumber, confirmerName: fullName(CURRENT_MEMBER) };
+        const data = await apiPost(params);
+        if (data.success) {
+            const today = new Date().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+            document.getElementById('verifiedText').textContent = 'Last verified ' + today;
+            const vbs2 = document.getElementById('verifyBoxStatus'); if (vbs2) vbs2.textContent = 'Confirmed as of ' + today + '.';
+            status.textContent = 'Thanks \u2014 saved to your record.';
+            status.className = 'confirm-status ok';
+            btn.textContent = '\u2713 Confirmed';
+        } else {
+            status.textContent = data.error || 'Could not save \u2014 try again.';
+            status.className = 'confirm-status err';
+            btn.disabled = false;
+        }
+    } catch (e) {
+        status.innerHTML = 'Could not reach the server \u2014 try again, or <a href="' + mailtoFallback('Confirm my data looks good') + '" style="color:inherit;text-decoration:underline;">email a data administrator</a>.';
+        status.className = 'confirm-status err';
+        btn.disabled = false;
+    }
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+    Session.renew();   // quietly renews a remembered pass, at most once a day
+    if (isOwnerMode()) {
+        document.getElementById('reviewPanel').style.display = 'block';
+        initMemberSelect(); // builds demo dropdown + applies a default member
+    } else {
+        document.getElementById('demoControls').style.display = 'none'; // no demo browsing for non-owners
+    }
+    tryLiveLogin(); // real ?member= login works for anyone with a link, owner or not
+    loadDataRefreshLine();
+    loadTierMessages();
+});
+
+/* ---- Positions (Groups feature): active positions shown on the rolodex ---- */
+const POSITIONS_GID = KOC_CONFIG.gids.positions; // Positions tab
+const GVIZ_POSITIONS_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${POSITIONS_GID}`;
+let POSITIONS_CACHE = null;
+
+async function fetchAllPositions() {
+    if (POSITIONS_CACHE) return POSITIONS_CACHE;
+    const res = await fetch(GVIZ_POSITIONS_URL);
+    const text = await res.text();
+    const match = text.match(/setResponse\(([\s\S]*)\);?\s*$/);
+    if (!match) throw new Error('Unexpected sheet response');
+    const json = JSON.parse(match[1]);
+    const cols = json.table.cols.map(c => (c.label || '').trim().replace(/[\u2018\u2019]/g, "'"));
+    const idx = (label) => cols.indexOf(label);
+    const cell = (row, label) => {
+        const i = idx(label);
+        if (i === -1) return null;
+        const c = row.c[i];
+        if (!c) return null;
+        return (c.v !== null && c.v !== undefined) ? c.v : c.f;
+    };
+    POSITIONS_CACHE = json.table.rows.map(row => ({
+        group: (cell(row, 'Group') || '').toString().trim(),
+        position: (cell(row, 'Position') || '').toString().trim(),
+        memberNumber: String(cell(row, 'Member Number') || '').replace(/^0+/, ''),
+        endDate: cell(row, 'End Date'),
+    }));
+    return POSITIONS_CACHE;
+}
+
+async function updatePositionsLine(memberNumber) {
+    const el = document.getElementById('rxPositions');
+    if (!memberNumber) { el.style.display = 'none'; return; }
+    const target = String(memberNumber).replace(/^0+/, '');
+    try {
+        const all = await fetchAllPositions();
+        const active = all.filter(p => p.memberNumber === target && !p.endDate && p.position);
+        if (!active.length) { el.style.display = 'none'; el.innerHTML = ''; return; }
+        el.innerHTML = active.map(p => `<span class="position-pill">${p.position}</span>`).join('');
+        el.style.display = 'block';
+    } catch (e) {
+        el.style.display = 'none'; // fail quiet — positions are a bonus, not core to the page
+    }
+}
+
+/* Carry the logged-in member across pages via preserve-member links */
+(function () {
+    const memberParam = new URLSearchParams(window.location.search).get("member");
+    if (!memberParam) return;
+    document.querySelectorAll("a.preserve-member").forEach(a => {
+        const url = new URL(a.getAttribute("href"), window.location.href);
+        url.searchParams.set("member", memberParam);
+        a.setAttribute("href", url.pathname + url.search);
+    });
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Groups — St. Luke Knights of Columbus Member Center</title>
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600;700&family=Lora:wght@400;500;600&family=Lato:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+    --primary: #1E3A8A;
+    --secondary: #C5A572;
+    --accent: #B91C1C;
+    --light-bg: #F9FAFB;
+    --text-dark: #1F2937;
+    --text-medium: #6B7280;
+    --shadow: rgba(30, 58, 138, 0.15);
+    --green: #15803D;
+    --green-bg: #F0FDF4;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html { max-width:100%; }
+body { font-family:'Lora', serif; color:var(--text-dark); background:var(--light-bg); line-height:1.6; padding-bottom:4rem; }
+a { color:inherit; }
+
+.review-panel { background:#fff; border-bottom:2px dashed #9CA3AF; padding:0.9rem 1.5rem; }
+.review-panel .inner { max-width:1200px; margin:0 auto; display:flex; align-items:center; gap:1rem; flex-wrap:wrap; }
+.review-panel .tag { font-family:'Lato', sans-serif; font-size:0.7rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; background:#374151; color:#fff; padding:0.3rem 0.6rem; border-radius:4px; }
+.review-panel .note { font-family:'Lato', sans-serif; font-size:0.8rem; color:var(--text-medium); }
+
+nav { background:white; box-shadow:0 2px 4px rgba(0,0,0,0.1); border-bottom:3px solid var(--primary); }
+nav .container { max-width:1200px; margin:0 auto; display:flex; justify-content:space-between; align-items:stretch; flex-wrap:wrap; }
+.logo-section { padding:0.7rem 1.5rem; display:flex; align-items:center; }
+.logo { font-family:'Crimson Pro', serif; color:var(--primary); line-height:1.15; text-decoration:none; }
+.logo-main { display:block; font-size:1.05rem; font-weight:700; }
+.logo-sub { display:block; font-size:0.72rem; color:var(--text-medium); font-family:'Lato',sans-serif; }
+nav ul { list-style:none; display:flex; margin:0; flex-wrap:wrap; }
+nav ul li { display:flex; align-items:center; }
+nav a.navlink { font-family:'Lato', sans-serif; font-size:0.92rem; font-weight:500; color:var(--text-medium); text-decoration:none; padding:1.1rem 1.15rem; border-bottom:3px solid transparent; }
+nav a.navlink.active { color:var(--primary); font-weight:700; border-bottom-color:var(--secondary); }
+nav a.signout { font-family:'Lato',sans-serif; font-size:0.85rem; color:var(--text-medium); padding:1.1rem 1.5rem; text-decoration:none; }
+
+.page { max-width:800px; margin:0 auto; padding:0 1.5rem; }
+h1 { font-family:'Crimson Pro', serif; font-size:1.9rem; color:var(--primary); font-weight:700; margin-top:2rem; }
+.sub { font-family:'Lato',sans-serif; font-size:0.92rem; color:var(--text-medium); margin-top:0.4rem; }
+
+.selector-row { margin-top:1.5rem; display:flex; align-items:center; gap:0.9rem; flex-wrap:wrap; }
+.selector-row label { font-family:'Lato',sans-serif; font-size:0.85rem; color:var(--text-medium); }
+.selector-row select { font-family:'Lato', sans-serif; font-size:1rem; padding:0.6rem 1rem; border-radius:10px; border:1.5px solid #D1D5DB; background:white; min-width:220px; }
+
+.group-card { background:white; border-radius:16px; box-shadow:0 4px 15px var(--shadow); margin-top:1.25rem; overflow:hidden; }
+.member-row { display:grid; grid-template-columns:1.4fr 1.4fr 1fr; gap:1rem; padding:1rem 1.5rem; border-bottom:1px solid #F0F1F3; align-items:center; }
+.member-row:last-child { border-bottom:none; }
+.member-row.header { background:var(--light-bg); font-family:'Lato',sans-serif; font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-medium); }
+.member-row .position { font-family:'Lato',sans-serif; font-weight:600; color:var(--primary); }
+.member-row .name { font-family:'Crimson Pro', serif; font-size:1.05rem; font-weight:700; }
+.status-pill { font-family:'Lato',sans-serif; font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; padding:0.3rem 0.7rem; border-radius:50px; display:inline-block; }
+.status-pill.active { background:var(--green-bg); color:var(--green); }
+.status-pill.ended { background:#F3F4F6; color:var(--text-medium); }
+
+.member-row.directory { grid-template-columns:1.5fr 0.8fr 1.1fr 1fr 1.5fr; }
+#mainContent { max-width:1000px; }   /* wider on computers so the photo column leaves room for emails */
+.member-row.directory .contact-value { font-family:'Lato',sans-serif; font-size:0.9rem; color:var(--text-dark); }
+.member-row.directory .contact-value.empty { color:var(--text-medium); font-style:italic; }
+
+/* Search */
+.search-row { position:relative; margin-top:1rem; max-width:560px; }
+.search-row input { width:100%; min-height:52px; font-family:'Lato',sans-serif; font-size:1.05rem; color:var(--text-dark); padding:0.8rem 3.4rem 0.8rem 2.9rem; border-radius:12px; border:1.5px solid #D1D5DB; background:white url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2.2' stroke-linecap='round'><circle cx='11' cy='11' r='7'/><path d='M20 20l-3.5-3.5'/></svg>") no-repeat 0.95rem center; -webkit-appearance:none; appearance:none; }
+.search-row input::-webkit-search-cancel-button { -webkit-appearance:none; display:none; }
+.search-row input:focus { outline:3px solid rgba(37,99,235,0.3); border-color:var(--primary); }
+.search-clear { position:absolute; right:0.3rem; top:0; width:48px; height:52px; border:none; background:none; font-size:1.7rem; line-height:1; color:var(--text-medium); cursor:pointer; border-radius:50%; }
+.search-count { font-family:'Lato',sans-serif; font-size:0.88rem; color:var(--text-medium); margin-top:0.6rem; min-height:1.3em; }
+.is-hidden { display:none !important; }
+.no-match .btn { margin-top:0.9rem; }
+.contact-value { overflow-wrap:break-word; }
+.mc-avatar { width:var(--s,56px); height:var(--s,56px); border-radius:50%; flex:none; object-fit:cover; display:block; background:#E8EDFB; box-shadow:0 0 0 2px #fff, 0 0 0 3px #D1D5DB; }
+.mc-avatar.initials { display:flex; align-items:center; justify-content:center; font-family:'Crimson Pro',serif; font-weight:700; color:var(--primary); font-size:calc(var(--s,56px) * 0.4); line-height:1; }
+.name-cell { display:flex; align-items:center; gap:0.85rem; min-width:0; }
+.name-cell .name { line-height:1.25; }
+.position-pill { display:inline-block; background:var(--light-bg); color:var(--primary); border-radius:50px; padding:0.2rem 0.7rem; margin:0.15rem 0.3rem 0.15rem 0; font-family:'Lato',sans-serif; font-size:0.75rem; font-weight:600; }
+
+.empty-state { padding:2rem; text-align:center; font-family:'Lato',sans-serif; color:var(--text-medium); }
+
+.actions { max-width:700px; margin:2rem auto 0; padding:0 2rem; display:flex; gap:0.9rem; justify-content:center; flex-wrap:wrap; }
+.btn { font-family:'Lato', sans-serif; font-weight:600; font-size:0.9rem; cursor:pointer; border-radius:50px; padding:0.7rem 1.5rem; border:2px solid transparent; text-decoration:none; display:inline-block; }
+.btn-outline { background:transparent; color:var(--primary); border-color:var(--primary); }
+.btn-outline:hover { background:var(--primary); color:white; }
+
+@media (max-width:640px){
+    nav ul { flex-wrap:nowrap; width:100%; justify-content:flex-start; order:3; border-top:1px solid #F0F1F3; overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+    nav ul::-webkit-scrollbar { display:none; }
+    nav ul li { flex-shrink:0; }
+    nav a.navlink { padding:0.65rem 0.7rem; font-size:0.82rem; white-space:nowrap; }
+    .logo-section { padding:0.6rem 1rem; flex:1; min-width:200px; }
+    .page { padding:0 1rem; }
+    .member-row { grid-template-columns:1fr; gap:0.3rem; }
+    .member-row.directory .wife::before { content:'Wife: '; font-family:'Lato',sans-serif; font-size:0.85rem; color:var(--text-medium); }
+    .member-row.directory .wife.empty, .member-row.directory .pos.empty { display:none; }
+    .member-row.header { display:none; }
+    /* Photo on the left; the name and every detail stacked to its right, so each line sits right under the one above it
+       (no empty space under the name where the photo ends). The photo spans a few rows; rows with nothing in them take no room. */
+    .member-row.directory { grid-template-columns:56px 1fr; column-gap:0.85rem; row-gap:0; align-items:start; }
+    .member-row.directory .name-cell { display:contents; }
+    .member-row.directory .mc-avatar { grid-column:1; grid-row:1 / span 4; }
+    .member-row.directory .name { grid-column:2; grid-row:1; margin-top:2px; }
+    .member-row.directory > div:not(.name-cell) { grid-column:2; margin-top:0.3rem; }
+    .member-row:not(.directory):not(.header) { grid-template-columns:48px 1fr; column-gap:0.85rem; row-gap:0; align-items:start; }
+    .member-row:not(.directory):not(.header) .name-cell { display:contents; }
+    .member-row:not(.directory):not(.header) .mc-avatar { grid-column:1; grid-row:1 / span 3; }
+    .member-row:not(.directory):not(.header) > .position { grid-column:2; grid-row:1; }
+    .member-row:not(.directory):not(.header) .name { grid-column:2; grid-row:2; margin-top:0.15rem; }
+    .member-row:not(.directory):not(.header) > div:last-child { grid-column:2; grid-row:3; margin-top:0.35rem; }
+}
+.site-header { position:sticky; top:0; z-index:1000; }
+
+/* Menu: never break a label across two lines; below 1180px the menu gets its own row */
+nav a.navlink, nav a.signout { white-space:nowrap; }
+@media (max-width:1180px) {
+    nav .container { flex-wrap:wrap; }
+    .logo-section { flex:1; min-width:200px; }
+    nav ul { width:100%; order:3; justify-content:flex-start; border-top:1px solid #F0F1F3; overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+    nav ul::-webkit-scrollbar { display:none; }
+    nav ul li { flex-shrink:0; }
+}
+.not-logged-in { max-width:500px; margin:4rem auto; padding:0 1.5rem; text-align:center; }
+.not-logged-in h1 { font-family:'Crimson Pro', serif; font-size:1.8rem; color:var(--primary); font-weight:700; }
+.not-logged-in p { font-family:'Lato',sans-serif; font-size:0.95rem; color:var(--text-medium); margin:0.75rem 0 1.5rem; }
+</style>
+<script src="config.js"></script>
+<script src="session.js"></script>
+<script src="nav-toggle.js"></script>
+</head>
+<body>
+
+<header class="site-header">
+<div class="review-panel" id="reviewPanel" style="display:none;">
+    <div class="inner">
+        <span class="tag">Live</span>
+        <span class="note" id="statusNote">Loading positions from the sheet&hellip;</span>
+    </div>
+</div>
+
+<nav>
+    <div class="container">
+        <div class="logo-section">
+            <a href="home.html" class="logo preserve-member">
+                <span class="logo-main">ST. LUKE KNIGHTS OF COLUMBUS</span>
+                <span class="logo-sub">Member Center · Council 14895</span>
+            </a>
+        </div>
+        <ul>
+            <li><a href="home.html" class="navlink preserve-member">Profile</a></li>
+            <li><a href="calendar.html" class="navlink preserve-member">Calendar</a></li>
+            <li><a href="prayers.html" class="navlink preserve-member">Prayers</a></li>
+            <li><a href="groups.html" class="navlink preserve-member active">Groups</a></li>
+            <li><a href="membership-card.html" class="navlink preserve-member">KofC Card</a></li>
+            <li class="nav-whydues"><a href="why-dues.html" class="navlink preserve-member">Why Dues?</a></li>
+            <li><a href="verify-wizard.html" class="navlink preserve-member">Verify Data</a></li>
+        </ul>
+    </div>
+</nav>
+</header>
+
+<div class="not-logged-in" id="notLoggedIn" style="display:none;">
+    <h1>Please sign in</h1>
+    <p>Sign in to the Member Center to view this page.</p>
+    <a href="landing.html" class="btn btn-primary">Sign in</a>
+</div>
+
+<div class="page" id="mainContent">
+
+    <h1>Groups</h1>
+    <p class="sub">Board Members, Activity Leaders, and other council groups — who's currently serving.</p>
+
+    <div class="selector-row">
+        <label for="groupSelect">Group:</label>
+        <select id="groupSelect" onchange="clearSearch(false); renderGroup(this.value)"></select>
+    </div>
+
+    <div class="search-row">
+        <input type="search" id="groupSearch" placeholder="Search this list" aria-label="Search this list by name, position, phone or email" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="search">
+        <button type="button" class="search-clear" id="searchClear" aria-label="Clear search" hidden>&times;</button>
+    </div>
+    <div class="search-count" id="searchCount" aria-live="polite"></div>
+
+    <div class="group-card">
+        <div class="member-row header" id="groupHeader">
+            <div>Position</div>
+            <div>Member</div>
+            <div>Status</div>
+        </div>
+        <div id="groupList">
+            <div class="empty-state">Loading&hellip;</div>
+        </div>
+        <div class="empty-state no-match is-hidden" id="noMatch">
+            <div>No one matches that search.</div>
+            <div style="margin-top:0.3rem;font-size:0.9rem;">Try fewer letters, or just part of a name.</div>
+            <button type="button" class="btn btn-outline" onclick="clearSearch(true)">Clear search</button>
+        </div>
+    </div>
+
+    <div class="actions">
+        <a href="home.html" class="btn btn-outline preserve-member">Back to My Profile</a>
+    </div>
+</div>
+
+<script>
+const SHEET_ID = KOC_CONFIG.sheetId;
+const POSITIONS_GID = KOC_CONFIG.gids.positions; // Positions tab
+const MEMBERSHIP_GID = KOC_CONFIG.gids.membership; // St Luke KOC Membership DB tab
+const GVIZ_POSITIONS_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${POSITIONS_GID}`;
+const GVIZ_MEMBERSHIP_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${MEMBERSHIP_GID}`;
+const DIRECTORY_GROUP_NAME = 'Member Directory';
+
+let POSITIONS = [];
+let DIRECTORY_MEMBERS = [];
+let ACTIVE_POSITIONS_BY_MEMBER = {};
+let PHOTOS = {};   // member number (no leading zeros) -> small JPEG as base64 text
+const GVIZ_PHOTOS_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&headers=1&sheet=Photos&tq=${encodeURIComponent('select A, B')}`;
+
+const noZeros = n => String(n == null ? '' : n).trim().replace(/^0+/, '');
+const isB64 = v => typeof v === 'string' && /^\/9j\/[A-Za-z0-9+\/]+={0,2}$/.test(v);
+function initialsOf(name) {
+    const p = String(name || '').replace(/[^A-Za-z .'-]/g, '').split(/\s+/).filter(Boolean);
+    if (!p.length) return '?';
+    return (p[0][0] + (p.length > 1 ? p[p.length - 1][0] : '')).toUpperCase();
+}
+function avatarHtml(name, memberNumber, size) {
+    const photo = PHOTOS[noZeros(memberNumber)];
+    return isB64(photo)
+        ? `<img class="mc-avatar" style="--s:${size}px" src="data:image/jpeg;base64,${photo}" alt="" loading="lazy">`
+        : `<div class="mc-avatar initials" style="--s:${size}px" aria-hidden="true">${initialsOf(name)}</div>`;
+}
+/* Photos load after the lists appear, so a slow photo never holds up the page. */
+async function fetchPhotos() {
+    const map = {};
+    try {
+        const json = await fetchGvizJson(GVIZ_PHOTOS_URL);
+        (json.table.rows || []).forEach(r => {
+            const n = noZeros(r.c[0] && r.c[0].v), v = r.c[1] && r.c[1].v;
+            if (n && isB64(v)) map[n] = v;
+        });
+    } catch (e) { /* no Photos tab yet, or offline: everyone shows initials */ }
+    try {   // a change this member made earlier in this visit wins (the sheet can lag a moment)
+        const me = Session.read();
+        const ov = me && sessionStorage.getItem('mcPhoto_' + noZeros(me.memberNumber));
+        if (ov) { if (ov === '-') delete map[noZeros(me.memberNumber)]; else if (isB64(ov)) map[noZeros(me.memberNumber)] = ov; }
+    } catch (e) {}
+    return map;
+}
+
+function formatDate(v) {
+    if (v === null || v === undefined || v === '') return null;
+    const s = String(v);
+    const m = s.match(/^Date\((\d+),(\d+),(\d+)/);
+    let d;
+    if (m) {
+        d = new Date(parseInt(m[1]), parseInt(m[2]), parseInt(m[3]));
+    } else {
+        d = new Date(s);
+        if (isNaN(d.getTime())) return s;
+    }
+    return d.toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' });
+}
+
+function titleCase(s) {
+    return (s || '').toString().replace(/\w\S*/g, t => t.charAt(0).toUpperCase() + t.slice(1).toLowerCase());
+}
+
+function gvizCellReader(json) {
+    const cols = json.table.cols.map(c => (c.label || '').trim().replace(/[\u2018\u2019]/g, "'"));
+    const idx = (label) => cols.indexOf(label);
+    return (row, label) => {
+        const i = idx(label);
+        if (i === -1) return null;
+        const c = row.c[i];
+        if (!c) return null;
+        return (c.v !== null && c.v !== undefined) ? c.v : c.f;
+    };
+}
+
+async function fetchGvizJson(url) {
+    const res = await fetch(url);
+    const text = await res.text();
+    const match = text.match(/setResponse\(([\s\S]*)\);?\s*$/);
+    if (!match) throw new Error('Unexpected sheet response');
+    return JSON.parse(match[1]);
+}
+
+async function fetchPositions() {
+    const json = await fetchGvizJson(GVIZ_POSITIONS_URL);
+    const cell = gvizCellReader(json);
+    return json.table.rows
+        .map(row => ({
+            group: (cell(row, 'Group') || '').toString().trim(),
+            position: (cell(row, 'Position') || '').toString().trim(),
+            name: (cell(row, 'Name') || '').toString().trim(),
+            memberNumber: String(cell(row, 'Member Number') || '').replace(/^0+/, ''),
+            startDate: cell(row, 'Start Date'),
+            endDate: cell(row, 'End Date'),
+        }))
+        .filter(p => p.group && p.position && p.name);
+}
+
+/* Tidying names for the directory. A name typed with its own capitals ("McKay", "O'Brien", "DeLuca") is left exactly as typed.
+   Only names that are ALL CAPITALS or all lower-case are tidied: "MCKAY" -> "McKay", "O'BRIEN" -> "O'Brien", "SMITH-JONES" -> "Smith-Jones".
+   A short all-capital nickname ("DJ", "AJ") is kept when the member chose it (keepShort). */
+function tidyName(s, keepShort) {
+    const t = String(s == null ? '' : s).trim();
+    if (!t) return '';
+    const hasLower = /[a-z]/.test(t), hasUpper = /[A-Z]/.test(t);
+    if (hasLower && hasUpper) return t;
+    if (keepShort && hasUpper && t.replace(/[^A-Za-z]/g, '').length <= 2) return t;
+    return t.toLowerCase()
+        .replace(/(^|[\s'\u2019\-])([a-z])/g, (m, pre, ch) => pre + ch.toUpperCase())
+        .replace(/\bMc([a-z])/g, (m, ch) => 'Mc' + ch.toUpperCase());
+}
+/* The name shown in the directory: the preferred name if there is one ("Bill Berg"), otherwise the first name. */
+function directoryName(first, preferred, last) {
+    const given = tidyName(preferred, true) || tidyName(first);
+    const fam = tidyName(last);
+    if (given && fam && given.toLowerCase().endsWith(' ' + fam.toLowerCase())) return given;   // they already typed the whole name
+    return [given, fam].filter(Boolean).join(' ');
+}
+async function fetchDirectoryMembers() {
+    const json = await fetchGvizJson(GVIZ_MEMBERSHIP_URL);
+    const cell = gvizCellReader(json);
+    return json.table.rows
+        .map(row => ({
+            memberNumber: String(cell(row, 'Member Number') || '').replace(/^0+/, ''),
+            name: directoryName(cell(row, 'First Name'), cell(row, 'Preferred Name'), cell(row, 'Last Name')),
+            legalName: [tidyName(cell(row, 'First Name')), tidyName(cell(row, 'Last Name'))].filter(Boolean).join(' '),
+            wife: (cell(row, "Wife's Name") || '').toString().trim(),
+            phone: (cell(row, 'phone') || '').toString().trim(),
+            email: (cell(row, 'email') || '').toString().trim(),
+            optIn: String(cell(row, 'Directory Opt-In') || '').trim().toLowerCase() === 'yes',
+        }))
+        .filter(m => m.optIn && m.memberNumber);
+}
+
+function buildActivePositionsIndex() {
+    const map = {};
+    POSITIONS.forEach(p => {
+        if (p.endDate || !p.memberNumber) return;
+        if (!map[p.memberNumber]) map[p.memberNumber] = [];
+        map[p.memberNumber].push(p.position);
+    });
+    return map;
+}
+
+function renderGroupRows(groupName) {
+    const header = document.getElementById('groupHeader');
+    const list = document.getElementById('groupList');
+
+    if (groupName === DIRECTORY_GROUP_NAME) {
+        header.className = 'member-row header directory';
+        header.innerHTML = '<div>Name</div><div>Wife</div><div>Position(s)</div><div>Phone</div><div>Email</div>';
+        if (!DIRECTORY_MEMBERS.length) {
+            list.innerHTML = '<div class="empty-state">No members have opted into the directory yet.</div>';
+            return;
+        }
+        list.innerHTML = DIRECTORY_MEMBERS.map(m => {
+            const positions = ACTIVE_POSITIONS_BY_MEMBER[m.memberNumber] || [];
+            const positionsHtml = positions.length
+                ? positions.map(p => `<span class="position-pill">${p}</span>`).join('')
+                : '';
+            const phoneHtml = m.phone ? `<span class="contact-value">${m.phone}</span>` : '<span class="contact-value empty">Not on file</span>';
+            const emailHtml = m.email ? `<span class="contact-value">${m.email}</span>` : '<span class="contact-value empty">Not on file</span>';
+            const find = [m.name, m.legalName, m.wife, positions.join(' '), m.phone, m.email].join(' ');
+            return `<div class="member-row directory" data-s="${searchAttr(find)}" data-d="${digitsOf(m.phone)}">
+                <div class="name-cell">${avatarHtml(m.name, m.memberNumber, 56)}<div class="name">${m.name}</div></div>
+                <div class="wife${m.wife ? '' : ' empty'}">${m.wife ? `<span class="contact-value">${m.wife}</span>` : ''}</div>
+                <div class="pos${positions.length ? '' : ' empty'}">${positionsHtml}</div>
+                <div>${phoneHtml}</div>
+                <div>${emailHtml}</div>
+            </div>`;
+        }).join('');
+        return;
+    }
+
+    header.className = 'member-row header';
+    header.innerHTML = '<div>Position</div><div>Member</div><div>Status</div>';
+    const rows = POSITIONS.filter(p => p.group === groupName);
+    if (!rows.length) {
+        list.innerHTML = '<div class="empty-state">No positions recorded for this group yet.</div>';
+        return;
+    }
+    list.innerHTML = rows.map(p => {
+        const active = !p.endDate;
+        const startText = formatDate(p.startDate);
+        const endText = formatDate(p.endDate);
+        const statusHtml = active
+            ? `<span class="status-pill active">Active${startText ? ' since ' + startText : ''}</span>`
+            : `<span class="status-pill ended">Ended ${endText || ''}</span>`;
+        const find = [p.position, p.name, active ? 'active' : 'ended'].join(' ');
+        return `<div class="member-row" data-s="${searchAttr(find)}" data-d="">
+            <div class="position">${p.position}</div>
+            <div class="name-cell">${avatarHtml(p.name, p.memberNumber, 48)}<div class="name">${p.name}</div></div>
+            <div>${statusHtml}</div>
+        </div>`;
+    }).join('');
+}
+
+function initGroupSelect() {
+    const groups = [...new Set(POSITIONS.map(p => p.group))];
+    groups.unshift(DIRECTORY_GROUP_NAME);
+    const select = document.getElementById('groupSelect');
+    select.innerHTML = '';
+    groups.forEach(g => {
+        const opt = document.createElement('option');
+        opt.value = g;
+        opt.textContent = g;
+        select.appendChild(opt);
+    });
+    select.value = DIRECTORY_GROUP_NAME;
+    renderGroup(DIRECTORY_GROUP_NAME);
+}
+
+/* ---------- Search ----------
+   Every row carries its own searchable text (data-s), so typing only shows or hides rows. */
+const normText = s => String(s == null ? '' : s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+const digitsOf = s => String(s == null ? '' : s).replace(/\D/g, '');
+const searchAttr = s => normText(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+function applySearch() {
+    const input = document.getElementById('groupSearch');
+    const tokens = normText(input.value).split(/\s+/).filter(Boolean);
+    document.getElementById('searchClear').hidden = !input.value;
+    const rows = document.querySelectorAll('#groupList [data-s]');
+    let shown = 0;
+    rows.forEach(r => {
+        const hay = r.dataset.s, hayDigits = r.dataset.d || '';
+        const ok = tokens.every(t => {
+            if (hay.includes(t)) return true;
+            const d = digitsOf(t);   // a phone number typed with or without punctuation
+            return d.length >= 3 && d.length === t.replace(/[\s().+\-]/g, '').length && hayDigits.includes(d);
+        });
+        r.classList.toggle('is-hidden', !ok);
+        if (ok) shown++;
+    });
+    const total = rows.length, count = document.getElementById('searchCount');
+    document.getElementById('noMatch').classList.toggle('is-hidden', !(total && tokens.length && !shown));
+    if (!total) count.textContent = '';
+    else if (!tokens.length) count.textContent = total + ' in this list. Type a name, position, phone number or email to narrow it down.';
+    else count.textContent = shown ? 'Showing ' + shown + ' of ' + total : '';   // the box below says "No one matches"
+}
+function clearSearch(refocus) {
+    const input = document.getElementById('groupSearch');
+    input.value = '';
+    applySearch();
+    if (refocus) input.focus();
+}
+function renderGroup(groupName) { renderGroupRows(groupName); applySearch(); }
+(function () {
+    const input = document.getElementById('groupSearch');
+    input.addEventListener('input', applySearch);
+    input.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); input.blur(); } });   // closes the phone keyboard so the results are visible
+    document.getElementById('searchClear').addEventListener('click', () => clearSearch(true));
+})();
+
+async function init() {
+    // The directory is for signed-in members only
+    if (!Session.read()) {
+        document.getElementById('mainContent').style.display = 'none';
+        document.getElementById('notLoggedIn').style.display = 'block';
+        return;
+    }
+    Session.renew();
+    if (Session.adminTools()) document.getElementById('reviewPanel').style.display = 'block';
+    const status = document.getElementById('statusNote');
+    try {
+        const [positions, directory] = await Promise.all([fetchPositions(), fetchDirectoryMembers()]);
+        POSITIONS = positions;
+        DIRECTORY_MEMBERS = directory;
+        ACTIVE_POSITIONS_BY_MEMBER = buildActivePositionsIndex();
+        status.textContent = `Connected — ${POSITIONS.length} position record${POSITIONS.length === 1 ? '' : 's'}, ${DIRECTORY_MEMBERS.length} directory member${DIRECTORY_MEMBERS.length === 1 ? '' : 's'} loaded.`;
+        initGroupSelect();
+        fetchPhotos().then(map => {
+            if (!Object.keys(map).length) return;
+            PHOTOS = map;
+            renderGroup(document.getElementById('groupSelect').value);
+        });
+    } catch (e) {
+        status.textContent = 'Could not reach the sheet — check sharing settings (Anyone with the link — Viewer).';
+        document.getElementById('groupList').innerHTML = '<div class="empty-state">Could not load groups right now.</div>';
+    }
+}
+
+window.addEventListener('DOMContentLoaded', init);
+
+/* Carry the logged-in member across pages via preserve-member links */
+(function () {
+    const memberParam = new URLSearchParams(window.location.search).get("member");
+    if (!memberParam) return;
+    document.querySelectorAll("a.preserve-member").forEach(a => {
+        const url = new URL(a.getAttribute("href"), window.location.href);
+        url.searchParams.set("member", memberParam);
+        a.setAttribute("href", url.pathname + url.search);
+    });
+})();
+</script>
+
+</body>
+</html>
