@@ -121,7 +121,7 @@ a { color:inherit; }
     .stage h1 { font-size:1.55rem; }
     .login-card { padding:1.5rem; margin-top:1.75rem; }
 }
-/* Sign-in with an emailed code */
+/* Sign-in with email + PIN */
 .step { display:none; }
 .step.active { display:block; }
 .step-title { font-family:'Crimson Pro', serif; font-size:1.5rem; color:var(--primary); font-weight:700; margin-bottom:0.4rem; }
@@ -135,6 +135,10 @@ a { color:inherit; }
 .small-links { font-family:'Lato',sans-serif; font-size:0.9rem; color:var(--text-medium); margin-top:1.1rem; line-height:1.9; text-align:center; }
 .linkish { background:none; border:none; padding:0; font:inherit; color:var(--primary); text-decoration:underline; cursor:pointer; }
 .linkish:disabled { color:var(--text-medium); text-decoration:none; cursor:default; }
+.pin-input { width:100%; font-family:'Lato',sans-serif; font-size:2rem; font-weight:700; letter-spacing:0.7em; text-align:center; padding:0.7rem 0.5rem 0.7rem 1.2rem; border:2px solid #D1D5DB; border-radius:10px; outline:none; margin-bottom:0.9rem; }
+.pin-input:focus { border-color:var(--primary-light); }
+.number-input { letter-spacing:0.15em; font-size:1.4rem; }
+.number-input::placeholder { letter-spacing:0; font-size:1.05rem; font-weight:400; }
 .delivery-note { font-family:'Lato',sans-serif; font-size:0.9rem; color:var(--text-medium); line-height:1.5; margin:-0.5rem 0 1.1rem; }
 </style>
 <script src="config.js"></script>
@@ -153,19 +157,19 @@ a { color:inherit; }
 <div class="stage">
     <div class="hero-emblem">14895</div>
     <h1>Member Center</h1>
-    <p class="sub" id="stageSub">Enter the email address on file with the council. We'll email you a code to sign in.</p>
+    <p class="sub" id="stageSub">Enter the email address on file with the council. Then your 4-digit PIN.</p>
 
     <div class="login-card">
 
         <!-- Step 1: email -->
         <div class="step" id="step-email">
-            <form id="emailForm" action="#" method="post" novalidate onsubmit="event.preventDefault(); sendCode();">
+            <form id="emailForm" action="#" method="post" novalidate onsubmit="event.preventDefault(); checkEmail();">
                 <label class="field-label" for="emailField">Email address</label>
                 <input class="email-input" id="emailField" name="email" type="email" inputmode="email"
                        autocomplete="email" autocapitalize="none" autocorrect="off" spellcheck="false"
                        enterkeyhint="go" placeholder="you@example.com">
                 <p class="login-hint">This should match the email a data administrator has on file for you.</p>
-                <button class="btn-submit" id="sendBtn" type="submit">Email Me a Code</button>
+                <button class="btn-submit" id="sendBtn" type="submit">Continue</button>
             </form>
             <div class="status-msg status-checking" id="msg-checking">Checking our records&hellip;</div>
             <div class="status-msg status-notfound" id="msg-notfound">
@@ -187,25 +191,54 @@ a { color:inherit; }
             <div class="status-msg status-notfound" id="msg-error"></div>
         </div>
 
-        <!-- Step 2: code -->
-        <div class="step" id="step-code">
-            <h2 class="step-title">Check your email</h2>
-            <p class="step-text">We sent a 6-digit code to <strong id="maskedEmail"></strong>.</p>
-            <p class="delivery-note">It usually arrives within a minute, but some email providers, like AT&amp;T or Yahoo, can take up to 10 minutes. You can keep this page open.</p>
-            <form id="codeForm" action="#" method="post" novalidate onsubmit="event.preventDefault(); verifyCode();">
-            <label class="field-label" for="codeField">6-digit code</label>
-            <input class="code-input" id="codeField" name="one-time-code" type="text" inputmode="numeric" pattern="[0-9]*"
-                   autocomplete="one-time-code" autocorrect="off" enterkeyhint="done" maxlength="6" placeholder="••••••"
+        <!-- Step 2a: PIN (member already has one) -->
+        <div class="step" id="step-pin">
+            <h2 class="step-title">Enter your PIN</h2>
+            <p class="step-text">Signing in as <strong id="pinEmail"></strong>.</p>
+            <form id="pinForm" action="#" method="post" novalidate onsubmit="event.preventDefault(); signInPin();">
+            <label class="field-label" for="pinField">4-digit PIN</label>
+            <input class="pin-input" id="pinField" name="pin" type="password" inputmode="numeric" pattern="[0-9]*"
+                   autocomplete="current-password" autocorrect="off" enterkeyhint="go" maxlength="4" placeholder="&bull;&bull;&bull;&bull;"
                    oninput="this.value = this.value.replace(/\D/g, '')">
             <label class="remember">
                 <input type="checkbox" id="rememberBox" checked>
                 <span><strong>Keep me signed in on this device</strong><br><span class="remember-hint">You'll stay signed in as long as you visit at least once every 90 days. Uncheck on a shared or public computer.</span></span>
             </label>
-            <button class="btn-submit" id="verifyBtn" type="submit">Sign In</button>
+            <button class="btn-submit" id="pinBtn" type="submit">Sign In</button>
             </form>
-            <div class="status-msg" id="msg-code"></div>
+            <div class="status-msg" id="msg-pin"></div>
             <p class="small-links">
-                Didn't get it? Check your spam folder, or <button type="button" class="linkish" id="resendBtn" onclick="resendCode()">send a new code</button>.<br>
+                Forgot your PIN? Email <a data-koc-email></a> and a data administrator will reset it.<br>
+                <button type="button" class="linkish" onclick="useDifferentEmail()">Use a different email</button>
+            </p>
+        </div>
+
+        <!-- Step 2b: first visit, choose a PIN -->
+        <div class="step" id="step-claim">
+            <h2 class="step-title">Welcome<span id="claimName"></span></h2>
+            <p class="step-text">Let's set up your PIN. You'll use it with your email each time you sign in.</p>
+            <form id="claimForm" action="#" method="post" novalidate onsubmit="event.preventDefault(); claimPin();">
+            <label class="field-label" for="numField">Your member number</label>
+            <input class="pin-input number-input" id="numField" name="memberNumber" type="text" inputmode="numeric" pattern="[0-9]*"
+                   autocomplete="off" autocorrect="off" enterkeyhint="next" maxlength="10" placeholder="On your card"
+                   oninput="this.value = this.value.replace(/\D/g, '')">
+            <label class="field-label" for="newPinField">Choose a 4-digit PIN</label>
+            <input class="pin-input" id="newPinField" name="newPin" type="password" inputmode="numeric" pattern="[0-9]*"
+                   autocomplete="new-password" autocorrect="off" enterkeyhint="next" maxlength="4" placeholder="&bull;&bull;&bull;&bull;"
+                   oninput="this.value = this.value.replace(/\D/g, '')">
+            <label class="field-label" for="newPin2Field">Type it again</label>
+            <input class="pin-input" id="newPin2Field" name="newPin2" type="password" inputmode="numeric" pattern="[0-9]*"
+                   autocomplete="new-password" autocorrect="off" enterkeyhint="go" maxlength="4" placeholder="&bull;&bull;&bull;&bull;"
+                   oninput="this.value = this.value.replace(/\D/g, '')">
+            <label class="remember">
+                <input type="checkbox" id="rememberBoxClaim" checked>
+                <span><strong>Keep me signed in on this device</strong><br><span class="remember-hint">You'll stay signed in as long as you visit at least once every 90 days. Uncheck on a shared or public computer.</span></span>
+            </label>
+            <button class="btn-submit" id="claimBtn" type="submit">Set PIN and Sign In</button>
+            </form>
+            <div class="status-msg" id="msg-claim"></div>
+            <p class="small-links">
+                Don't have your card handy? Email <a data-koc-email></a> and a data administrator will help.<br>
                 <button type="button" class="linkish" onclick="useDifferentEmail()">Use a different email</button>
             </p>
         </div>
@@ -213,7 +246,7 @@ a { color:inherit; }
         <!-- Returning visitor on a remembered device -->
         <div class="step" id="step-returning">
             <h2 class="step-title">Welcome back<span id="returningName"></span></h2>
-            <p class="step-text">You're still signed in on this device, so you don't need a code.</p>
+            <p class="step-text">You're still signed in on this device, so you don't need your PIN.</p>
             <button class="btn-submit" id="continueBtn" onclick="continueSignedIn()">Continue to My Profile</button>
             <p class="small-links"><button type="button" class="linkish" id="notMeBtn" onclick="notMe()">Not you? Sign in as someone else</button></p>
         </div>
@@ -228,9 +261,8 @@ a { color:inherit; }
 
 <script>
 const VERIFY_ENDPOINT_URL = MC_ENDPOINT; // from session.js
-const SIGN_IN_SUB = "Enter the email address on file with the council. We'll email you a code to sign in.";
+const SIGN_IN_SUB = "Enter the email address on file with the council.";
 let pendingEmail = '';
-let cooldownTimer = null;
 
 async function apiPost(params) {
     const res = await fetch(VERIFY_ENDPOINT_URL, {
@@ -249,13 +281,7 @@ function show(id) {
 
 function hideMessages() {
     ['checking', 'notfound', 'notyet', 'error'].forEach(s => document.getElementById('msg-' + s).classList.remove('show'));
-    const m = document.getElementById('msg-code'); m.className = 'status-msg'; m.textContent = '';
-}
-
-function codeMessage(text, kind) {
-    const m = document.getElementById('msg-code');
-    m.className = 'status-msg show ' + (kind === 'ok' ? 'status-found' : 'status-notfound');
-    m.textContent = text;
+    ['msg-pin', 'msg-claim'].forEach(id => { const m = document.getElementById(id); m.className = 'status-msg'; m.textContent = ''; });
 }
 
 function maskTyped(email) {
@@ -275,7 +301,18 @@ function rememberedEmail() {
 
 function goToProfile() { window.location.href = 'home.html'; }
 
-async function sendCode() {
+function formMessage(id, text, kind) {
+    const m = document.getElementById(id);
+    m.className = 'status-msg show ' + (kind === 'ok' ? 'status-found' : 'status-notfound');
+    m.textContent = text;
+}
+
+function lockText(minutes) {
+    if (minutes >= 120) return 'Too many tries. Please try again tomorrow, or email ' + KOC_CONFIG.emails.council + ' and a data administrator will help.';
+    return 'Too many tries. Please wait ' + minutes + ' minute' + (minutes === 1 ? '' : 's') + ' and try again.';
+}
+
+async function checkEmail() {
     const email = document.getElementById('emailField').value.trim().toLowerCase();
     hideMessages();
     document.getElementById('helpForm').classList.remove('hidden');
@@ -286,24 +323,28 @@ async function sendCode() {
     btn.disabled = true;
     document.getElementById('msg-checking').classList.add('show');
     try {
-        const r = await apiPost({ action: 'requestCode', email });
+        const r = await apiPost({ action: 'pinStatus', email });
         document.getElementById('msg-checking').classList.remove('show');
-        if (r.success || r.error === 'wait') {
+        if (r.success) {
             pendingEmail = email;
-            document.getElementById('maskedEmail').textContent = r.masked || maskTyped(email);
-            document.getElementById('codeField').value = '';
-            document.getElementById('stageSub').textContent = 'Almost there. Enter the code we just emailed you.';
-            show('step-code');
-            startCooldown(r.error === 'wait' ? (r.seconds || 30) : 30);
-            if (r.error === 'wait') codeMessage('We just sent you a code. Check your email.', 'ok');
-            document.getElementById('codeField').focus();
+            if (r.hasPin) {
+                document.getElementById('pinEmail').textContent = email;
+                document.getElementById('pinField').value = '';
+                document.getElementById('stageSub').textContent = '';
+                show('step-pin');
+                document.getElementById('pinField').focus();
+            } else {
+                document.getElementById('claimName').textContent = r.firstName ? ', ' + r.firstName : '';
+                ['numField', 'newPinField', 'newPin2Field'].forEach(id => document.getElementById(id).value = '');
+                document.getElementById('stageSub').textContent = '';
+                show('step-claim');
+                document.getElementById('numField').focus();
+            }
         } else if (r.error === 'not_found') {
             document.getElementById('msg-notfound').classList.add('show');
         } else if (r.error === 'not_yet') {
             document.getElementById('notyetName').textContent = r.firstName ? ', ' + r.firstName : '';
             document.getElementById('msg-notyet').classList.add('show');
-        } else if (r.error === 'too_many_codes') {
-            showError("We've sent several codes in the last hour. Please wait a little while, then try again.");
         } else {
             showError("Something went wrong. Please try again.");
         }
@@ -320,67 +361,73 @@ function showError(text) {
     m.classList.add('show');
 }
 
-async function verifyCode() {
-    const code = document.getElementById('codeField').value.trim();
-    if (code.length !== 6) return codeMessage('Please enter all 6 digits.');
-    const btn = document.getElementById('verifyBtn');
+async function signInPin() {
+    const pin = document.getElementById('pinField').value.trim();
+    if (pin.length !== 4) return formMessage('msg-pin', 'Please enter all 4 digits.');
+    const btn = document.getElementById('pinBtn');
+    const remember = document.getElementById('rememberBox').checked;
     btn.disabled = true;
     btn.textContent = 'Checking\u2026';
     try {
-        const r = await apiPost({
-            action: 'verifyCode', email: pendingEmail, code,
-            remember: document.getElementById('rememberBox').checked
-        });
+        const r = await apiPost({ action: 'signIn', email: pendingEmail, pin, remember });
         if (r.success) {
             Session.save(r);
-            rememberEmail(document.getElementById('rememberBox').checked ? pendingEmail : '');
+            rememberEmail(remember ? pendingEmail : '');
             btn.textContent = 'Signed in \u2713';
             goToProfile();
             return;
         }
-        if (r.error === 'wrong_code') codeMessage(`That code doesn't match. ${r.triesLeft} ${r.triesLeft === 1 ? 'try' : 'tries'} left.`);
-        else if (r.error === 'too_many_tries') codeMessage('Too many tries. Tap "send a new code" below.');
-        else if (r.error === 'expired') codeMessage('That code has expired. Tap "send a new code" below.');
-        else codeMessage('Something went wrong. Please try again.');
+        document.getElementById('pinField').value = '';
+        if (r.error === 'wrong_pin') formMessage('msg-pin', `That PIN doesn't match. ${r.triesLeft} ${r.triesLeft === 1 ? 'try' : 'tries'} left.`);
+        else if (r.error === 'locked') formMessage('msg-pin', lockText(r.minutes));
+        else if (r.error === 'no_pin') { useDifferentEmail(); checkEmailAgain(); return; }
+        else formMessage('msg-pin', 'Something went wrong. Please try again.');
     } catch (e) {
-        codeMessage("We couldn't reach the Member Center just now. Please try again in a moment.");
+        formMessage('msg-pin', "We couldn't reach the Member Center just now. Please try again in a moment.");
     }
     btn.disabled = false;
     btn.textContent = 'Sign In';
+    document.getElementById('pinField').focus();
 }
 
-function startCooldown(seconds) {
-    let s = seconds;
-    const btn = document.getElementById('resendBtn');
-    btn.disabled = true;
-    clearInterval(cooldownTimer);
-    const tick = () => {
-        if (s <= 0) { clearInterval(cooldownTimer); btn.disabled = false; btn.textContent = 'send a new code'; return; }
-        btn.textContent = `send a new code (in ${s}s)`;
-        s--;
-    };
-    tick();
-    cooldownTimer = setInterval(tick, 1000);
+function checkEmailAgain() {
+    document.getElementById('emailField').value = pendingEmail;
+    checkEmail();
 }
 
-async function resendCode() {
-    const btn = document.getElementById('resendBtn');
+async function claimPin() {
+    const number = document.getElementById('numField').value.trim();
+    const pin = document.getElementById('newPinField').value.trim();
+    const pin2 = document.getElementById('newPin2Field').value.trim();
+    if (!number) return formMessage('msg-claim', 'Please enter your member number. It is printed on your membership card.');
+    if (pin.length !== 4) return formMessage('msg-claim', 'Please choose a PIN with 4 digits.');
+    if (pin !== pin2) return formMessage('msg-claim', "The two PINs don't match. Please type them again.");
+    const btn = document.getElementById('claimBtn');
+    const remember = document.getElementById('rememberBoxClaim').checked;
     btn.disabled = true;
-    document.getElementById('codeField').value = '';
+    btn.textContent = 'Checking\u2026';
     try {
-        const r = await apiPost({ action: 'requestCode', email: pendingEmail });
-        if (r.success) { codeMessage('A new code is on its way. Any code we\u2019ve sent you in the last hour will work.', 'ok'); startCooldown(30); return; }
-        if (r.error === 'wait') { startCooldown(r.seconds || 30); return; }
-        if (r.error === 'too_many_codes') codeMessage("We've sent several codes in the last hour. Please wait a little while, then try again.");
-        else codeMessage('Something went wrong. Please try again.');
+        const r = await apiPost({ action: 'claimPin', email: pendingEmail, memberNumber: number, pin, remember });
+        if (r.success) {
+            Session.save(r);
+            rememberEmail(remember ? pendingEmail : '');
+            btn.textContent = 'Signed in \u2713';
+            goToProfile();
+            return;
+        }
+        if (r.error === 'weak_pin') formMessage('msg-claim', 'That PIN is too easy to guess (like 1234 or 0000). Please choose a different one.');
+        else if (r.error === 'wrong_member_number') formMessage('msg-claim', `That member number doesn't match our records. ${r.triesLeft} ${r.triesLeft === 1 ? 'try' : 'tries'} left.`);
+        else if (r.error === 'locked') formMessage('msg-claim', lockText(r.minutes));
+        else if (r.error === 'already_set') { useDifferentEmail(); checkEmailAgain(); return; }
+        else formMessage('msg-claim', 'Something went wrong. Please try again.');
     } catch (e) {
-        codeMessage("We couldn't reach the Member Center just now. Please try again in a moment.");
+        formMessage('msg-claim', "We couldn't reach the Member Center just now. Please try again in a moment.");
     }
     btn.disabled = false;
+    btn.textContent = 'Set PIN and Sign In';
 }
 
 function useDifferentEmail() {
-    clearInterval(cooldownTimer);
     hideMessages();
     document.getElementById('stageSub').textContent = SIGN_IN_SUB;
     show('step-email');
@@ -406,6 +453,7 @@ function notMe() {
     rememberEmail('');
     document.getElementById('emailField').value = '';
     document.getElementById('rememberBox').checked = true;
+    document.getElementById('rememberBoxClaim').checked = true;
     useDifferentEmail();
 }
 

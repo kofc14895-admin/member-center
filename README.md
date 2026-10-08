@@ -1,2 +1,404 @@
-# member-center
-Knights of Columbus Member Center (member portal)
+# St. Luke Knights of Columbus — Member Center
+### Council 14895 · Indianapolis, Indiana
+
+A member self-service site hosted on GitHub Pages. Members sign in with their email and a 4-digit PIN, see and correct their profile, add a profile photo, view their membership card(s), pay dues, browse the member directory, pray the Rosary, and complete an annual data-verification wizard. Member data lives in a Google Sheet; every change goes through an Apps Script (via a Cloudflare Worker relay) that checks the member's sign-in.
+
+---
+
+## Admin Tools & Demo Mode (read this first)
+
+Admin tools — the **Browse as a member** dropdown (Profile, Membership Card, Pay Dues) and the technical status strip on **Groups** — are **hidden by default, even for admins.** A signed-in admin sees exactly what any member sees, which makes the site safe to demo.
+
+| To… | Add this to the end of any Member Center address |
+|---|---|
+| **Show** admin tools | `?admin=on` — e.g. `https://members.kofc14895.org/home.html?admin=on` |
+| **Hide** admin tools | `?admin=off` |
+
+- The setting is remembered **on that device** as you move between pages; the address tidies itself so the switch isn't left showing.
+- **Signing out turns the tools off**, so every demo starts clean. If the setting is ever reset (on iPhones, Safari may clear it after a week without visiting), it falls back to **off**.
+- Viewing another member by number (`home.html?member=…`) **only works while the tools are on** — a stray link can't show someone else's data during a demo.
+- **Who is an admin:** the member whose email matches the **Data Administrator email** row on the Assumptions tab. A regular member typing `?admin=on` sees no change.
+- **Tip:** bookmark both links on your phone and computer.
+
+> The old `?admin=stluke14895` key no longer does anything.
+
+---
+
+## Live URLs
+
+| Resource | URL |
+|---|---|
+| Member Center (sign in) | https://members.kofc14895.org/landing.html |
+| GitHub repo | https://github.com/kofc14895-admin/member-center |
+| Relay, Apps Script and Google Sheet addresses | Kept private in the council's Shared Drive (06 Technology), not in this public repo. The pages read them from `config.js`. |
+
+---
+
+## How Members Sign In
+
+**First visit (choosing a PIN)**
+
+1. Member enters the email address on file and taps **Continue**.
+2. The page asks for his **member number** (printed on his membership card) and a **4-digit PIN** of his choosing, typed twice. PINs that are too easy to guess (1234, 0000, 1212, and similar) are refused.
+3. He is signed in, and the Data Administrator gets a short notice that a PIN was set.
+
+**Every visit after that**
+
+1. Member enters his email and taps **Continue**, then enters his PIN.
+2. With **Keep me signed in on this device** checked (the default), he stays signed in as long as he visits at least once every **90 days**; otherwise the sign-in ends when the browser closes.
+3. Returning on a remembered device shows **Welcome back → Continue to My Profile** — no PIN.
+
+Members change their PIN on the **Change my PIN** page (linked at the bottom of the Profile page).
+
+| Rule | Setting |
+|---|---|
+| PIN length | 4 digits |
+| Wrong tries before a lockout | 5, then locked for 15 minutes |
+| After 15 wrong tries in a row | Each further round of 5 locks the account for 24 hours, and the Data Administrator is emailed |
+| Wrong tries are forgotten after | 7 days without a wrong try |
+| Where PINs live | The **PINs** tab, stored scrambled (hashed with a secret kept in Script Properties, not in the sheet) |
+| Who can claim a PIN | Only members who are "invited" under the staged rollout |
+| Reset a forgotten PIN or clear a lockout | Delete that member's row on the **PINs** tab; he chooses a new PIN next time |
+| "Keep me signed in" | 90 days **from the last visit** (renews automatically, at most once a day) |
+| Not kept signed in | Ends when the browser closes (12-hour limit) |
+
+The earlier emailed-code sign-in is still in the script but switched off (`EMAIL_CODE_ENABLED = false` in `Code.gs`). It can be turned back on if email delivery becomes reliable.
+
+**Sign out** is deliberately out of the way: there's no Sign out in the top bar (members tapped it out of habit, forcing a new sign-in each visit). A small gray **Sign out of this device** link sits at the very bottom of the Profile page, beside **Change my PIN**, and asks for confirmation (*Stay signed in* is the main button). Signing out forgets the device — the sign-in, the remembered email, and admin tools. Closing the browser or restarting the phone does **not** sign a member out. To switch people on a device, the sign-in page's **Not you? Sign in as someone else** link does the same.
+
+**Emails not on file** — the login page offers a help form that logs a "Contact Request / Add Email" row in the Change Log for a data administrator.
+
+**iPhone notes**
+- The email field is set up for Safari AutoFill (Settings → Apps → Safari → AutoFill → *Use Contact Info*), with no auto-capitalize/autocorrect; the keyboard's **Go** key submits. After a kept sign-in, the device also remembers the email address for next time.
+- Safari erases a site's saved data after **7 days of Safari use without visiting that site**, so a monthly visitor on an iPhone will usually need a new code. Members who **Add to Home Screen** (Share → Add to Home Screen) aren't affected by that rule.
+- Codes may take several minutes to reach AT&T/Yahoo addresses; the "Check your email" screen says so.
+
+**Maintenance functions** (run from the Apps Script editor's function dropdown):
+- `testMemberCenterEmail` — sends a test email to the Data Administrator listing every officer email found on the Assumptions tab. Also grants the script permission to send email the first time.
+- `signEveryoneOut` — emergency use: signs every member out on every device.
+
+---
+
+## Architecture
+
+```
+Member's browser
+    │
+    ├── READS  ──▶  docs.google.com (gviz / published CSV), addresses set in config.js
+    │
+    └── SIGN-IN & CHANGES ──▶  Cloudflare Worker (kofc14895-relay)
+                                   │
+                                   └──▶  Apps Script web app (verify-endpoint.gs)
+                                             │   checks the member's signed session pass
+                                             ├──▶  Google Sheet (Membership DB, Change Log)
+                                             └──▶  Gmail (officer notifications)
+```
+
+- **Why the Worker?** Apps Script doesn't return browser-friendly (CORS) replies, which broke writes on iPhones. The Worker relays requests server-to-server and passes replies through unchanged. (Its code, `cloudflare-worker.js`, is kept privately; the live copy is edited in the Cloudflare dashboard. Its first line holds the Apps Script address.)
+- **Large requests:** the Worker normally passes a request to the Apps Script in the web address. A request over about 1,500 characters (a member photo) can't fit there, so the Worker sends it as a POST body instead. Small requests are unchanged.
+- **Session pass:** after a correct code, the script issues a pass signed with a secret only it knows. Pages read the member number from the pass; the script re-checks the signature on every change and uses **the pass's** member number, never one supplied by the page.
+
+---
+
+## Pages
+
+Menu order on every page: **Profile · Calendar · Prayers · Groups · KofC Card · Why Dues? · Verify Data** (*KofC Card* opens the Membership Cards page)
+
+| File | Purpose | Sign-in required |
+|---|---|---|
+| `landing.html` | Emailed-code sign-in; welcome back; help form for emails not on file | — |
+| `home.html` (Profile) | Tier badge and message; Membership Profile (Member Status, degree, years, role); Dues Profile with **Thanks for Clicking to Pay →**; Contact Profile edit (incl. Wife's Name, Directory opt-in); *My circumstances have changed* link; quiet *Sign out of this device* link (with confirmation) at the very bottom. The identity card shows the member's **photo** (initials until one is added) with *Add my photo / Change photo / Remove photo*. Under the greeting: an **announcement banner** (when there is something to say). Near the bottom: a **Questions, problems or ideas?** block with three email buttons | Yes |
+| `membership-card.html` | Council card (degrees 1st–3rd) and, for Sir Knights, the Fourth Degree card | Yes |
+| `pay-dues.html` | Square (card), Venmo (for members who already use it), mail a check | Yes |
+| `groups.html` | Council positions and the member directory (opted-in members only), each with a photo or initials circle, and a **search box** above the list | Yes |
+| `verify-wizard.html` | Annual data-verification wizard and the circumstances flow | Yes |
+| `calendar.html` | Live activity calendar with theme and month filters; events with a **Sign-up Link** show a *Sign up* button | No |
+| `prayers.html` | Knights Prayers: Rosary (top), McGivney prayer, prayers for a Brother Knight / deceased Brother, resource links | No |
+| `rosary.html` | Sub-page of Prayers: how to pray, prayers, the four sets of mysteries with USCCB Scripture links, today's mysteries tagged | No |
+| `why-dues.html` | Where dues go | No |
+| `events.html` | Older activity write-ups (not in the menu; reachable by direct link) | No |
+
+**Shared files:** `config.js` (every address the pages read from; see *Configuration*), `index.html` (sends the bare address to the sign-in page), `session.js` (sign-in pass, admin-tools switch, sign-out) and `nav-toggle.js` (Why Dues menu toggle) load on every menu page. `council-logo.png` is the KofC emblem used on the wizard welcome and the council card.
+
+---
+
+## Deploying Changes
+
+0. **Cloudflare Worker** (only when `cloudflare-worker.js` changes): open the Worker in the Cloudflare dashboard → **Edit code**, paste the whole file, **Save and deploy**. The Worker URL doesn't change. Line 1 must hold the current Apps Script address.
+1. **Apps Script** (`verify-endpoint.gs`): paste the full file into the editor, save, then **Deploy → Manage deployments → pencil → Version: New version → Deploy.**
+   - Keep **Execute as: Me** and **Who has access: Anyone.** ("User accessing the web app" would make every member sign in to Google.)
+   - The web-app URL doesn't change between versions, so the Worker needs no update. **Always edit the existing deployment.** *New deployment* creates a new address, and then line 1 of the Worker must be updated too.
+   - **After pasting the script into a new project** (a copied sheet, say): run `testMemberCenterEmail` once from that project and approve the permission prompts *before* deploying. Permissions belong to each project; skipping this makes sign-in fail with a generic "couldn't reach the Member Center" message.
+2. **Pages:** upload the changed files to the repo root. Watch for browsers adding "(1)" to downloaded file names. Addresses (sheet, tabs, calendar link, relay, emails) live only in `config.js`.
+3. When the Worker, script and pages all change (e.g. member photos), deploy in this order, back to back: **Worker → Apps Script → pages**. The Worker and script changes are backward-compatible, so the old pages keep working until the new ones go up.
+4. Hard refresh (Ctrl+Shift+R) when testing; GitHub Pages can take a minute or two to update.
+
+> ⚠️ **Never upload `*-mockup.html` files to the repo.** Several contain an old built-in copy of all members' names, numbers, and dues balances.
+
+---
+
+## Configuration (`config.js`)
+
+Every address the pages read from is in one file, `config.js`, loaded before `session.js` on every page. To move the data or the relay, edit that file and upload it; no page needs to change.
+
+| Setting | What it is |
+|---|---|
+| `sheetId` | The membership spreadsheet (Membership DB, Assumptions, Tier Messages, Positions, Photos, Change Log) |
+| `announcementsSheetId` | The separate Announcements spreadsheet |
+| `assumptionsSheetId` | Where the Assumptions tab lives (same as `sheetId` unless Assumptions is moved to its own file; the Apps Script has a matching `ASSUMPTIONS_SHEET_ID`) |
+| `gids` | Tab numbers: membership, assumptions, tierMessages, positions, announcements |
+| `calendarCsvUrl` | The calendar tab's published-to-web CSV link |
+| `endpoint` | The Cloudflare Worker address |
+| `emails.council` | The public council contact (footer, error messages, last-resort Help recipient). Tag a page element `data-koc-email` to show it |
+
+`config.js` is public: never put member data or private keys in it. The Apps Script address is not here; it is on line 1 of the Worker.
+
+**Moving to another sheet:** copy the file, check each tab number after `gid=` in the new address, re-publish the calendar tab, deploy the script from the new sheet (and approve its permissions), update the Worker's line 1, then upload the new `config.js`. Upload `config.js` last, and make it the file you change last.
+
+---
+
+## Google Sheet
+
+### Tabs
+
+| Tab | GID | Purpose |
+|---|---|---|
+| St Luke KOC Membership DB | 1292747386 | Master member records |
+| Assumptions | 753284304 | Settings: payment info, officer emails, toggles, rollout waves |
+| Positions | 620591520 | Council officers and committee positions |
+| Tier Messages | 1560227874 | Friendly tier labels and Profile/card messages |
+| Change Log | — | Audit trail of every change, flag, request, and notification |
+| Announcements (separate file) | 1133674898 | The Profile banner. Lives in its own spreadsheet so the people posting never need the membership data (address in `config.js`: `announcementsSheetId`). Headings: Message · Type · Link · Show From · Show Through |
+| Photos | — | Member photos, one row per member. **Created automatically** when the first photo is saved. Columns: Member Number (text, no leading zeros) · Photo (small JPEG as text) · Updated. Don't edit by hand |
+| Activity List | 2034915391 | Calendar events. Published to the web as CSV; the link is in `config.js` (`calendarCsvUrl`). Publishing a copied sheet creates a new link |
+
+### Key Columns — Membership DB
+
+| Column | Used for |
+|---|---|
+| Member Number | Primary key |
+| email | Sign-in match (the code is sent here) |
+| Membership Tier | Tier badge, Profile message, card styling |
+| Council Member Status | Shown on Profile as **Member Status** (blank = Active). Set by the site only to **Withdrawal Pending** or **Move Alert**; everything else is set by the data administrator |
+| Outstanding Dues | Dues step in the wizard, Pay button, **EXPIRED** stamp on the council card. Amounts in parentheses, e.g. `($25.00)`, are credits |
+| Last Yr Paid | "Paid through" / Dues Paid To |
+| Degree Level | Council card degree (shown as 1st, 2nd, or 3rd — never higher) |
+| Forth Degree | *(sic)* Any date here marks a **Sir Knight** and shows the Fourth Degree card |
+| Preferred Name | Greetings |
+| Wife's Name | Profile, wizard, and a **Wife** column in the directory (straight or curly apostrophe both work) |
+| Directory Opt-In | Yes/No — appears in the Groups directory |
+| Rollout Wave | 1, 2, 3… for staged rollout (blank = not invited while waves are numbered) |
+| Wizard Completed / Wizard Outcome | Date and result of the last wizard run (Confirmed, Confirmed - Paid, Flagged, Withdrawal Pending) |
+| Login Count / Last Login | Engagement |
+| Member Last Verify Date | Last "data looks good" confirmation |
+| *Circumstance* (optional) | If added, the site fills in **Moved Away** / **Stepping Back** |
+
+### Assumptions Rows (column A label → column B value)
+
+| Label | Effect |
+|---|---|
+| Dues Check Payable to: | Pay Dues check instructions |
+| Dues Check Mail to: | Pay Dues mailing address; withdrawal-letter return address |
+| Financial Secretary VENMO | Venmo handle (blank hides the Venmo option) |
+| Data last refreshed on: | "Data last updated" footer |
+| Include Why Dues quicklink | **Yes** shows *Why Dues?* in the menu; anything else hides it |
+| Grand Knight email | Withdrawal-request emails |
+| Retention Committee email | Move / step-back / withdrawal / other emails |
+| Data Administrator email | Admin rights; "something else" emails; stands in for the Financial Secretary if that row is missing |
+| Show step back option *(optional)* | Whether the wizard's **"I need to step back for a while"** choice is offered. **No** (also *Off*, *False*, *Hide*) removes it; a missing row, or anything else, keeps it. Takes effect on the next page load. Members who want to step back can still use *Something else* |
+| Help email *(optional)* | Where the Profile page's **Help / Problem / Idea** buttons send email. One address, or several separated by commas. If the row is missing or blank: the first **Data Administrator email**, then the council address in `config.js` (`emails.council`) |
+| Financial Secretary email *(optional)* | Move-out-of-area emails (address update in Member Management) |
+| Open rollout waves through | A number *N* lets in waves 1..N; **All** (or no row) lets in everyone with an email on file |
+| 4th Degree Assembly No. *(optional)* | Overrides **2850** on the Fourth Degree card |
+| 4th Degree Assembly City *(optional)* | Overrides **Indianapolis, IN** (write as "City, ST") |
+
+---
+
+## Membership Cards
+
+**Council card** (every member): certificate style with the KofC emblem and an **Active** ribbon. Degree shows **1st, 2nd, or 3rd** — Sir Knights show 3rd here.
+- **EXPIRED** diagonal stamp when Outstanding Dues is above $0 (clergy exempt; credits don't count).
+- **UNVERIFIED** stamp when there's no dues record.
+- Note under the title: *facsimile, not officially recognized; official card from the Financial Secretary at a monthly meeting.*
+
+**Fourth Degree card** (only members with a *Forth Degree* date): Sir Knight name (with middle initial and suffix), member number, **IS A 4th DEGREE MEMBER OF**, Assembly **2850, Indianapolis, IN**, **Dues Paid To 12/31** *current year* (assembly dues aren't in our records, so current is assumed), the Supreme Knight signature line, and the Fourth Degree emblem. Its own note explains it's a facsimile and assumes current assembly dues.
+- The "Council Card" / "Fourth Degree Card" titles appear **only** for Sir Knights; other members see no reference to a second card.
+
+---
+
+## Member Photos
+
+- **Who sees it:** signed-in members, on the member's **Profile** and the **Groups** page. In the **Member Directory** a photo shows only for members who are opted in (the directory's existing rule). **Council officer** rows show the officer's photo regardless. A member with no photo shows an initials circle, so lists stay even.
+- **How a member adds one:** Profile → **Add my photo** → **Take a photo** (camera) or **Choose from my photos** → preview → **Use this photo**. The phone shrinks the picture to a 160-pixel square (tall photos are cropped toward the top so faces aren't cut off) before sending, so each photo is only about 5–12 KB. **Remove photo** asks first; *Keep my photo* is the main button.
+- **Where it lives:** the **Photos** tab (see Tabs). Pages read it the same way as everything else, so the directory loads without extra requests. Groups shows initials immediately and fills in photos as they arrive.
+- **Admin:** a Data Administrator browsing another member (`?admin=on`) can't add or change that member's photo, but can **Remove photo** (logged as *Admin edit*).
+- **Change Log:** every add, change and removal writes a row (Category *Profile*, Field *Photo*; Type *Self-edit*, or *Admin edit* when an administrator acts on someone else).
+- **How Profile reads it:** with plain requests only — a short list of member numbers, then just that one row's photo; if Google refuses either, it reads the whole tab the way Groups does. (A "where member = N" filter was tried first and was unreliable on the live sheet: the photo showed only on the device that had just saved it.)
+- **Rest of this visit:** after a member saves or removes a photo, that device shows the change right away even if the sheet is a moment behind.
+- **Limits:** JPEG only (phone photos convert automatically); a file the phone can't read shows a friendly "That photo didn't work" screen. Photos are not on the membership card yet.
+
+---
+
+## Groups Search
+
+- A search box sits above the list and narrows it as the member types (no Search button needed; Enter just closes the phone keyboard). A line under it shows "Showing 4 of 150"; the **×** clears it.
+- It searches the list on screen: **name, wife's name, position, phone and email**. Several words must all match ("tom kow"). Capitals and accents are ignored ("renee" finds Renée). A phone number works with or without spaces, dashes and parentheses.
+- **Names in the directory:** a member's **Preferred Name** is shown in place of the first name when one is on file (*Bill Berg*, not *William Berg*), and search finds either the preferred or the legal first name. A preferred name that already includes the last name isn't doubled. **Capitalization:** a name typed with its own capitals (*McKay*, *O'Brien*, *DeLuca*) is shown exactly as typed; only names that are ALL CAPS or all lower-case are tidied (*MCKAY* → *McKay*, *O'BRIEN* → *O'Brien*, *SMITH-JONES* → *Smith-Jones*). Limits: a plain all-caps *DELUCA* becomes *Deluca*, and only the *Mc* prefix is recognized (*MACDONALD* → *Macdonald*) — retype it with its capitals in the sheet and it will be kept. The council-officer lists show names as typed on the Positions tab. Members with no position or no wife simply show nothing for it (no dash); on phones the empty line is dropped, and on computers the columns stay lined up. **Phone layout:** the photo sits at the left and the name, wife, positions, phone and email stack beside it, so every line follows directly under the one above (no empty space under the name); the council-officer lists use the same arrangement.
+- Switching groups clears the search. Photos loading later don't disturb it.
+- It only shows or hides rows already on the page, so it is instant and makes no extra requests.
+
+---
+
+## Calendar Sign-up Links
+
+- **Where the link comes from:** a column named **Sign-up Link** on the Activity List tab (the published sheet the calendar reads). Paste the sign-up address (SurveyMonkey or any `https://` link) into that row. Leave it blank for events with no sign-up — those cards show no button.
+- **What members see:** a large **Sign up** button at the bottom of that event's card, with "Opens in a new tab" beside it. It opens the link in a new tab, so the Member Center stays open behind it.
+- **Forgiving about what's pasted:** stray spaces are trimmed; a link typed without `https://` gets it added; an `http://` link is upgraded to `https://`. Anything that isn't a real web address (words like "coming soon", a link with a space in it, `javascript:` etc.) is ignored and shows no button.
+- **Timing:** the calendar reads the *published* copy of the sheet, so a new or changed link appears after Google republishes it (usually a few minutes). The column header is matched loosely ("Sign-up Link", "Signup link", "Sign-Up Link" all work).
+- **Check it worked:** the calendar's status line (admin view) says how many events have a link, or that no Sign-up Link column was found.
+- **Remember:** the calendar page doesn't require sign-in, and the published sheet is readable by anyone with its address, so sign-up links aren't hidden from non-members.
+- **Cleanup:** the calendar hides past months by default; clear a link from the sheet once its sign-up has closed.
+
+---
+
+## Help / Problem / Idea Email
+
+- **Where:** the bottom of the Profile page, just above *Sign out of this device*. Three large buttons: **Ask for help**, **Report a problem**, **Suggest an idea**.
+- **What happens:** each opens the member's own email app with a note already started — the subject says which kind it is, and the body has short prompts to fill in ("What I was trying to do… What happened instead…").
+- **What arrives automatically:** below the prompts, the member's **name and member number**, the page, the time, and the phone or browser, so a problem can be looked into without a back-and-forth. (If an administrator is browsing as another member, it identifies the administrator who is actually sending.)
+- **Who receives it — set on the Assumptions tab, no code change:** the **Help email** row; if that's empty, the first **Data Administrator email**; if that's empty too, the council address in `config.js` (`emails.council`). To use a new address, put it in **Help email** (no upload needed).
+- **Limit:** like every email link on the site, it needs an email app set up on the device. Members who only use webmail in a browser may see nothing happen; the council address in the page footer still works for them.
+
+---
+
+## Announcements Banner
+
+- **Where:** the top of the Profile, under *Welcome back*. When there is nothing to show, the banner takes no space.
+- **Two sources:**
+  1. **Next event** (automatic): the soonest upcoming event on the Calendar sheet, e.g. *Fall Pancake Breakfast — Saturday, October 17*. Says *Today* / *Tomorrow* when it's that close. It shows a **Sign up** button when that event has a Sign-up Link. Only events within **60 days** are announced (`ANN_NEXT_EVENT_DAYS` in `home.html`); events whose date can't be read are skipped.
+  2. **Typed announcements** from the **Announcements** tab of the separate Announcements spreadsheet (set in `config.js`; link sharing must be **Anyone with the link can view**, or the banner quietly shows nothing). At most **2** show at once, top of the sheet first (`ANN_MAX_TYPED`).
+- **The Announcements tab** (already created; headings in row 1, any order, spelling and capitals don't matter):
+
+  | Message | Type | Link | Show From | Show Through |
+  |---|---|---|---|---|
+  | Need two drivers for Thursday's food pantry run. | Need | | 10/1/2026 | 10/8/2026 |
+
+  - **Type** — *Event* 📅, *Need* 🙋, *Prayer* 🙏 or *Notice* ℹ️ (anything else shows as a Notice). It picks the icon and label.
+  - **Buttons:** **Need** always gets **I Can Help**, which opens the member's email app with a note to the administrator already started (subject *I can help — <the need>*; the body quotes the need, asks how to reach them, and adds the member's name and number). **Who gets it:** if the Need's **Link** cell holds an **email address** (or several, separated by commas or semicolons; `mailto:` in front is fine), it goes there — e.g. the Food Pantry chair. If **Link is blank** (or isn't an email address), it goes to the same address as the Help buttons: the **Help email** row, else the first **Data Administrator email**, else the council address. Only plain email addresses are accepted, so nothing extra (a hidden Cc or Bcc) can be added by what's typed in the cell. For other types, a **Link** gives a button: **Sign up** for *Event*, **Learn more** for *Prayer* and *Notice*. No Link, no button. (A web address typed on a Need is ignored — use *Event* for something with a sign-up form.)
+  - **Show From / Show Through** — real dates (Format → Number → Date), or leave blank. A row shows from the start of its From date through the **end** of its Through date, then disappears by itself. Blank From = shows right away; blank Through = stays until you delete the row. A date the page can't read (e.g. "soon") **hides** the row, so nothing gets stuck on.
+- **Safe by design:** text is always shown as plain text (no formatting or HTML is run); links must be real `https://` addresses; and the page only uses the tab if it has *Message* and *Type* headings, so it can never show some other tab by mistake.
+- **Keep it short** (about 140 characters). The sheet is link-readable like the rest, so put nothing private in it, and name people in a Prayer only with their agreement.
+- **v1 limit:** only the first **2** active typed announcements show (sheet order); any others are hidden, and nobody is told. **v2 idea (decided to hold):** the first two plus a large *See N more* button that expands the rest in place (cap about 8 total).
+- **Not built (ideas):** a dismiss button.
+
+---
+
+## Verify Data Wizard
+
+Reached from **Verify Data** in the menu, and **automatically on a member's first visit**:
+
+- **First-visit start:** when a signed-in member's **Wizard Completed** is blank, the Profile sends him to the wizard (welcome screen with a line saying it's his first visit and takes about two minutes) before showing the Profile. It's a *start*, not a wall: it fires **once per browser visit**, so going back to the Profile (or using the menu) never loops, and the next visit asks again until he's done.
+- **Never redirects:** an administrator with admin tools **on** (so the Profile can be tested — switch tools off to see what members see); anyone viewing someone else's profile; a Profile link that carries `?member=` (the wizard's own *Continue to My Profile*); members whose **Council Member Status** is anything other than blank/Active (Move Alert, Withdrawal Pending, etc.); and **everyone** if the sheet has no *Wizard Completed* column (a misspelled heading can't trap members).
+- **Device memory:** finishing the wizard, or reporting *moved / step back / something else* (which don't stamp the sheet), is remembered on that device for **7 days** (`WIZARD_GATE_SUPPRESS_DAYS` in `home.html`) so he isn't sent straight back while the sheet catches up.
+
+1. **Welcome** — greets by preferred name; **Get Started** or **My circumstances have changed**.
+2. **A quick refresher before we begin** — what dues support.
+3. **Verify your Contact Info** — incl. Preferred Name and Wife's Name; **Data is Correct** becomes **Save & Continue** once anything is edited.
+4. **Member Directory Option** — Yes (default) / No.
+5. **Verify your Dues Balance** — only if Outstanding Dues > 0: **Data is Correct**, **Thanks for Clicking to Pay →** (returns straight to the last step after paying), or *Something looks wrong with my dues*.
+6. **Result** — stamps **Wizard Completed** and **Wizard Outcome**.
+
+### My Circumstances Have Changed
+Reached from the wizard's Welcome screen or the link at the bottom of the Profile. Nothing is pre-selected.
+
+| Choice | Sheet | Emails |
+|---|---|---|
+| **I've moved out of the area** (moves within the area are handled by a Profile address update — the screen offers a button for that) | Saves any new address; **Council Member Status → Move Alert** (only if blank/Active) | Retention Chair + Financial Secretary |
+| **I need to step back for a while** *(can be switched off — Assumptions row **Show step back option** = No)* — reasons: Family or work, Health, Dues or cost, Other | Change Log (flags **DUES BARRIER**) | Retention Chair, who calls within a few weeks |
+| **I want to withdraw from the Knights** — print a signed letter (to the Grand Knight, cc Retention Chair) and/or ask to be contacted | **Council Member Status → Withdrawal Pending**; wizard stamped so he isn't asked to verify again | Grand Knight + Retention Chair |
+| **Something else** — free text | Change Log | Retention Chair + Data Administrator |
+
+Every report writes a Change Log row whose **Notes** column records who was emailed (or why not).
+
+---
+
+## Staged Rollout (Waves)
+
+1. Put 1, 2, 3… in **Rollout Wave** for each member.
+2. Set **Open rollout waves through** to 1, then raise it as each wave is invited; set it to **All** when finished.
+3. Members not yet invited get a friendly "we're opening in stages" note instead of a PIN prompt. The data administrator can always sign in. This check runs in the Apps Script, so it's enforced.
+
+---
+
+## Apps Script — Actions
+
+| Action | Needs sign-in | What it does |
+|---|---|---|
+| `pinStatus` | No | Checks the email and rollout wave; says whether he has a PIN yet |
+| `signIn` | No | Checks the PIN (with lockout); returns a signed session pass |
+| `claimPin` | No | First visit: checks email + member number, saves the PIN he chose |
+| `changePin` | Pass | Member changes his own PIN |
+| `resetPin` | Pass (admin) | Data Administrator clears a member's PIN |
+| `requestCode` / `verifyCode` | No | Emailed-code sign-in; switched off (`EMAIL_CODE_ENABLED`) |
+| `session` | Pass | Confirms and renews a remembered pass |
+| `logChange` | Pass* | Appends a Change Log row (*the "Add Email" help request needs no pass) |
+| `saveContact` | Pass | Saves contact fields (incl. Wife's Name, Directory Opt-In); logs each change |
+| `recordLogin` | Pass | Login Count and Last Login |
+| `completeWizard` | Pass | Wizard Completed / Wizard Outcome |
+| `reportCircumstance` | Pass | Moved / step back / withdraw / other: address, status, Change Log, emails |
+| `verify` | Pass | Member Last Verify Date |
+| `savePhoto` | Pass | Saves the member's photo to the Photos tab (JPEG only, under ~45,000 characters), logs it |
+| `removePhoto` | Pass | Removes the member's photo row, logs it. The Data Administrator may remove anyone's (admin view) |
+
+Unknown actions return an "Unknown action" error. A member can only change his own record; the data administrator may act on another member's record from the admin view.
+
+---
+
+## Change Log — Row Format
+
+Timestamp · Member Number · Member Name · Type · Category · Field · Old Value · New Value · Notes · Date Reconciled · Reconciled By
+
+---
+
+## Security Notes & Known Limitations
+
+- **Sign-in and all changes are protected** (email + PIN with lockout, signed pass, member number taken from the pass).
+- **The member sheet itself is still link-readable** (the pages read it directly for speed). Anyone who digs the link out of a page's source could download it. This was a deliberate trade-off: keeping the sheet private would require routing all reads through Apps Script, adding a second or two to every page. The directory wording promises only what's true under this setup ("only signed-in members can see the directory").
+- **Photos are on the sheet, not in the repo.** The Photos tab is link-readable like the rest of the sheet, so the same caveat applies: only the pages limit photos to signed-in members. The upload screen says photos are shown to signed-in members of the council. No photo is ever stored in the repo.
+- **Repository history:** this repository was started fresh in October 2026 and contains no member data. Never upload `*-mockup.html` files or any page with a built-in copy of members' names, numbers, dues or emails; the pages must always read members from the sheet.
+- **Keep private:** `cloudflare-worker.js` and `verify-endpoint.gs` are not in this repo. The Worker file contains the Apps Script address. Store both in the council's Shared Drive (06 Technology).
+- **Emails come from the council's Workspace account** (`Administrator@kofc14895.org`), with SPF and DKIM set up, which helps delivery. Some providers (notably AT&T/Yahoo-run domains such as sbcglobal.net) can still be slow or strict with new senders; always test your own address after changing the sender.
+
+---
+
+## Cleanup Campaign
+
+- **Step 1 — Verify Data (current):** members confirm or correct their data, flag dues questions, and report changed circumstances. Track with **Wizard Completed** (blank = not done) and **Wizard Outcome** / **Council Member Status** (Flagged, Move Alert, Withdrawal Pending = follow-up).
+- **Step 2 — Mass email (planned):** after Step 1 is substantially complete.
+
+---
+
+## Pending / Open Items
+
+- [ ] Fill in **Forth Degree** dates for Sir Knights (and reconcile anyone with Degree Level "4th" but no date)
+- [ ] Fill in **Rollout Wave** values; set **Open rollout waves through**
+- [ ] Optional: **Financial Secretary email** row; **Circumstance** column
+- [x] Automatic wizard prompt on **first** sign-in (Wizard Completed blank) — built
+- [ ] Re-prompt once a year (Wizard Completed over a year old) — not built; the gate would just treat an old date like a blank one
+- [ ] Home-screen icon and one-time "Add to Home Screen" tip for iPhones
+- [ ] Decide on member numbers with a leading zero on the cards (printed cards show none)
+- [ ] Optional: move the Cloudflare Worker into the council's own Cloudflare account (then only `endpoint` in `config.js` changes)
+- [ ] Optional: add a DMARC record for the council domain; verify the domain at the GitHub account level; add `dataadministrator@kofc14895.org` to the Data Administrator email row
+- [ ] Collect emails for members with none on file
+- [ ] Member photo on the council card / Fourth Degree card (not built)
+- [ ] After deploying photos: add one real photo on your own profile and confirm the **Photos** tab gets a row, then see it on Groups from another device
+
+---
+
+## Files
+
+**Deployed (repo root):** `landing.html`, `home.html`, `calendar.html`, `prayers.html`, `rosary.html`, `membership-card.html`, `groups.html`, `why-dues.html`, `pay-dues.html`, `verify-wizard.html`, `events.html`, `config.js`, `session.js`, `nav-toggle.js`, `index.html`, `council-logo.png`, `README.md` (GitHub also adds a `CNAME` file for the custom address; leave it)
+
+**Kept privately (not in the repo):** `verify-endpoint.gs` (Apps Script source) and `cloudflare-worker.js` (Worker source), in the Shared Drive's 06 Technology folder
+
+**Never deploy:** any `*-mockup.html` (review-only files; some contain old member data)

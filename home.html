@@ -415,9 +415,10 @@ nav a.navlink, nav a.signout { white-space:nowrap; }
     </div>
 
     <div class="quiet-signout">
+        <a class="quiet-signout-link" href="change-pin.html" style="margin-right:1rem;">Change my PIN</a>
         <button type="button" class="quiet-signout-link" id="quietSignoutLink" onclick="toggleSignoutConfirm(true)">Sign out of this device</button>
         <div class="signout-confirm" id="signoutConfirm" role="dialog" aria-labelledby="signoutConfirmTitle" hidden>
-            <p><strong id="signoutConfirmTitle">Sign out of this device?</strong> You'll need an emailed code to sign in again. If this is your own phone or computer, there's no need &mdash; just close the page.</p>
+            <p><strong id="signoutConfirmTitle">Sign out of this device?</strong> You'll need your email and PIN to sign in again. If this is your own phone or computer, there's no need &mdash; just close the page.</p>
             <div class="signout-confirm-actions">
                 <button type="button" class="btn btn-primary" onclick="toggleSignoutConfirm(false)">Stay signed in</button>
                 <button type="button" class="signout-confirm-go" onclick="Session.signOut()">Sign out</button>
