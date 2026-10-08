@@ -39,7 +39,7 @@ Admin tools — the **Browse as a member** dropdown (Profile, Membership Card, P
 **First visit (choosing a PIN)**
 
 1. Member enters the email address on file and taps **Continue**.
-2. The page asks for his **member number** (printed on his membership card) and a **4-digit PIN** of his choosing, typed twice. PINs that are too easy to guess (1234, 0000, 1212, and similar) are refused.
+2. The page asks for the **starting PIN** that every member is given (it is set in the Apps Script, as `INITIAL_PIN`, and is not published here) and a **4-digit PIN of his own**, typed twice. PINs that are too easy to guess (1234, 0000, 1212, the starting PIN, and similar) are refused.
 3. He is signed in, and the Data Administrator gets a short notice that a PIN was set.
 
 **Every visit after that**
@@ -57,8 +57,8 @@ Members change their PIN on the **Change my PIN** page (linked at the bottom of 
 | After 15 wrong tries in a row | Each further round of 5 locks the account for 24 hours, and the Data Administrator is emailed |
 | Wrong tries are forgotten after | 7 days without a wrong try |
 | Where PINs live | The **PINs** tab, stored scrambled (hashed with a secret kept in Script Properties, not in the sheet) |
-| Who can claim a PIN | Only members who are "invited" under the staged rollout |
-| Reset a forgotten PIN or clear a lockout | Delete that member's row on the **PINs** tab; he chooses a new PIN next time |
+| Who can choose a PIN | Only members who are "invited" under the staged rollout, and only with the starting PIN |
+| Reset a forgotten PIN or clear a lockout | Delete that member's row on the **PINs** tab; he is back to the starting PIN and chooses a new one next time |
 | "Keep me signed in" | 90 days **from the last visit** (renews automatically, at most once a day) |
 | Not kept signed in | Ends when the browser closes (12-hour limit) |
 
@@ -96,7 +96,7 @@ Member's browser
 
 - **Why the Worker?** Apps Script doesn't return browser-friendly (CORS) replies, which broke writes on iPhones. The Worker relays requests server-to-server and passes replies through unchanged. (Its code, `cloudflare-worker.js`, is kept privately; the live copy is edited in the Cloudflare dashboard. Its first line holds the Apps Script address.)
 - **Large requests:** the Worker normally passes a request to the Apps Script in the web address. A request over about 1,500 characters (a member photo) can't fit there, so the Worker sends it as a POST body instead. Small requests are unchanged.
-- **Session pass:** after a correct code, the script issues a pass signed with a secret only it knows. Pages read the member number from the pass; the script re-checks the signature on every change and uses **the pass's** member number, never one supplied by the page.
+- **Session pass:** after a correct PIN, the script issues a pass signed with a secret only it knows. Pages read the member number from the pass; the script re-checks the signature on every change and uses **the pass's** member number, never one supplied by the page.
 
 ---
 
@@ -336,7 +336,7 @@ Every report writes a Change Log row whose **Notes** column records who was emai
 |---|---|---|
 | `pinStatus` | No | Checks the email and rollout wave; says whether he has a PIN yet |
 | `signIn` | No | Checks the PIN (with lockout); returns a signed session pass |
-| `claimPin` | No | First visit: checks email + member number, saves the PIN he chose |
+| `claimPin` | No | First visit: checks email + starting PIN, saves the PIN he chose |
 | `changePin` | Pass | Member changes his own PIN |
 | `resetPin` | Pass (admin) | Data Administrator clears a member's PIN |
 | `requestCode` / `verifyCode` | No | Emailed-code sign-in; switched off (`EMAIL_CODE_ENABLED`) |

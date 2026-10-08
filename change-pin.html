@@ -202,7 +202,7 @@ async function changePin() {
             ['curField', 'newField', 'new2Field'].forEach(id => document.getElementById(id).value = '');
             say('Your PIN has been changed.', true);
         } else if (r.error === 'wrong_pin') say(`Your current PIN doesn't match. ${r.triesLeft} ${r.triesLeft === 1 ? 'try' : 'tries'} left.`);
-        else if (r.error === 'weak_pin') say('That PIN is too easy to guess (like 1234 or 0000). Please choose a different one.');
+        else if (r.error === 'weak_pin') say('That PIN is too easy to guess (like 1234 or 0000, or the starting PIN). Please choose a different one.');
         else if (r.error === 'locked') say('Too many tries. Please wait ' + r.minutes + ' minutes and try again.');
         else if (r.error === 'not_signed_in') say('Your sign-in has expired. Please sign in again.');
         else say('Something went wrong. Please try again.');

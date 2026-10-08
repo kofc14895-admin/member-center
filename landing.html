@@ -137,8 +137,6 @@ a { color:inherit; }
 .linkish:disabled { color:var(--text-medium); text-decoration:none; cursor:default; }
 .pin-input { width:100%; font-family:'Lato',sans-serif; font-size:2rem; font-weight:700; letter-spacing:0.7em; text-align:center; padding:0.7rem 0.5rem 0.7rem 1.2rem; border:2px solid #D1D5DB; border-radius:10px; outline:none; margin-bottom:0.9rem; }
 .pin-input:focus { border-color:var(--primary-light); }
-.number-input { letter-spacing:0.15em; font-size:1.4rem; }
-.number-input::placeholder { letter-spacing:0; font-size:1.05rem; font-weight:400; }
 .delivery-note { font-family:'Lato',sans-serif; font-size:0.9rem; color:var(--text-medium); line-height:1.5; margin:-0.5rem 0 1.1rem; }
 </style>
 <script src="config.js"></script>
@@ -216,11 +214,11 @@ a { color:inherit; }
         <!-- Step 2b: first visit, choose a PIN -->
         <div class="step" id="step-claim">
             <h2 class="step-title">Welcome<span id="claimName"></span></h2>
-            <p class="step-text">Let's set up your PIN. You'll use it with your email each time you sign in.</p>
+            <p class="step-text">Enter the starting PIN you were given, then choose a PIN of your own. You'll use your own PIN with your email each time you sign in.</p>
             <form id="claimForm" action="#" method="post" novalidate onsubmit="event.preventDefault(); claimPin();">
-            <label class="field-label" for="numField">Your member number</label>
-            <input class="pin-input number-input" id="numField" name="memberNumber" type="text" inputmode="numeric" pattern="[0-9]*"
-                   autocomplete="off" autocorrect="off" enterkeyhint="next" maxlength="10" placeholder="On your card"
+            <label class="field-label" for="startField">Starting PIN</label>
+            <input class="pin-input" id="startField" name="startPin" type="password" inputmode="numeric" pattern="[0-9]*"
+                   autocomplete="off" autocorrect="off" enterkeyhint="next" maxlength="4" placeholder="&bull;&bull;&bull;&bull;"
                    oninput="this.value = this.value.replace(/\D/g, '')">
             <label class="field-label" for="newPinField">Choose a 4-digit PIN</label>
             <input class="pin-input" id="newPinField" name="newPin" type="password" inputmode="numeric" pattern="[0-9]*"
@@ -238,7 +236,7 @@ a { color:inherit; }
             </form>
             <div class="status-msg" id="msg-claim"></div>
             <p class="small-links">
-                Don't have your card handy? Email <a data-koc-email></a> and a data administrator will help.<br>
+                Don't have the starting PIN? Email <a data-koc-email></a> and a data administrator will help.<br>
                 <button type="button" class="linkish" onclick="useDifferentEmail()">Use a different email</button>
             </p>
         </div>
@@ -335,10 +333,10 @@ async function checkEmail() {
                 document.getElementById('pinField').focus();
             } else {
                 document.getElementById('claimName').textContent = r.firstName ? ', ' + r.firstName : '';
-                ['numField', 'newPinField', 'newPin2Field'].forEach(id => document.getElementById(id).value = '');
+                ['startField', 'newPinField', 'newPin2Field'].forEach(id => document.getElementById(id).value = '');
                 document.getElementById('stageSub').textContent = '';
                 show('step-claim');
-                document.getElementById('numField').focus();
+                document.getElementById('startField').focus();
             }
         } else if (r.error === 'not_found') {
             document.getElementById('msg-notfound').classList.add('show');
@@ -396,10 +394,10 @@ function checkEmailAgain() {
 }
 
 async function claimPin() {
-    const number = document.getElementById('numField').value.trim();
+    const start = document.getElementById('startField').value.trim();
     const pin = document.getElementById('newPinField').value.trim();
     const pin2 = document.getElementById('newPin2Field').value.trim();
-    if (!number) return formMessage('msg-claim', 'Please enter your member number. It is printed on your membership card.');
+    if (start.length !== 4) return formMessage('msg-claim', 'Please enter the 4-digit starting PIN you were given.');
     if (pin.length !== 4) return formMessage('msg-claim', 'Please choose a PIN with 4 digits.');
     if (pin !== pin2) return formMessage('msg-claim', "The two PINs don't match. Please type them again.");
     const btn = document.getElementById('claimBtn');
@@ -407,7 +405,7 @@ async function claimPin() {
     btn.disabled = true;
     btn.textContent = 'Checking\u2026';
     try {
-        const r = await apiPost({ action: 'claimPin', email: pendingEmail, memberNumber: number, pin, remember });
+        const r = await apiPost({ action: 'claimPin', email: pendingEmail, startPin: start, pin, remember });
         if (r.success) {
             Session.save(r);
             rememberEmail(remember ? pendingEmail : '');
@@ -415,8 +413,8 @@ async function claimPin() {
             goToProfile();
             return;
         }
-        if (r.error === 'weak_pin') formMessage('msg-claim', 'That PIN is too easy to guess (like 1234 or 0000). Please choose a different one.');
-        else if (r.error === 'wrong_member_number') formMessage('msg-claim', `That member number doesn't match our records. ${r.triesLeft} ${r.triesLeft === 1 ? 'try' : 'tries'} left.`);
+        if (r.error === 'weak_pin') formMessage('msg-claim', 'That PIN is too easy to guess (like 1234 or 0000, or the starting PIN). Please choose a different one.');
+        else if (r.error === 'wrong_start_pin') formMessage('msg-claim', `That starting PIN doesn't match. ${r.triesLeft} ${r.triesLeft === 1 ? 'try' : 'tries'} left.`);
         else if (r.error === 'locked') formMessage('msg-claim', lockText(r.minutes));
         else if (r.error === 'already_set') { useDifferentEmail(); checkEmailAgain(); return; }
         else formMessage('msg-claim', 'Something went wrong. Please try again.');
