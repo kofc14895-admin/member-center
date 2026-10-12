@@ -1,7 +1,7 @@
 # St. Luke Knights of Columbus — Member Center
 ### Council 14895 · Indianapolis, Indiana
 
-A member self-service site hosted on GitHub Pages. Members sign in with their email and a 4-digit PIN, see and correct their profile, add a profile photo, view their membership card(s), pay dues, browse the member directory, pray the Rosary, and complete an annual data-verification wizard. Member data lives in a Google Sheet; every change goes through an Apps Script (via a Cloudflare Worker relay) that checks the member's sign-in.
+A member self-service site hosted on GitHub Pages. Members sign in with an emailed code, see and correct their profile, add a profile photo, view their membership card(s), pay dues, browse the member directory, pray the Rosary, and complete an annual data-verification wizard. Member data lives in a Google Sheet; every change goes through an Apps Script (via a Cloudflare Worker relay) that checks the member's sign-in.
 
 ---
 
@@ -11,7 +11,7 @@ Admin tools — the **Browse as a member** dropdown (Profile, Membership Card, P
 
 | To… | Add this to the end of any Member Center address |
 |---|---|
-| **Show** admin tools | `?admin=on` — e.g. `https://members.kofc14895.org/home.html?admin=on` |
+| **Show** admin tools | `?admin=on` — e.g. `https://mikesale97-8099.github.io/stluke-koc-memberportal/home.html?admin=on` |
 | **Hide** admin tools | `?admin=off` |
 
 - The setting is remembered **on that device** as you move between pages; the address tidies itself so the switch isn't left showing.
@@ -28,43 +28,32 @@ Admin tools — the **Browse as a member** dropdown (Profile, Membership Card, P
 
 | Resource | URL |
 |---|---|
-| Member Center (sign in) | https://members.kofc14895.org/landing.html |
-| GitHub repo | https://github.com/kofc14895-admin/member-center |
-| Relay, Apps Script and Google Sheet addresses | Kept private in the council's Shared Drive (06 Technology), not in this public repo. The pages read them from `config.js`. |
+| Member Center (sign in) | https://mikesale97-8099.github.io/stluke-koc-memberportal/landing.html |
+| GitHub Repo | https://github.com/mikesale97-8099/stluke-koc-memberportal |
+| Cloudflare Worker | https://stluke-koc14895-relay.mike-sale97.workers.dev |
+| Apps Script (web app) | https://script.google.com/macros/s/AKfycbw-wxkf1XzXM-tvhj-tsmDVdHdgI5YcWI63yj7W3RQyee7mrWmi2h88bvIykQq0Jb50FQ/exec |
+| Google Sheet | https://docs.google.com/spreadsheets/d/1BXIzmI531yWJA7BYkATFrqED4nxict_pkScKadFNdUI/edit |
 
 ---
 
 ## How Members Sign In
 
-**First visit (choosing a PIN)**
-
-1. Member enters the email address on file and taps **Continue**.
-2. The page asks for the **starting PIN** that every member is given (it is set in the Apps Script, as `INITIAL_PIN`, and is not published here) and a **4-digit PIN of his own**, typed twice. PINs that are too easy to guess (1234, 0000, 1212, the starting PIN, and similar) are refused.
-3. He is signed in, and the Data Administrator gets a short notice that a PIN was set.
-
-**Every visit after that**
-
-1. Member enters his email and taps **Continue**, then enters his PIN.
-2. With **Keep me signed in on this device** checked (the default), he stays signed in as long as he visits at least once every **90 days**; otherwise the sign-in ends when the browser closes.
-3. Returning on a remembered device shows **Welcome back → Continue to My Profile** — no PIN.
-
-Members change their PIN on the **Change my PIN** page (linked at the bottom of the Profile page).
+1. Member enters the email address on file and taps **Email Me a Code**.
+2. The Apps Script emails a **6-digit code** (sent from the script owner's Gmail, shown as "St. Luke Member Center").
+3. Member enters the code. With **Keep me signed in on this device** checked (the default), he stays signed in as long as he visits at least once every **90 days**; otherwise the sign-in ends when the browser closes.
+4. Returning on a remembered device shows **Welcome back → Continue to My Profile** — no code.
 
 | Rule | Setting |
 |---|---|
-| PIN length | 4 digits |
-| Wrong tries before a lockout | 5, then locked for 15 minutes |
-| After 15 wrong tries in a row | Each further round of 5 locks the account for 24 hours, and the Data Administrator is emailed |
-| Wrong tries are forgotten after | 7 days without a wrong try |
-| Where PINs live | The **PINs** tab, stored scrambled (hashed with a secret kept in Script Properties, not in the sheet) |
-| Who can choose a PIN | Only members who are "invited" under the staged rollout, and only with the starting PIN |
-| Reset a forgotten PIN or clear a lockout | Delete that member's row on the **PINs** tab; he is back to the starting PIN and chooses a new one next time |
+| Code works for | 60 minutes (AT&T/Yahoo can deliver slowly) |
+| Any code sent in the last hour works | Yes — delayed or out-of-order emails still sign him in |
+| Wrong tries before a code locks | 5 (asking for a new code clears the lock) |
+| Wait between code emails | 30 seconds |
+| Code emails per member per hour | 5 |
 | "Keep me signed in" | 90 days **from the last visit** (renews automatically, at most once a day) |
 | Not kept signed in | Ends when the browser closes (12-hour limit) |
 
-The earlier emailed-code sign-in is still in the script but switched off (`EMAIL_CODE_ENABLED = false` in `Code.gs`). It can be turned back on if email delivery becomes reliable.
-
-**Sign out** is deliberately out of the way: there's no Sign out in the top bar (members tapped it out of habit, forcing a new sign-in each visit). A small gray **Sign out of this device** link sits at the very bottom of the Profile page, beside **Change my PIN**, and asks for confirmation (*Stay signed in* is the main button). Signing out forgets the device — the sign-in, the remembered email, and admin tools. Closing the browser or restarting the phone does **not** sign a member out. To switch people on a device, the sign-in page's **Not you? Sign in as someone else** link does the same.
+**Sign out** is deliberately out of the way: there's no Sign out in the top bar (members tapped it out of habit, forcing a new code each visit). A small gray **Sign out of this device** link sits at the very bottom of the Profile page and asks for confirmation (*Stay signed in* is the main button). Signing out forgets the device — the sign-in, the remembered email, and admin tools. Closing the browser or restarting the phone does **not** sign a member out. To switch people on a device, the sign-in page's **Not you? Sign in as someone else** link does the same.
 
 **Emails not on file** — the login page offers a help form that logs a "Contact Request / Add Email" row in the Change Log for a data administrator.
 
@@ -84,19 +73,19 @@ The earlier emailed-code sign-in is still in the script but switched off (`EMAIL
 ```
 Member's browser
     │
-    ├── READS  ──▶  docs.google.com (gviz / published CSV), addresses set in config.js
+    ├── READS  ──▶  docs.google.com (gviz / published CSV)
     │
-    └── SIGN-IN & CHANGES ──▶  Cloudflare Worker (kofc14895-relay)
+    └── SIGN-IN & CHANGES ──▶  Cloudflare Worker (stluke-koc14895-relay)
                                    │
                                    └──▶  Apps Script web app (verify-endpoint.gs)
                                              │   checks the member's signed session pass
                                              ├──▶  Google Sheet (Membership DB, Change Log)
-                                             └──▶  Gmail (officer notifications)
+                                             └──▶  Gmail (sign-in codes, officer notifications)
 ```
 
-- **Why the Worker?** Apps Script doesn't return browser-friendly (CORS) replies, which broke writes on iPhones. The Worker relays requests server-to-server and passes replies through unchanged. (Its code, `cloudflare-worker.js`, is kept privately; the live copy is edited in the Cloudflare dashboard. Its first line holds the Apps Script address.)
+- **Why the Worker?** Apps Script doesn't return browser-friendly (CORS) replies, which broke writes on iPhones. The Worker relays requests server-to-server and passes replies through unchanged. (Its code is kept in `cloudflare-worker.js`; the live copy is edited in the Cloudflare dashboard.)
 - **Large requests:** the Worker normally passes a request to the Apps Script in the web address. A request over about 1,500 characters (a member photo) can't fit there, so the Worker sends it as a POST body instead. Small requests are unchanged.
-- **Session pass:** after a correct PIN, the script issues a pass signed with a secret only it knows. Pages read the member number from the pass; the script re-checks the signature on every change and uses **the pass's** member number, never one supplied by the page.
+- **Session pass:** after a correct code, the script issues a pass signed with a secret only it knows. Pages read the member number from the pass; the script re-checks the signature on every change and uses **the pass's** member number, never one supplied by the page.
 
 ---
 
@@ -118,42 +107,21 @@ Menu order on every page: **Profile · Calendar · Prayers · Groups · KofC Car
 | `why-dues.html` | Where dues go | No |
 | `events.html` | Older activity write-ups (not in the menu; reachable by direct link) | No |
 
-**Shared files:** `config.js` (every address the pages read from; see *Configuration*), `index.html` (sends the bare address to the sign-in page), `session.js` (sign-in pass, admin-tools switch, sign-out) and `nav-toggle.js` (Why Dues menu toggle) load on every menu page. `council-logo.png` is the KofC emblem used on the wizard welcome and the council card.
+**Shared files:** `session.js` (sign-in pass, admin-tools switch, sign-out) and `nav-toggle.js` (Why Dues menu toggle) load on every menu page. `council-logo.png` is the KofC emblem used on the wizard welcome and the council card.
 
 ---
 
 ## Deploying Changes
 
-0. **Cloudflare Worker** (only when `cloudflare-worker.js` changes): open the Worker in the Cloudflare dashboard → **Edit code**, paste the whole file, **Save and deploy**. The Worker URL doesn't change. Line 1 must hold the current Apps Script address.
+0. **Cloudflare Worker** (only when `cloudflare-worker.js` changes): open the Worker in the Cloudflare dashboard → **Edit code**, paste the whole file, **Save and deploy**. The Worker URL doesn't change.
 1. **Apps Script** (`verify-endpoint.gs`): paste the full file into the editor, save, then **Deploy → Manage deployments → pencil → Version: New version → Deploy.**
    - Keep **Execute as: Me** and **Who has access: Anyone.** ("User accessing the web app" would make every member sign in to Google.)
-   - The web-app URL doesn't change between versions, so the Worker needs no update. **Always edit the existing deployment.** *New deployment* creates a new address, and then line 1 of the Worker must be updated too.
-   - **After pasting the script into a new project** (a copied sheet, say): run `testMemberCenterEmail` once from that project and approve the permission prompts *before* deploying. Permissions belong to each project; skipping this makes sign-in fail with a generic "couldn't reach the Member Center" message.
-2. **Pages:** upload the changed files to the repo root. Watch for browsers adding "(1)" to downloaded file names. Addresses (sheet, tabs, calendar link, relay, emails) live only in `config.js`.
+   - The web-app URL doesn't change between versions, so the Worker needs no update.
+2. **Pages:** upload the changed files to the repo root. Watch for browsers adding "(1)" to downloaded file names.
 3. When the Worker, script and pages all change (e.g. member photos), deploy in this order, back to back: **Worker → Apps Script → pages**. The Worker and script changes are backward-compatible, so the old pages keep working until the new ones go up.
 4. Hard refresh (Ctrl+Shift+R) when testing; GitHub Pages can take a minute or two to update.
 
 > ⚠️ **Never upload `*-mockup.html` files to the repo.** Several contain an old built-in copy of all members' names, numbers, and dues balances.
-
----
-
-## Configuration (`config.js`)
-
-Every address the pages read from is in one file, `config.js`, loaded before `session.js` on every page. To move the data or the relay, edit that file and upload it; no page needs to change.
-
-| Setting | What it is |
-|---|---|
-| `sheetId` | The membership spreadsheet (Membership DB, Assumptions, Tier Messages, Positions, Photos, Change Log) |
-| `announcementsSheetId` | The separate Announcements spreadsheet |
-| `assumptionsSheetId` | Where the Assumptions tab lives (same as `sheetId` unless Assumptions is moved to its own file; the Apps Script has a matching `ASSUMPTIONS_SHEET_ID`) |
-| `gids` | Tab numbers: membership, assumptions, tierMessages, positions, announcements |
-| `calendarCsvUrl` | The calendar tab's published-to-web CSV link |
-| `endpoint` | The Cloudflare Worker address |
-| `emails.council` | The public council contact (footer, error messages, last-resort Help recipient). Tag a page element `data-koc-email` to show it |
-
-`config.js` is public: never put member data or private keys in it. The Apps Script address is not here; it is on line 1 of the Worker.
-
-**Moving to another sheet:** copy the file, check each tab number after `gid=` in the new address, re-publish the calendar tab, deploy the script from the new sheet (and approve its permissions), update the Worker's line 1, then upload the new `config.js`. Upload `config.js` last, and make it the file you change last.
 
 ---
 
@@ -168,9 +136,9 @@ Every address the pages read from is in one file, `config.js`, loaded before `se
 | Positions | 620591520 | Council officers and committee positions |
 | Tier Messages | 1560227874 | Friendly tier labels and Profile/card messages |
 | Change Log | — | Audit trail of every change, flag, request, and notification |
-| Announcements (separate file) | 1133674898 | The Profile banner. Lives in its own spreadsheet so the people posting never need the membership data (address in `config.js`: `announcementsSheetId`). Headings: Message · Type · Link · Show From · Show Through |
+| Announcements | — | The Profile banner. **You create this tab** (see *Announcements Banner*). Headings: Message · Type · Link · Show From · Show Through |
 | Photos | — | Member photos, one row per member. **Created automatically** when the first photo is saved. Columns: Member Number (text, no leading zeros) · Photo (small JPEG as text) · Updated. Don't edit by hand |
-| Activity List | 2034915391 | Calendar events. Published to the web as CSV; the link is in `config.js` (`calendarCsvUrl`). Publishing a copied sheet creates a new link |
+| Activity List (separate published sheet) | 2034915391 | Calendar events |
 
 ### Key Columns — Membership DB
 
@@ -206,7 +174,7 @@ Every address the pages read from is in one file, `config.js`, loaded before `se
 | Retention Committee email | Move / step-back / withdrawal / other emails |
 | Data Administrator email | Admin rights; "something else" emails; stands in for the Financial Secretary if that row is missing |
 | Show step back option *(optional)* | Whether the wizard's **"I need to step back for a while"** choice is offered. **No** (also *Off*, *False*, *Hide*) removes it; a missing row, or anything else, keeps it. Takes effect on the next page load. Members who want to step back can still use *Something else* |
-| Help email *(optional)* | Where the Profile page's **Help / Problem / Idea** buttons send email. One address, or several separated by commas. If the row is missing or blank: the first **Data Administrator email**, then the council address in `config.js` (`emails.council`) |
+| Help email *(optional)* | Where the Profile page's **Help / Problem / Idea** buttons send email. One address, or several separated by commas. If the row is missing or blank: the first **Data Administrator email**, then council14895@gmail.com |
 | Financial Secretary email *(optional)* | Move-out-of-area emails (address update in Member Management) |
 | Open rollout waves through | A number *N* lets in waves 1..N; **All** (or no row) lets in everyone with an email on file |
 | 4th Degree Assembly No. *(optional)* | Overrides **2850** on the Fourth Degree card |
@@ -266,7 +234,7 @@ Every address the pages read from is in one file, `config.js`, loaded before `se
 - **Where:** the bottom of the Profile page, just above *Sign out of this device*. Three large buttons: **Ask for help**, **Report a problem**, **Suggest an idea**.
 - **What happens:** each opens the member's own email app with a note already started — the subject says which kind it is, and the body has short prompts to fill in ("What I was trying to do… What happened instead…").
 - **What arrives automatically:** below the prompts, the member's **name and member number**, the page, the time, and the phone or browser, so a problem can be looked into without a back-and-forth. (If an administrator is browsing as another member, it identifies the administrator who is actually sending.)
-- **Who receives it — set on the Assumptions tab, no code change:** the **Help email** row; if that's empty, the first **Data Administrator email**; if that's empty too, the council address in `config.js` (`emails.council`). To use a new address, put it in **Help email** (no upload needed).
+- **Who receives it — set on the Assumptions tab, no code change:** the **Help email** row; if that's empty, the first **Data Administrator email**; if that's empty too, council14895@gmail.com. When the council's own domain is ready, put the new address in **Help email** and you're done.
 - **Limit:** like every email link on the site, it needs an email app set up on the device. Members who only use webmail in a browser may see nothing happen; the council address in the page footer still works for them.
 
 ---
@@ -276,8 +244,8 @@ Every address the pages read from is in one file, `config.js`, loaded before `se
 - **Where:** the top of the Profile, under *Welcome back*. When there is nothing to show, the banner takes no space.
 - **Two sources:**
   1. **Next event** (automatic): the soonest upcoming event on the Calendar sheet, e.g. *Fall Pancake Breakfast — Saturday, October 17*. Says *Today* / *Tomorrow* when it's that close. It shows a **Sign up** button when that event has a Sign-up Link. Only events within **60 days** are announced (`ANN_NEXT_EVENT_DAYS` in `home.html`); events whose date can't be read are skipped.
-  2. **Typed announcements** from the **Announcements** tab of the separate Announcements spreadsheet (set in `config.js`; link sharing must be **Anyone with the link can view**, or the banner quietly shows nothing). At most **2** show at once, top of the sheet first (`ANN_MAX_TYPED`).
-- **The Announcements tab** (already created; headings in row 1, any order, spelling and capitals don't matter):
+  2. **Typed announcements** from the **Announcements** tab in the main workbook (the same workbook as Assumptions and Photos). At most **2** show at once, top of the sheet first (`ANN_MAX_TYPED`).
+- **The Announcements tab** (you create it; headings in row 1, any order, spelling and capitals don't matter):
 
   | Message | Type | Link | Show From | Show Through |
   |---|---|---|---|---|
@@ -326,7 +294,7 @@ Every report writes a Change Log row whose **Notes** column records who was emai
 
 1. Put 1, 2, 3… in **Rollout Wave** for each member.
 2. Set **Open rollout waves through** to 1, then raise it as each wave is invited; set it to **All** when finished.
-3. Members not yet invited get a friendly "we're opening in stages" note instead of a PIN prompt. The data administrator can always sign in. This check runs in the Apps Script, so it's enforced.
+3. Members not yet invited get a friendly "we're opening in stages" note instead of a code. The data administrator can always sign in. This check runs in the Apps Script, so it's enforced.
 
 ---
 
@@ -334,12 +302,8 @@ Every report writes a Change Log row whose **Notes** column records who was emai
 
 | Action | Needs sign-in | What it does |
 |---|---|---|
-| `pinStatus` | No | Checks the email and rollout wave; says whether he has a PIN yet |
-| `signIn` | No | Checks the PIN (with lockout); returns a signed session pass |
-| `claimPin` | No | First visit: checks email + starting PIN, saves the PIN he chose |
-| `changePin` | Pass | Member changes his own PIN |
-| `resetPin` | Pass (admin) | Data Administrator clears a member's PIN |
-| `requestCode` / `verifyCode` | No | Emailed-code sign-in; switched off (`EMAIL_CODE_ENABLED`) |
+| `requestCode` | No | Checks the email and rollout wave; emails a code |
+| `verifyCode` | No | Checks the code; returns a signed session pass |
 | `session` | Pass | Confirms and renews a remembered pass |
 | `logChange` | Pass* | Appends a Change Log row (*the "Add Email" help request needs no pass) |
 | `saveContact` | Pass | Saves contact fields (incl. Wife's Name, Directory Opt-In); logs each change |
@@ -362,12 +326,21 @@ Timestamp · Member Number · Member Name · Type · Category · Field · Old Va
 
 ## Security Notes & Known Limitations
 
-- **Sign-in and all changes are protected** (email + PIN with lockout, signed pass, member number taken from the pass).
+- **Sign-in and all changes are protected** (emailed code, signed pass, member number taken from the pass).
 - **The member sheet itself is still link-readable** (the pages read it directly for speed). Anyone who digs the link out of a page's source could download it. This was a deliberate trade-off: keeping the sheet private would require routing all reads through Apps Script, adding a second or two to every page. The directory wording promises only what's true under this setup ("only signed-in members can see the directory").
 - **Photos are on the sheet, not in the repo.** The Photos tab is link-readable like the rest of the sheet, so the same caveat applies: only the pages limit photos to signed-in members. The upload screen says photos are shown to signed-in members of the council. No photo is ever stored in the repo.
-- **Repository history:** this repository was started fresh in October 2026 and contains no member data. Never upload `*-mockup.html` files or any page with a built-in copy of members' names, numbers, dues or emails; the pages must always read members from the sheet.
-- **Keep private:** `cloudflare-worker.js` and `verify-endpoint.gs` are not in this repo. The Worker file contains the Apps Script address. Store both in the council's Shared Drive (06 Technology).
-- **Emails come from the council's Workspace account** (`Administrator@kofc14895.org`), with SPF and DKIM set up, which helps delivery. Some providers (notably AT&T/Yahoo-run domains such as sbcglobal.net) can still be slow or strict with new senders; always test your own address after changing the sender.
+- **Repository history:** older versions of `membership-card.html` (Aug 27 – Sep 28, 2026) and `home.html` (Aug 27 – Sep 23) — plus some mockups — contained members' names, numbers, dues balances, and up to about 133 emails and 143 phone numbers per file (a scan of all 133 commits, Oct 2, 2026). The current files are clean, but the old versions remain in the **public** repo's history. **No passwords or keys are in the history** (the session secret lives in Apps Script's private settings), so nothing needs replacing. **Plan: do the cleanup below before the Board pilot starts.** It removes the old copies; it does not recall copies anyone already made, and it does not make the live sheet private (see the first bullet above).
+
+### Repo cleanup — fresh repo (about 20–30 minutes; the site is offline briefly)
+1. On the old repo, check **Insights → Forks** (forks keep their own copy of the history).
+2. Rename the old repo (e.g. `stluke-koc-memberportal-OLD`), then **Settings → Danger Zone → Change visibility → Private**. The live site goes offline.
+3. Create a new **public** repo named `stluke-koc-memberportal` (the original name).
+4. **Add file → Upload files**: the 17 current files, individually (no zip). Ask Claude to stage the complete current set at that time so it's up to date.
+5. **Settings → Pages**: deploy from branch `main`, folder `/ (root)`. The site returns at the same address in a minute or two; members stay signed in; the Worker, Apps Script and sheet are unchanged.
+6. Check the site works, then keep the private `-OLD` repo as a backup or delete it later.
+- Alternatives: a private repo (needs a paid GitHub plan to keep Pages online), or rewriting history with `git filter-repo` (command line; not recommended for the upload-through-the-web workflow).
+- Worth mentioning to the council officers that the old pages were publicly readable Aug 27 – Sep 28.
+- **Emails come from a personal Gmail account**, which some providers (notably AT&T/Yahoo) may delay. Sending from the council's own domain with proper email records would help.
 
 ---
 
@@ -387,8 +360,8 @@ Timestamp · Member Number · Member Name · Type · Category · Field · Old Va
 - [ ] Re-prompt once a year (Wizard Completed over a year old) — not built; the gate would just treat an old date like a blank one
 - [ ] Home-screen icon and one-time "Add to Home Screen" tip for iPhones
 - [ ] Decide on member numbers with a leading zero on the cards (printed cards show none)
-- [ ] Optional: move the Cloudflare Worker into the council's own Cloudflare account (then only `endpoint` in `config.js` changes)
-- [ ] Optional: add a DMARC record for the council domain; verify the domain at the GitHub account level; add `dataadministrator@kofc14895.org` to the Data Administrator email row
+- [ ] **Before the Board pilot:** clean up repository history — fresh repo, steps under *Security notes → Repository history*
+- [ ] Send code emails from the council's own domain once it's set up
 - [ ] Collect emails for members with none on file
 - [ ] Member photo on the council card / Fourth Degree card (not built)
 - [ ] After deploying photos: add one real photo on your own profile and confirm the **Photos** tab gets a row, then see it on Groups from another device
@@ -397,8 +370,8 @@ Timestamp · Member Number · Member Name · Type · Category · Field · Old Va
 
 ## Files
 
-**Deployed (repo root):** `landing.html`, `home.html`, `calendar.html`, `prayers.html`, `rosary.html`, `membership-card.html`, `groups.html`, `why-dues.html`, `pay-dues.html`, `verify-wizard.html`, `events.html`, `config.js`, `session.js`, `nav-toggle.js`, `index.html`, `council-logo.png`, `README.md` (GitHub also adds a `CNAME` file for the custom address; leave it)
+**Deployed (repo root):** `landing.html`, `home.html`, `calendar.html`, `prayers.html`, `rosary.html`, `membership-card.html`, `groups.html`, `why-dues.html`, `pay-dues.html`, `verify-wizard.html`, `events.html`, `session.js`, `nav-toggle.js`, `council-logo.png`, `README.md`
 
-**Kept privately (not in the repo):** `verify-endpoint.gs` (Apps Script source) and `cloudflare-worker.js` (Worker source), in the Shared Drive's 06 Technology folder
+**Kept for reference (not served as pages):** `verify-endpoint.gs` (Apps Script source), `cloudflare-worker.js` (Worker source)
 
 **Never deploy:** any `*-mockup.html` (review-only files; some contain old member data)
