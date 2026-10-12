@@ -51,7 +51,7 @@ const KOC_CONFIG = {
     // then the first "Data Administrator email" row; this address is used only if both are empty.
     // To add another address: add a line here, then tag a page element with data-koc-email="thatName".
     emails: {
-        council: 'council14895@gmail.com'
+        council: 'maccsale@sbcglobal.net'
     }
 };
 
