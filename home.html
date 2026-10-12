@@ -207,6 +207,8 @@ nav a.navlink, nav a.signout { white-space:nowrap; }
 .help-block { text-align:center; margin-top:2.5rem; padding-top:1.75rem; border-top:1px dashed #D1D5DB; }
 .help-title { font-family:'Crimson Pro',serif; font-size:1.2rem; font-weight:700; color:var(--primary); }
 .help-text { font-family:'Lato',sans-serif; font-size:0.9rem; color:var(--text-medium); margin-top:0.3rem; }
+.help-tip { font-family:'Lato',sans-serif; font-size:0.88rem; line-height:1.45; color:var(--text-medium); margin:1rem auto 0; max-width:30rem; }
+.ann-tip { font-family:'Lato',sans-serif; font-size:0.85rem; line-height:1.4; color:var(--text-medium); margin-top:0.5rem; }
 .help-actions { display:flex; gap:0.7rem; justify-content:center; flex-wrap:wrap; margin-top:1rem; }
 .help-btn { display:inline-flex; align-items:center; justify-content:center; min-height:46px; padding:0.55rem 1.3rem; border-radius:50px; border:2px solid var(--primary); background:#fff; color:var(--primary); font-family:'Lato',sans-serif; font-size:0.95rem; font-weight:700; text-decoration:none; }
 @media (hover:hover) { .help-btn:hover { background:var(--primary); color:#fff; } }
@@ -412,13 +414,13 @@ nav a.navlink, nav a.signout { white-space:nowrap; }
             <a class="help-btn" data-kind="bug" href="#">Report a problem</a>
             <a class="help-btn" data-kind="idea" href="#">Suggest an idea</a>
         </div>
+        <p class="help-tip" id="helpTip">Tip: if your phone asks which app to use, pick the email app you use for your Knights of Columbus email (the address the council has for you) and tap <b>Always</b> so it won’t ask again. If no email app opens, write to <span id="helpTipAddr" data-koc-email></span>.</p>
     </div>
 
     <div class="quiet-signout">
-        <a class="quiet-signout-link" href="change-pin.html" style="margin-right:1rem;">Change my PIN</a>
         <button type="button" class="quiet-signout-link" id="quietSignoutLink" onclick="toggleSignoutConfirm(true)">Sign out of this device</button>
         <div class="signout-confirm" id="signoutConfirm" role="dialog" aria-labelledby="signoutConfirmTitle" hidden>
-            <p><strong id="signoutConfirmTitle">Sign out of this device?</strong> You'll need your email and PIN to sign in again. If this is your own phone or computer, there's no need &mdash; just close the page.</p>
+            <p><strong id="signoutConfirmTitle">Sign out of this device?</strong> You'll need an emailed code to sign in again. If this is your own phone or computer, there's no need &mdash; just close the page.</p>
             <div class="signout-confirm-actions">
                 <button type="button" class="btn btn-primary" onclick="toggleSignoutConfirm(false)">Stay signed in</button>
                 <button type="button" class="signout-confirm-go" onclick="Session.signOut()">Sign out</button>
@@ -717,6 +719,7 @@ async function loadHelpEmail() {
         if (list.length) FEEDBACK_TO = list.join(',');
     } catch (e) { /* keep the council address */ }
     document.querySelectorAll('.help-btn').forEach(a => { a.href = feedbackHref(a.dataset.kind, true); });
+    const ta = document.getElementById('helpTipAddr'); if (ta) ta.textContent = FEEDBACK_TO.split(',')[0];
 }
 function feedbackWho() {
     const sess = Session.read() || {};
@@ -870,7 +873,9 @@ function annItem(meta, textNodes, action) {
         const a = document.createElement('a'); a.className = 'ann-btn'; a.textContent = action.text; a.href = action.href;
         if (action.newTab) { a.target = '_blank'; a.rel = 'noopener noreferrer'; }
         if (action.refresh) a.addEventListener('click', () => { a.href = action.refresh(); });
-        wrap.appendChild(a); body.appendChild(wrap);
+        wrap.appendChild(a);
+        if (action.tip) { const t = document.createElement('div'); t.className = 'ann-tip'; t.textContent = action.tip; wrap.appendChild(t); }
+        body.appendChild(wrap);
     }
     el.append(icon, body);
     return el;
@@ -888,7 +893,7 @@ async function loadBanner() {
     }
     typed.forEach(a => {
         const meta = ANN_TYPES[a.type]; let action = null;
-        if (a.type === 'need') action = { text: 'I Can Help', href: annCanHelpHref(a.message, a.to), refresh: () => annCanHelpHref(a.message, a.to) };   // emails the address in Link, else the administrator
+        if (a.type === 'need') action = { text: 'I Can Help', tip: 'If your phone asks which email app to use, pick the one for your Knights email and tap "Always".', href: annCanHelpHref(a.message, a.to), refresh: () => annCanHelpHref(a.message, a.to) };   // emails the address in Link, else the administrator
         else if (a.link) action = { text: a.type === 'event' ? 'Sign up' : 'Learn more', href: a.link, newTab: true };
         box.appendChild(annItem(meta, [annText(a.message)], action));
     });
