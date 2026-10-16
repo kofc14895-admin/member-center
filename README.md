@@ -174,7 +174,7 @@ Menu order on every page: **Profile · Calendar · Prayers · Groups · KofC Car
 | Retention Committee email | Move / step-back / withdrawal / other emails |
 | Data Administrator email | Admin rights; "something else" emails; stands in for the Financial Secretary if that row is missing |
 | Show step back option *(optional)* | Whether the wizard's **"I need to step back for a while"** choice is offered. **No** (also *Off*, *False*, *Hide*) removes it; a missing row, or anything else, keeps it. Takes effect on the next page load. Members who want to step back can still use *Something else* |
-| Help email *(optional)* | Where the Profile page's **Help / Problem / Idea** buttons send email. One address, or several separated by commas. If the row is missing or blank: the first **Data Administrator email**, then maccesale@sbcglobal.net |
+| Help email *(optional)* | Where the Profile page's **Help / Problem / Idea** buttons send email. One address, or several separated by commas. If the row is missing or blank: the first **Data Administrator email**, then maccsale@sbcglobal.net |
 | Financial Secretary email *(optional)* | Move-out-of-area emails (address update in Member Management) |
 | Open rollout waves through | A number *N* lets in waves 1..N; **All** (or no row) lets in everyone with an email on file |
 | 4th Degree Assembly No. *(optional)* | Overrides **2850** on the Fourth Degree card |
@@ -234,7 +234,7 @@ Menu order on every page: **Profile · Calendar · Prayers · Groups · KofC Car
 - **Where:** the bottom of the Profile page, just above *Sign out of this device*. Three large buttons: **Ask for help**, **Report a problem**, **Suggest an idea**.
 - **What happens:** each opens the member's own email app with a note already started — the subject says which kind it is, and the body has short prompts to fill in ("What I was trying to do… What happened instead…").
 - **What arrives automatically:** below the prompts, the member's **name and member number**, the page, the time, and the phone or browser, so a problem can be looked into without a back-and-forth. (If an administrator is browsing as another member, it identifies the administrator who is actually sending.)
-- **Who receives it — set on the Assumptions tab, no code change:** the **Help email** row; if that's empty, the first **Data Administrator email**; if that's empty too, maccesale@sbcglobal.net. When the council's own domain is ready, put the new address in **Help email** and you're done.
+- **Who receives it — set on the Assumptions tab, no code change:** the **Help email** row; if that's empty, the first **Data Administrator email**; if that's empty too, maccsale@sbcglobal.net. When the council's own domain is ready, put the new address in **Help email** and you're done.
 - **Email-app chooser tip:** a small note under the buttons tells members that if their phone asks which app to use, they should pick the email app they use for the address the council has on file and tap **Always**, and shows the help address to write to if no email app opens. **I Can Help** on a Need announcement carries a one-line version. (The site can't switch the chooser off; it's a phone setting.)
 - **Limit:** like every email link on the site, it needs an email app set up on the device. Members who only use webmail in a browser may see nothing happen; the council address in the page footer still works for them.
 
