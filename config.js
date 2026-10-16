@@ -12,17 +12,17 @@ const KOC_CONFIG = {
 
     // The Google Sheet that holds the Membership DB, Assumptions, Tier Messages, Positions,
     // Photos and Announcements tabs. This is the ID between /d/ and /edit in the sheet's address.
-    sheetId: '1BXIzmI531yWJA7BYkATFrqED4nxict_pkScKadFNdUI',
+    sheetId: '1Uc7z_TqT-rYsIqO5Ah3SJ3kaSPA7dyKpjit-xJMrVXE',
 
     // The Google Sheet that holds the Assumptions tab (dues amounts, officer emails, dates, messages).
     // Until Assumptions is moved into its own file this is the SAME ID as sheetId above.
     // After the move, paste the new file's ID here and set gids.assumptions to that file's tab ID.
     // The Apps Script has its own copy of this setting (ASSUMPTIONS_SHEET_ID in verify-endpoint.gs): change both.
-    assumptionsSheetId: '1BXIzmI531yWJA7BYkATFrqED4nxict_pkScKadFNdUI',
+    assumptionsSheetId: '1Uc7z_TqT-rYsIqO5Ah3SJ3kaSPA7dyKpjit-xJMrVXE',
 
     // The Google Sheet that holds the Announcements tab shown on the Home page.
     // It lives in its own file so the people who post announcements never need to open the membership data.
-    announcementsSheetId: '1uG6AAwzEaaGcuUAZrygeG29GwHMKm7Vx7iTUqxUMyv0',
+    announcementsSheetId: '1TPuMPjpACtOOeW2uJd8t2ZN3AkMVoKPnKV8gEOKLjLQ',
 
     // Tab IDs (the number after gid= in the address when that tab is open).
     // A copied sheet may get different tab IDs: check each one after copying.
@@ -38,11 +38,11 @@ const KOC_CONFIG = {
 
     // Calendar feed: the sheet's "Publish to web" link, set to CSV for the Activity tab.
     // Publishing a copied sheet creates a NEW link; paste it here.
-    calendarCsvUrl: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRQDS_b-fdZjWOcOZ4OUD7TkNLLaCaXt-AN2cOHyltxZRwOOlcGICvdTd2JXGLpzoAx3fPFKq5SgNjd/pub?gid=2034915391&single=true&output=csv',
+    calendarCsvUrl: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSfpEA7Isg8stZS6IzvIzno0RIEmwZ3PpuQHOVKDdOlOkY3nQqFd_Z9ZejGZLatQ0l4zha0LKNZMq19/pub?gid=2034915391&single=true&output=csv',
 
     // The relay the pages talk to (sign-in, saves, photos). The relay forwards to the Apps Script.
     // The Apps Script address itself lives in the relay's own code (cloudflare-worker.js), not here.
-    endpoint: 'https://stluke-koc14895-relay.mike-sale97.workers.dev',
+    endpoint: 'https://kofc14895-relay.mike-sale97.workers.dev',
 
     // Email addresses shown to members. Change them here and nowhere else.
     //   council: the public council contact (page footer, "Questions?" lines, error messages).
