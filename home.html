@@ -440,8 +440,8 @@ nav a.navlink, nav a.signout { white-space:nowrap; }
   <div class="ph-sheet">
     <div class="ph-step" id="phPick">
         <h2 id="phTitle">Add your photo</h2>
-        <p>Choose a clear photo of your face, or take one now.</p>
-        <p class="small">Your photo will be shown to other signed-in members of the council.</p>
+        <p id="phPickText">Choose a clear photo of your face, or take one now.</p>
+        <p class="small" id="phPickSmall">Your photo will be shown to other signed-in members of the council.</p>
         <label class="ph-big main" for="phCam">Take a photo</label>
         <label class="ph-big alt" for="phFile">Choose from my photos</label>
         <input type="file" id="phCam" class="ph-vh" accept="image/*" capture="user">
@@ -451,12 +451,12 @@ nav a.navlink, nav a.signout { white-space:nowrap; }
     <div class="ph-step" id="phPreview">
         <h2>Is this the one?</h2>
         <div class="ph-preview" id="phPreviewBox"></div>
-        <p class="small">This is how other members will see you.</p>
+        <p class="small" id="phPreviewSmall">This is how other members will see you.</p>
         <button type="button" class="ph-big main" id="phUse">Use this photo</button>
         <label class="ph-big alt" for="phFile">Choose a different photo</label>
     </div>
     <div class="ph-step" id="phSaved">
-        <h2>Your photo is saved</h2>
+        <h2 id="phSavedTitle">Your photo is saved</h2>
         <div class="ph-preview" id="phSavedBox"></div>
         <p class="small">Other members will now see it on the Groups page.</p>
         <button type="button" class="ph-big main" data-ph-close>Done</button>
@@ -1322,15 +1322,34 @@ async function loadPhoto(key) {
 function renderPhotoUI() {
     if (!CURRENT_MEMBER) return;
     const own = isOwnProfile();
+    const onBehalf = !own && Session.adminTools();   // Data Administrator with admin tools on, viewing another member
+    const canEdit = own || onBehalf;
     const has = isB64(MY_PHOTO);
     const slot = document.getElementById('photoSlot');
     slot.innerHTML = avatarHtml(fullName(CURRENT_MEMBER), MY_PHOTO, 88);
-    slot.disabled = !own;
-    document.getElementById('photoBtn').style.display = own ? '' : 'none';
-    document.getElementById('photoBtn').textContent = has ? 'Change photo' : 'Add my photo';
+    slot.disabled = !canEdit;
+    document.getElementById('photoBtn').style.display = canEdit ? '' : 'none';
+    document.getElementById('photoBtn').textContent = has ? 'Change photo' : (own ? 'Add my photo' : 'Add photo for this member');
     document.getElementById('photoHint').style.display = (own && !has) ? '' : 'none';
-    document.getElementById('photoRemoveLink').hidden = !(has && (own || Session.adminTools()));
-    document.getElementById('photoActions').style.display = (own || has) ? '' : 'none';
+    document.getElementById('photoRemoveLink').hidden = !(has && canEdit);
+    document.getElementById('photoActions').style.display = (canEdit || has) ? '' : 'none';
+}
+
+/* The photo sheet says "your photo" for a member and names the member when the Data Administrator adds one for him. */
+function openPhotoPicker() {
+    const own = isOwnProfile();
+    const who = CURRENT_MEMBER ? (CURRENT_MEMBER.nickname || CURRENT_MEMBER.firstName || 'this member') : 'this member';
+    const full = CURRENT_MEMBER ? fullName(CURRENT_MEMBER) : 'this member';
+    document.getElementById('phTitle').textContent = own ? 'Add your photo' : 'Add a photo for ' + full;
+    document.getElementById('phPickText').textContent = own
+        ? 'Choose a clear photo of your face, or take one now.'
+        : 'Choose a clear photo of ' + who + '’s face. Use only a photo the member has given you or agreed to.';
+    document.getElementById('phPickSmall').textContent = own
+        ? 'Your photo will be shown to other signed-in members of the council.'
+        : 'It will be shown to other signed-in members of the council. This change is recorded as an admin edit.';
+    document.getElementById('phPreviewSmall').textContent = own ? 'This is how other members will see you.' : 'This is how other members will see ' + who + '.';
+    document.getElementById('phSavedTitle').textContent = own ? 'Your photo is saved' : 'Photo saved for ' + full;
+    phStep('phPick');
 }
 
 /* --- sheet --- */
@@ -1346,8 +1365,8 @@ function phError(title, msg, canRetry) {
 document.querySelectorAll('[data-ph-close]').forEach(b => b.addEventListener('click', phClose));
 phOverlay.addEventListener('click', e => { if (e.target === phOverlay) phClose(); });
 document.addEventListener('keydown', e => { if (e.key === 'Escape') phClose(); });
-document.getElementById('photoBtn').addEventListener('click', () => phStep('phPick'));
-document.getElementById('photoSlot').addEventListener('click', () => { if (isOwnProfile()) phStep('phPick'); });
+document.getElementById('photoBtn').addEventListener('click', openPhotoPicker);
+document.getElementById('photoSlot').addEventListener('click', () => { if (isOwnProfile() || Session.adminTools()) openPhotoPicker(); });
 document.getElementById('photoRemoveLink').addEventListener('click', () => {
     document.getElementById('phRemoveMsg').textContent = isOwnProfile()
         ? 'Other members will see your initials instead.'
