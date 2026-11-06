@@ -245,6 +245,10 @@ nav a.navlink, nav a.signout { white-space:nowrap; }
 .ph-big:disabled { opacity:0.6; cursor:default; }
 .ph-linkish { margin-top:0.9rem; background:none; border:none; font-family:'Lato',sans-serif; font-size:0.95rem; color:var(--text-medium); text-decoration:underline; cursor:pointer; padding:0.5rem; }
 .ph-vh { position:absolute; width:1px; height:1px; opacity:0; overflow:hidden; pointer-events:none; }
+.ph-adjust { margin-top:0.9rem; text-align:left; }
+.ph-adjust label { display:block; font-family:'Lato',sans-serif; font-size:0.88rem; color:var(--text-medium); margin-top:0.5rem; }
+.ph-adjust input[type=range] { width:100%; margin:0.2rem 0 0; accent-color:var(--primary); }
+.ph-adjust [hidden] { display:none; }
 .ph-step { display:none; } .ph-step.on { display:block; }
 </style>
 <script src="config.js"></script>
@@ -452,6 +456,12 @@ nav a.navlink, nav a.signout { white-space:nowrap; }
         <h2>Is this the one?</h2>
         <div class="ph-preview" id="phPreviewBox"></div>
         <p class="small" id="phPreviewSmall">This is how other members will see you.</p>
+        <div class="ph-adjust" id="phAdjust">
+            <label for="phZoom">Zoom in</label>
+            <input type="range" id="phZoom" min="0" max="100" value="0">
+            <div id="phXRow" hidden><label for="phX">Move left / right</label><input type="range" id="phX" min="0" max="100" value="50"></div>
+            <div id="phYRow" hidden><label for="phY">Move up / down</label><input type="range" id="phY" min="0" max="100" value="20"></div>
+        </div>
         <button type="button" class="ph-big main" id="phUse">Use this photo</button>
         <label class="ph-big alt" for="phFile">Choose a different photo</label>
     </div>
@@ -1383,29 +1393,54 @@ function loadImageFile(file) {
         img.src = url;
     });
 }
-/* Shrink to a small square. Tall photos are cropped toward the top so faces aren't cut off. */
-async function shrinkPhoto(file) {
-    const img = await loadImageFile(file);
+/* Frame the photo in a small square. By default the WHOLE photo is shown (so tightly framed portraits aren't
+   trimmed); the sliders zoom in and move it. Any space left over is filled with the photo's own backdrop colour. */
+let PHOTO_IMG = null;
+function backdropColour(img) {
+    try {
+        const c = document.createElement('canvas'); c.width = c.height = 16;
+        const g = c.getContext('2d'); g.drawImage(img, 0, 0, 16, 16);
+        const a = g.getImageData(0, 0, 1, 1).data, b = g.getImageData(15, 0, 1, 1).data;
+        return 'rgb(' + Math.round((a[0] + b[0]) / 2) + ',' + Math.round((a[1] + b[1]) / 2) + ',' + Math.round((a[2] + b[2]) / 2) + ')';
+    } catch (e) { return '#fff'; }
+}
+function framePhoto(img, zoom, px, py) {
     const w = img.naturalWidth, h = img.naturalHeight;
     if (!w || !h) throw new Error('empty');
-    const side = Math.min(w, h);
-    const sx = (w - side) / 2;
-    const sy = h > w ? (h - side) * 0.2 : 0;
+    const contain = PHOTO_W / Math.max(w, h), cover = PHOTO_W / Math.min(w, h);
+    const scale = contain + (cover - contain) * zoom;                 // zoom 0 = whole photo, 1 = fills the square
+    const dw = w * scale, dh = h * scale;
+    const ox = dw <= PHOTO_W ? (PHOTO_W - dw) / 2 : (PHOTO_W - dw) * px;
+    const oy = dh <= PHOTO_W ? (PHOTO_W - dh) / 2 : (PHOTO_W - dh) * py;
     const c = document.createElement('canvas'); c.width = c.height = PHOTO_W;
-    const g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, PHOTO_W, PHOTO_W);
-    g.imageSmoothingQuality = 'high'; g.drawImage(img, sx, sy, side, side, 0, 0, PHOTO_W, PHOTO_W);
+    const g = c.getContext('2d'); g.fillStyle = backdropColour(img); g.fillRect(0, 0, PHOTO_W, PHOTO_W);
+    g.imageSmoothingQuality = 'high'; g.drawImage(img, ox, oy, dw, dh);
     for (const q of [0.8, 0.65, 0.5]) {
         const b64 = c.toDataURL('image/jpeg', q).replace(/^data:image\/jpeg;base64,/, '');
-        if (isB64(b64) && b64.length <= 40000) return b64;
+        if (isB64(b64) && b64.length <= 40000) return { b64: b64, overW: dw > PHOTO_W + 0.5, overH: dh > PHOTO_W + 0.5 };
     }
     throw new Error('too big');
 }
+function refreshFrame() {
+    if (!PHOTO_IMG) return;
+    const z = +document.getElementById('phZoom').value / 100;
+    const px = +document.getElementById('phX').value / 100, py = +document.getElementById('phY').value / 100;
+    const r = framePhoto(PHOTO_IMG, z, px, py);
+    PHOTO_PENDING = r.b64;
+    document.getElementById('phXRow').hidden = !r.overW;
+    document.getElementById('phYRow').hidden = !r.overH;
+    document.getElementById('phPreviewBox').innerHTML = avatarHtml('', PHOTO_PENDING, 160);
+}
+['phZoom', 'phX', 'phY'].forEach(id => document.getElementById(id).addEventListener('input', () => { try { refreshFrame(); } catch (e) {} }));
 async function onPhotoChosen(input) {
     const f = input.files && input.files[0];
     if (!f) return;
     try {
-        PHOTO_PENDING = await shrinkPhoto(f);
-        document.getElementById('phPreviewBox').innerHTML = avatarHtml('', PHOTO_PENDING, 160);
+        PHOTO_IMG = await loadImageFile(f);
+        document.getElementById('phZoom').value = 0;
+        document.getElementById('phX').value = 50;
+        document.getElementById('phY').value = 20;
+        refreshFrame();
         const useBtn = document.getElementById('phUse'); useBtn.disabled = false; useBtn.textContent = 'Use this photo';
         phStep('phPreview');
     } catch (e) {
