@@ -39,3 +39,33 @@
         })
         .catch(function () { /* quiet fail — link stays hidden */ });
 })();
+
+/*
+ * Website Photos quick-link
+ * -------------------------
+ * Adds a "Website Photos" tab to the top menu for the people who manage the public website's pictures:
+ *  - a Data Administrator who has admin tools switched on (?admin=on), or
+ *  - anyone for whom the Website Photos page has already worked once on this device
+ *    (that page sets the "mcSitePhotos" flag), so listed photo editors who are not
+ *    administrators can find it too. The Apps Script still decides who may actually save.
+ */
+(function () {
+    function show() {
+        try {
+            if (typeof Session === 'undefined' || !Session.read()) return;
+            var editor = Session.adminTools() || localStorage.getItem('mcSitePhotos') === 'on';
+            if (!editor) return;
+            var ul = document.querySelector('nav ul');
+            if (!ul || ul.querySelector('a[href="website-photos.html"]')) return;
+            var li = document.createElement('li');
+            var a = document.createElement('a');
+            a.href = 'website-photos.html';
+            a.className = 'navlink preserve-member';
+            a.textContent = 'Website Photos';
+            li.appendChild(a);
+            ul.appendChild(li);
+        } catch (e) { /* the menu simply stays as it is */ }
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', show);
+    else show();
+})();
