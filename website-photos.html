@@ -52,12 +52,11 @@ input:focus { border-color:var(--primary-light); }
 .pick input { position:absolute; opacity:0; width:1px; height:1px; }
 
 .frame { position:relative; aspect-ratio:16/9; background:#0E2456; border-radius:12px; overflow:hidden; margin-top:0.4rem; }
-.frame img { width:100%; height:100%; display:block; }
-.frame.photo img { object-fit:cover; }
-.frame.poster img { object-fit:contain; }
+.frame canvas { width:100%; height:100%; display:block; touch-action:none; }
+.frame.photo canvas { cursor:grab; }
+.frame.poster canvas { cursor:default; }
 .frame .empty { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; text-align:center; padding:1rem;
                 color:#B9C3D6; font-family:'Lato',sans-serif; font-size:0.92rem; }
-@media (max-width:600px){ .frame { aspect-ratio:4/3; } }
 .cap-preview { font-family:'Lato',sans-serif; font-weight:700; color:var(--primary); margin-top:0.55rem; min-height:1.4em; }
 
 .btn { padding:0.8rem 1.4rem; border-radius:50px; border:none; cursor:pointer; background:var(--secondary); color:white;
@@ -107,7 +106,7 @@ input:focus { border-color:var(--primary-light); }
 
 <div class="page">
     <h1>Website photos and posters</h1>
-    <p class="sub">These rotate on the home page of the public website. Use recent event photos and posters for upcoming events. Photos fill the frame and may be cropped at the edges; posters are shown whole.</p>
+    <p class="sub">These rotate on the home page of the public website. Use recent event photos and posters for upcoming events. Photos are cropped to a wide frame, and you choose what shows; posters are shown whole.</p>
 
     <div class="card">
         <h2 id="formTitle">Add a picture</h2>
@@ -116,7 +115,9 @@ input:focus { border-color:var(--primary-light); }
                 <label class="fl" for="file">Picture</label>
                 <label class="pick" id="pickBox"><input type="file" id="file" accept="image/*">Tap or click to choose a photo or a poster image<br><span style="font-size:0.82rem">JPEG, PNG or a phone photo. It will be shrunk automatically.</span></label>
                 <label class="fl">Preview, as it will look on the website</label>
-                <div class="frame photo" id="frame"><div class="empty" id="frameEmpty">No picture chosen yet</div><img id="prev" alt="" hidden></div>
+                <div class="frame photo" id="frame"><div class="empty" id="frameEmpty">No picture chosen yet</div><canvas id="cv" width="960" height="540" tabindex="0" aria-label="Picture preview. Drag, or use the arrow keys, to move the picture." hidden></canvas></div>
+                <div id="zoomRow" hidden><label class="fl" for="zoom">Zoom</label><input type="range" id="zoom" min="100" max="400" value="100" style="width:100%"><div class="hint">Drag the picture to choose what shows. Zoom in to leave out the edges. What you see here is what visitors see.</div></div>
+                <div class="hint" id="posterHint" hidden>Posters are shown whole, with no cropping.</div>
                 <div class="cap-preview" id="capPrev"></div>
             </div>
             <div>
@@ -150,7 +151,7 @@ input:focus { border-color:var(--primary-light); }
         <div class="actions">
             <button class="btn" id="saveBtn" type="button">Add to website</button>
             <button class="btn ghost" id="clearBtn" type="button">Clear</button>
-            <span class="hint" id="sizeNote"></span>
+            
         </div>
         <div class="msg" id="formMsg" role="status"></div>
     </div>
@@ -171,7 +172,6 @@ const MAX_EDGE = 1600;          // longest side, in pixels
 const TARGET_CHARS = 1100000;   // aim for about 800 KB of picture text
 const $ = id => document.getElementById(id);
 
-let pending = null;             // base64 JPEG (no prefix) of the chosen picture
 let items = [];                 // rows from the sheet
 
 function say(el, text, kind) { el.className = 'msg show ' + (kind || 'info'); el.textContent = text; }
@@ -179,49 +179,107 @@ function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&
 function kindOf() { return document.querySelector('input[name=kind]:checked').value; }
 function thumbUrl(id, w) { return 'https://drive.google.com/thumbnail?id=' + encodeURIComponent(id) + '&sz=w' + (w || 600); }
 
-/* ---------- preview ---------- */
+/* ---------- preview, framing and shrinking ---------- */
+const VW = 960, VH = 540;                 // the preview canvas (16:9, same shape as the website frame)
+let srcImg = null;                        // the picture chosen (full size, in memory only)
+const view = { zoom: 1, ox: 0.5, oy: 0.5 };   // zoom, and the centre of the visible part (0..1 of the picture)
+
+function isPoster() { return kindOf() === 'Poster'; }
+/* Which part of the picture shows (in picture pixels) for the current zoom and position. */
+function region() {
+    const iw = srcImg.naturalWidth, ih = srcImg.naturalHeight;
+    const s = Math.max(VW / iw, VH / ih) * view.zoom;
+    const vw = VW / s, vh = VH / s;
+    const left = Math.min(Math.max(view.ox * iw - vw / 2, 0), iw - vw);
+    const top = Math.min(Math.max(view.oy * ih - vh / 2, 0), ih - vh);
+    view.ox = (left + vw / 2) / iw; view.oy = (top + vh / 2) / ih;
+    return { left, top, vw, vh, s };
+}
+function draw() {
+    const cv = $('cv'), g = cv.getContext('2d');
+    g.fillStyle = '#0E2456'; g.fillRect(0, 0, VW, VH);
+    if (!srcImg) return;
+    const iw = srcImg.naturalWidth, ih = srcImg.naturalHeight;
+    if (isPoster()) {
+        const s = Math.min(VW / iw, VH / ih);
+        g.drawImage(srcImg, (VW - iw * s) / 2, (VH - ih * s) / 2, iw * s, ih * s);
+    } else {
+        const r = region();
+        g.drawImage(srcImg, r.left, r.top, r.vw, r.vh, 0, 0, VW, VH);
+    }
+}
 function refreshPreview() {
-    $('frame').className = 'frame ' + (kindOf() === 'Poster' ? 'poster' : 'photo');
+    $('frame').className = 'frame ' + (isPoster() ? 'poster' : 'photo');
     $('capPrev').textContent = $('caption').value;
+    $('zoomRow').hidden = !srcImg || isPoster();
+    $('posterHint').hidden = !srcImg || !isPoster();
+    draw();
 }
 ['caption'].forEach(id => $(id).addEventListener('input', refreshPreview));
 document.querySelectorAll('input[name=kind]').forEach(r => r.addEventListener('change', refreshPreview));
+$('zoom').addEventListener('input', e => { view.zoom = e.target.value / 100; draw(); });
 
-/* ---------- choose and shrink ---------- */
+/* drag to move; arrow keys too */
+(function () {
+    const cv = $('cv'); let last = null;
+    cv.addEventListener('pointerdown', e => { if (!srcImg || isPoster()) return; last = { x: e.clientX, y: e.clientY }; cv.setPointerCapture(e.pointerId); cv.style.cursor = 'grabbing'; });
+    cv.addEventListener('pointermove', e => {
+        if (!last) return;
+        const r = region(), k = (VW / cv.clientWidth) / r.s;            // screen pixels -> picture pixels
+        view.ox -= (e.clientX - last.x) * k / srcImg.naturalWidth;
+        view.oy -= (e.clientY - last.y) * k / srcImg.naturalHeight;
+        last = { x: e.clientX, y: e.clientY }; draw();
+    });
+    const end = () => { last = null; cv.style.cursor = ''; };
+    cv.addEventListener('pointerup', end); cv.addEventListener('pointercancel', end);
+    cv.addEventListener('keydown', e => {
+        if (!srcImg || isPoster()) return;
+        const step = 0.03 / view.zoom, m = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, -step], ArrowDown: [0, step] }[e.key];
+        if (!m) return; e.preventDefault(); view.ox += m[0]; view.oy += m[1]; draw();
+    });
+})();
+
 function loadImage(file) {
     return new Promise((resolve, reject) => {
         const url = URL.createObjectURL(file);
         const img = new Image();
-        img.onload = () => { URL.revokeObjectURL(url); resolve(img); };
+        img.onload = () => resolve(img);       // keep the address alive: the picture is drawn from it later
         img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('read')); };
         img.src = url;
     });
 }
-function shrink(img) {
-    const scale = Math.min(1, MAX_EDGE / Math.max(img.naturalWidth, img.naturalHeight));
-    const w = Math.max(1, Math.round(img.naturalWidth * scale)), h = Math.max(1, Math.round(img.naturalHeight * scale));
-    const c = document.createElement('canvas'); c.width = w; c.height = h;
-    const g = c.getContext('2d');
-    g.fillStyle = '#fff'; g.fillRect(0, 0, w, h);     // PNGs with see-through areas become white, not black
-    g.drawImage(img, 0, 0, w, h);
+/* Final JPEG as base64 text. A photo is saved as exactly what the preview shows (16:9); a poster is saved whole. */
+function exportJpeg() {
+    const iw = srcImg.naturalWidth, ih = srcImg.naturalHeight;
+    const c = document.createElement('canvas'), g = c.getContext('2d');
+    if (isPoster()) {
+        const sc = Math.min(1, MAX_EDGE / Math.max(iw, ih));
+        c.width = Math.max(1, Math.round(iw * sc)); c.height = Math.max(1, Math.round(ih * sc));
+        g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height);
+        g.drawImage(srcImg, 0, 0, c.width, c.height);
+    } else {
+        const r = region();
+        c.width = MAX_EDGE; c.height = Math.round(MAX_EDGE * 9 / 16);
+        g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height);
+        g.drawImage(srcImg, r.left, r.top, r.vw, r.vh, 0, 0, c.width, c.height);
+    }
     let q = 0.86, data = c.toDataURL('image/jpeg', q);
     while (data.length > TARGET_CHARS && q > 0.45) { q -= 0.08; data = c.toDataURL('image/jpeg', q); }
-    return data;
+    return data.split(',')[1];
 }
 $('file').addEventListener('change', async e => {
     const f = e.target.files[0];
     if (!f) return;
     say($('formMsg'), 'Preparing the picture…', 'info');
     try {
-        const img = await loadImage(f);
-        const data = shrink(img);
-        pending = data.split(',')[1];
-        $('prev').src = data; $('prev').hidden = false; $('frameEmpty').hidden = true;
-        $('sizeNote').textContent = 'Picture size after shrinking: about ' + Math.round(pending.length * 0.75 / 1024) + ' KB';
+        srcImg = await loadImage(f);
+        view.zoom = 1; view.ox = 0.5; view.oy = 0.5; $('zoom').value = 100;
+        $('cv').hidden = false; $('frameEmpty').hidden = true;
+        refreshPreview();
         $('formMsg').className = 'msg';
         if (!$('caption').value) $('caption').focus();
     } catch (err) {
-        pending = null;
+        srcImg = null;
         say($('formMsg'), "That file couldn't be read as a picture. Phone photos in HEIC format sometimes fail: try a screenshot or a JPEG.", 'bad');
     }
 });
@@ -251,13 +309,13 @@ function formFields() {
 }
 $('saveBtn').addEventListener('click', async () => {
     const f = formFields();
-    if (!pending) return say($('formMsg'), 'Please choose a picture first.', 'bad');
+    if (!srcImg) return say($('formMsg'), 'Please choose a picture first.', 'bad');
     if (!f.caption) return say($('formMsg'), 'Please give the picture a short caption.', 'bad');
     if (!$('consent').checked) return say($('formMsg'), 'Please confirm that the people pictured have agreed.', 'bad');
     $('saveBtn').disabled = true;
     say($('formMsg'), 'Saving…', 'info');
     try {
-        const r = await post(Object.assign({ action: 'saveSitePhoto', photo: pending, consent: 'Yes' }, f));
+        const r = await post(Object.assign({ action: 'saveSitePhoto', photo: exportJpeg(), consent: 'Yes' }, f));
         if (r.success) {
             say($('formMsg'), 'Added. It can take a minute or two to appear on the website.', 'ok');
             resetForm(true);
@@ -269,9 +327,9 @@ $('saveBtn').addEventListener('click', async () => {
     $('saveBtn').disabled = false;
 });
 function resetForm(keepMsg) {
-    pending = null; $('file').value = ''; $('prev').hidden = true; $('prev').removeAttribute('src'); $('frameEmpty').hidden = false;
+    srcImg = null; $('file').value = ''; $('cv').hidden = true; $('frameEmpty').hidden = false; view.zoom = 1; view.ox = 0.5; view.oy = 0.5; $('zoom').value = 100;
     ['caption', 'link', 'from', 'thru', 'order'].forEach(id => $(id).value = '');
-    $('show').checked = true; $('consent').checked = false; $('sizeNote').textContent = '';
+    $('show').checked = true; $('consent').checked = false;
     document.querySelector('input[name=kind][value=Photo]').checked = true;
     refreshPreview();
     if (!keepMsg) $('formMsg').className = 'msg';
