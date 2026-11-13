@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex">
-<title>Website Reports — St. Luke Knights of Columbus Member Center</title>
+<title>News Reports — St. Luke Knights of Columbus Member Center</title>
 <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600;700&family=Lora:wght@400;500;600&family=Lato:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -98,6 +98,12 @@ input:focus { border-color:var(--primary-light); }
 .pdfchip { display:flex; align-items:center; gap:0.7rem; margin-top:0.6rem; padding:0.7rem 0.9rem; background:#F9FAFB; border:1.5px solid #E5E7EB; border-radius:10px; font-family:'Lato',sans-serif; font-size:0.92rem; }
 .pdfchip b { color:var(--primary); }
 .item.rep { grid-template-columns:1fr; }
+.aud { display:grid; gap:0.45rem; font-family:'Lato',sans-serif; font-size:0.95rem; margin-top:0.2rem; }
+.aud label { display:flex; gap:0.55rem; align-items:flex-start; cursor:pointer; line-height:1.35; }
+.aud input { width:18px; height:18px; margin-top:0.1rem; accent-color:var(--primary); flex-shrink:0; }
+.chip.both { background:#EFF6FF; color:#1E3A8A; } .chip.mem { background:#F5F3FF; color:#5B21B6; }
+.sel { width:100%; font-family:'Lora',serif; font-size:1rem; padding:0.65rem 0.8rem; border:1.5px solid #D1D5DB; border-radius:10px; background:#fff; }
+a.back2 { font-family:'Lato',sans-serif; font-size:0.9rem; color:var(--primary); font-weight:600; display:inline-block; margin-top:0.8rem; }
 </style>
 <script src="config.js"></script>
 <script src="session.js"></script>
@@ -105,12 +111,12 @@ input:focus { border-color:var(--primary-light); }
 <body>
 <div class="brandbar"><div class="inner">
     <a href="home.html" class="logo"><span class="logo-main">ST. LUKE KNIGHTS OF COLUMBUS</span><span class="logo-sub">Member Center · Council 14895</span></a>
-    <a class="back" href="home.html">&larr; Back to my profile</a>
+    <a class="back" href="news.html">&larr; News &amp; reports</a>
 </div></div>
 
 <div class="page">
-    <h1>Website reports</h1>
-    <p class="sub">PDF reports listed on the News page of the public website. Only reports you mark &ldquo;Show on the public website&rdquo; are visible to the public. Everyone with the link can read them, so use only reports meant for the whole parish.</p>
+    <h1>Manage reports</h1>
+    <p class="sub">PDF reports for the News pages. Choose who can see each one: the public website, the Member Center, both, or nobody (hidden). Public reports can be read by anyone with the link, so use them only for reports meant for the whole parish. Member Center reports are visible only to signed-in members.</p>
 
     <div class="card">
         <h2>Add a report</h2>
@@ -127,19 +133,25 @@ input:focus { border-color:var(--primary-light); }
                 <input type="text" id="summary" maxlength="300" placeholder="e.g. Fall Festival results and what is coming up">
                 <label class="fl" for="date">Date of the report</label>
                 <input type="date" id="date">
-                <label class="check"><input type="checkbox" id="show" checked> Show on the public website</label>
-                <label class="check"><input type="checkbox" id="reviewed"> I reviewed this report. It has no member personal information (addresses, phone numbers, health) and no individual financial details.</label>
+                <label class="fl">Who can see it</label>
+                <div class="aud" id="aud">
+                    <label><input type="radio" name="aud" value="Both" checked> <span><b>Everyone</b> &mdash; public website and Member Center</span></label>
+                    <label><input type="radio" name="aud" value="Public"> <span><b>Public website only</b></span></label>
+                    <label><input type="radio" name="aud" value="Members"> <span><b>Member Center only</b> &mdash; signed-in members</span></label>
+                    <label><input type="radio" name="aud" value="Hidden"> <span><b>Hidden</b> &mdash; only report editors</span></label>
+                </div>
+                <label class="check"><input type="checkbox" id="reviewed"> I reviewed this report. If it is for the public website, it has no member personal information (addresses, phone numbers, health) and no individual financial details.</label>
             </div>
         </div>
         <div class="actions">
-            <button class="btn" id="saveBtn" type="button">Add to website</button>
+            <button class="btn" id="saveBtn" type="button">Add report</button>
             <button class="btn ghost" id="clearBtn" type="button">Clear</button>
         </div>
         <div class="msg" id="formMsg" role="status"></div>
     </div>
 
     <div class="card">
-        <h2>Reports on the website</h2>
+        <h2>All reports</h2>
         <div class="msg info show" id="listMsg">Loading&hellip;</div>
         <div class="list" id="list"></div>
     </div>
@@ -148,8 +160,6 @@ input:focus { border-color:var(--primary-light); }
 
 <script>
 const ENDPOINT = KOC_CONFIG.endpoint;
-const WP_SHEET = KOC_CONFIG.announcementsSheetId;
-const WP_TAB = 'Website Reports';
 const MAX_BYTES = 4 * 1024 * 1024;
 const $ = id => document.getElementById(id);
 let pdfB64 = null, items = [];
@@ -158,7 +168,9 @@ function say(el, text, kind) { el.className = 'msg show ' + (kind || 'info'); el
 function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 function today() { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
 function viewUrl(id) { return 'https://drive.google.com/file/d/' + encodeURIComponent(id) + '/view'; }
-const isYes = v => /^(y|yes|true)$/i.test(String(v || ''));
+const AUD = { Both: ['Everyone', 'both'], Public: ['Public site', 'live'], Members: ['Members only', 'mem'], Hidden: ['Hidden', 'hidden'] };
+const isPubAud = a => a === 'Both' || a === 'Public';
+const chosenAud = () => (document.querySelector('input[name=aud]:checked') || {}).value || 'Both';
 
 /* ---------- choose a PDF ---------- */
 $('file').addEventListener('change', e => {
@@ -187,7 +199,7 @@ async function post(params) {
     });
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const out = await res.json();
-    if (out && out.success) { try { localStorage.setItem('mcSiteReports', 'on'); } catch (e) {} }   // shows the menu tab on this device
+    if (out && out.success && (out.editor || params.action !== 'listSiteReports')) { try { localStorage.setItem('mcSiteReports', 'on'); } catch (e) {} }   // shows the menu tab on this device
     return out;
 }
 function explain(r) {
@@ -204,8 +216,8 @@ $('saveBtn').addEventListener('click', async () => {
     $('saveBtn').disabled = true; say($('formMsg'), 'Saving…', 'info');
     try {
         const r = await post({ action: 'saveSiteReport', pdf: pdfB64, title, summary: $('summary').value.trim(), reportDate: $('date').value,
-                               show: $('show').checked ? 'Yes' : 'No', reviewed: 'Yes' });
-        if (r.success) { say($('formMsg'), 'Added. It can take a minute or two to appear on the website.', 'ok'); resetForm(true); loadList(); }
+                               audience: chosenAud(), reviewed: 'Yes' });
+        if (r.success) { say($('formMsg'), isPubAud(chosenAud()) ? 'Added. It can take a minute or two to appear on the website.' : 'Added.', 'ok'); resetForm(true); loadList(); }
         else say($('formMsg'), explain(r), 'bad');
     } catch (err) { say($('formMsg'), "We couldn't reach the Member Center just now. Please try again in a moment.", 'bad'); }
     $('saveBtn').disabled = false;
@@ -213,47 +225,38 @@ $('saveBtn').addEventListener('click', async () => {
 function resetForm(keepMsg) {
     pdfB64 = null; $('file').value = ''; $('chip').hidden = true;
     ['title', 'summary'].forEach(id => $(id).value = ''); $('date').value = today();
-    $('show').checked = true; $('reviewed').checked = false;
+    document.querySelector('input[name=aud][value=Both]').checked = true; $('reviewed').checked = false;
     if (!keepMsg) $('formMsg').className = 'msg';
 }
 $('clearBtn').addEventListener('click', () => resetForm(false));
 
-/* ---------- the list (read straight from the sheet) ---------- */
-function gvizDate(c) {
-    if (!c) return '';
-    const m = /^Date\((\d+),(\d+),(\d+)/.exec(String(c.v));
-    if (m) return m[1] + '-' + String(+m[2] + 1).padStart(2, '0') + '-' + String(+m[3]).padStart(2, '0');
-    return /^\d{4}-\d{2}-\d{2}$/.test(String(c.v || '')) ? c.v : '';
-}
-function cellText(c) { return c && c.v != null ? String(c.v).trim() : ''; }
+/* ---------- the list (signed-in request; editors see every report) ---------- */
 async function loadList() {
-    const url = 'https://docs.google.com/spreadsheets/d/' + WP_SHEET + '/gviz/tq?tqx=out:json&headers=1&sheet=' + encodeURIComponent(WP_TAB) + '&_=' + Date.now();
     try {
-        const text = await (await fetch(url)).text();
-        const m = text.match(/setResponse\(([\s\S]*)\);?\s*$/);
-        if (!m) throw new Error('shape');
-        items = (JSON.parse(m[1]).table.rows || []).map(r => {
-            const c = r.c || [];
-            return { id: cellText(c[0]), title: cellText(c[1]), summary: cellText(c[2]), date: gvizDate(c[3]), show: cellText(c[4]) };
-        }).filter(it => it.id);
+        const r = await post({ action: 'listSiteReports' });
+        if (!r.success) { items = []; $('list').innerHTML = ''; return say($('listMsg'), explain(r), 'bad'); }
+        items = (r.reports || []).slice();
         items.sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
         renderList();
     } catch (err) {
-        say($('listMsg'), "Couldn't load the list. Check that the Announcements workbook is shared so anyone with the link can view it, then refresh.", 'bad');
+        say($('listMsg'), "Couldn't load the list. Please refresh the page and try again.", 'bad');
     }
+}
+function audSelect(id, cur) {
+    return '<select class="sel" id="' + id + '">' + Object.keys(AUD).map(k => '<option value="' + k + '"' + (k === cur ? ' selected' : '') + '>' +
+        { Both: 'Everyone (public website and Member Center)', Public: 'Public website only', Members: 'Member Center only', Hidden: 'Hidden (editors only)' }[k] + '</option>').join('') + '</select>';
 }
 function renderList() {
     const box = $('list');
     if (!items.length) { box.innerHTML = ''; return say($('listMsg'), 'No reports yet. Add the first one above.', 'info'); }
     $('listMsg').className = 'msg';
     box.innerHTML = items.map((it, n) => {
-        const pub = isYes(it.show);
+        const a = AUD[it.audience] ? it.audience : 'Hidden';
         return '<div class="item rep" data-i="' + n + '"><div>' +
             '<h3>' + esc(it.title) + '</h3>' +
-            '<div class="meta"><span class="chip ' + (pub ? 'live' : 'hidden') + '">' + (pub ? 'Live' : 'Hidden') + '</span>' + esc(it.date) + (it.summary ? ' &middot; ' + esc(it.summary) : '') + '</div>' +
+            '<div class="meta"><span class="chip ' + AUD[a][1] + '">' + AUD[a][0] + '</span>' + esc(it.date) + (it.summary ? ' &middot; ' + esc(it.summary) : '') + '</div>' +
             '<div class="btns">' +
-              '<a class="btn small ghost" href="' + viewUrl(it.id) + '" target="_blank" rel="noopener" style="text-decoration:none">' + (pub ? 'Open PDF' : 'Open PDF (you only)') + '</a>' +
-              '<button class="btn small ghost" data-act="toggle">' + (pub ? 'Hide' : 'Show') + '</button>' +
+              '<button class="btn small ghost" data-act="open">Open PDF</button>' +
               '<button class="btn small ghost" data-act="edit">Edit</button>' +
               '<button class="btn small danger" data-act="del">Delete</button>' +
             '</div>' +
@@ -261,16 +264,32 @@ function renderList() {
               '<label class="fl" for="et' + n + '">Title</label><input type="text" id="et' + n + '" maxlength="140" value="' + esc(it.title) + '">' +
               '<label class="fl" for="es' + n + '">Summary</label><input type="text" id="es' + n + '" maxlength="300" value="' + esc(it.summary) + '">' +
               '<label class="fl" for="ed' + n + '">Date of the report</label><input type="date" id="ed' + n + '" value="' + esc(it.date) + '">' +
+              '<label class="fl" for="ea' + n + '">Who can see it</label>' + audSelect('ea' + n, a) +
               '<div class="actions"><button class="btn small" data-act="saveEdit">Save changes</button><button class="btn small ghost" data-act="cancelEdit">Cancel</button></div>' +
             '</div>' +
             '<div class="msg" id="im' + n + '" role="status"></div>' +
           '</div></div>';
     }).join('');
 }
+/* Opens a PDF. Public ones open from Drive; member-only ones are fetched with the member's sign-in. */
+async function openPdf(it, n) {
+    if (isPubAud(it.audience)) { window.open(viewUrl(it.id), '_blank', 'noopener'); return; }
+    const w = window.open('', '_blank');
+    itemMsg(n, 'Opening…', 'info');
+    try {
+        const r = await post({ action: 'getSiteReportFile', id: it.id });
+        if (!r.success) throw new Error(explain(r));
+        const bin = atob(r.pdf), bytes = new Uint8Array(bin.length);
+        for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+        const url = URL.createObjectURL(new Blob([bytes], { type: 'application/pdf' }));
+        if (w) w.location.href = url; else window.location.href = url;
+        $('im' + n).className = 'msg';
+    } catch (err) { if (w) w.close(); itemMsg(n, err.message || "That PDF couldn't be opened.", 'bad'); }
+}
 function itemMsg(n, text, kind) { const el = $('im' + n); if (el) say(el, text, kind); }
 async function saveOne(it, over) {
     const o = Object.assign({}, it, over || {});
-    const r = await post({ action: 'updateSiteReport', id: o.id, title: o.title, summary: o.summary, reportDate: o.date, show: isYes(o.show) ? 'Yes' : 'No' });
+    const r = await post({ action: 'updateSiteReport', id: o.id, title: o.title, summary: o.summary, reportDate: o.date, audience: o.audience });
     if (!r.success) throw new Error(explain(r));
 }
 $('list').addEventListener('click', async e => {
@@ -278,13 +297,13 @@ $('list').addEventListener('click', async e => {
     if (!b) return;
     const n = +b.closest('.item').dataset.i, it = items[n], act = b.dataset.act;
     try {
+        if (act === 'open') { await openPdf(it, n); return; }
         if (act === 'edit') { $('eb' + n).classList.add('open'); return; }
         if (act === 'cancelEdit') { $('eb' + n).classList.remove('open'); return; }
         b.disabled = true; itemMsg(n, act === 'del' ? 'Deleting…' : 'Saving…', 'info');
-        if (act === 'toggle') await saveOne(it, { show: isYes(it.show) ? 'No' : 'Yes' });
-        else if (act === 'saveEdit') await saveOne(it, { title: $('et' + n).value.trim(), summary: $('es' + n).value.trim(), date: $('ed' + n).value });
+        if (act === 'saveEdit') await saveOne(it, { title: $('et' + n).value.trim(), summary: $('es' + n).value.trim(), date: $('ed' + n).value, audience: $('ea' + n).value });
         else if (act === 'del') {
-            if (!confirm('Delete "' + it.title + '" from the website? This also deletes the PDF file from Drive.')) { b.disabled = false; $('im' + n).className = 'msg'; return; }
+            if (!confirm('Delete "' + it.title + '"? This also deletes the PDF file from Drive.')) { b.disabled = false; $('im' + n).className = 'msg'; return; }
             const r = await post({ action: 'deleteSiteReport', id: it.id });
             if (!r.success) throw new Error(explain(r));
         }

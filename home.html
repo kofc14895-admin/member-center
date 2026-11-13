@@ -190,6 +190,9 @@ nav a.navlink, nav a.signout { white-space:nowrap; }
 /* Announcement banner */
 .ann-banner { margin-top:0.9rem; background:#FFFDF7; border-radius:16px; box-shadow:0 4px 15px var(--shadow); border-left:6px solid var(--secondary); overflow:hidden; animation:annIn .35s ease; }
 .ann-banner[hidden] { display:none; }
+.ann-more { display:block; padding:0.65rem 1.2rem; border-top:1px solid #EFE7D6; font-family:'Lato',sans-serif; font-size:0.9rem; font-weight:700; color:var(--primary); text-decoration:none; }
+.ann-more:only-child { border-top:none; }
+.ann-more:hover { background:#FBF5E6; }
 @keyframes annIn { from { opacity:0; } to { opacity:1; } }
 @media (prefers-reduced-motion: reduce) { .ann-banner { animation:none; } }
 .ann-item { display:flex; gap:0.9rem; align-items:flex-start; padding:1.05rem 1.2rem; }
@@ -908,7 +911,10 @@ async function loadBanner() {
         else if (a.link) action = { text: a.type === 'event' ? 'Sign up' : 'Learn more', href: a.link, newTab: true };
         box.appendChild(annItem(meta, [annText(a.message)], action));
     });
-    box.hidden = !box.children.length;
+    const more = document.createElement('a'); more.className = 'ann-more'; more.href = 'news.html';
+    more.textContent = 'News & reports \u2192';
+    box.appendChild(more);
+    box.hidden = false;
 }
 window.addEventListener('DOMContentLoaded', loadBanner);
                  // after the page has loaded, look up who it goes to
