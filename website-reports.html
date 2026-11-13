@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>Website Reports — St. Luke Knights of Columbus Member Center</title>
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600;700&family=Lora:wght@400;500;600&family=Lato:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+    --primary:#1E3A8A; --primary-light:#2563EB; --secondary:#C5A572; --secondary-light:#D4B583; --accent:#B91C1C;
+    --light-bg:#F9FAFB; --text-dark:#1F2937; --text-medium:#6B7280; --shadow:rgba(30,58,138,0.15);
+    --green:#15803D; --green-bg:#F0FDF4; --amber:#B45309; --amber-bg:#FFFBEB; --red-bg:#FEF2F2;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+[hidden] { display:none !important; }
+html, body { max-width:100%; overflow-x:hidden; }
+body { font-family:'Lora',serif; color:var(--text-dark); background:var(--light-bg); min-height:100vh; }
+a { color:inherit; }
+:focus-visible { outline:3px solid var(--primary-light); outline-offset:2px; }
+.brandbar { background:white; box-shadow:0 2px 4px rgba(0,0,0,0.1); border-bottom:3px solid var(--primary); padding:0.9rem 0; }
+.brandbar .inner { max-width:980px; margin:0 auto; padding:0 1.5rem; display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap; }
+.logo { font-family:'Crimson Pro',serif; color:var(--primary); line-height:1.2; text-decoration:none; }
+.logo-main { display:block; font-size:1.05rem; font-weight:700; }
+.logo-sub { display:block; font-size:0.72rem; font-family:'Lato',sans-serif; color:var(--text-medium); }
+.back { font-family:'Lato',sans-serif; font-size:0.9rem; color:var(--primary); font-weight:600; }
+
+.page { max-width:980px; margin:0 auto; padding:2rem 1.5rem 3rem; }
+h1 { font-family:'Crimson Pro',serif; font-size:1.9rem; color:var(--primary); }
+.sub { font-family:'Lato',sans-serif; color:var(--text-medium); margin-top:0.4rem; line-height:1.5; max-width:680px; }
+.card { background:white; border-radius:16px; padding:1.6rem; box-shadow:0 4px 15px var(--shadow); margin-top:1.6rem; }
+.card h2 { font-family:'Crimson Pro',serif; font-size:1.4rem; color:var(--primary); margin-bottom:0.9rem; }
+.grid { display:grid; grid-template-columns:1fr 1fr; gap:1.6rem; }
+@media (max-width:760px){ .grid { grid-template-columns:1fr; } .page { padding:1.4rem 1rem 2.5rem; } }
+
+label.fl { font-family:'Lato',sans-serif; font-size:0.78rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-medium); display:block; margin:0.9rem 0 0.35rem; }
+input[type=text], input[type=url], input[type=date], input[type=number] {
+    width:100%; font-family:'Lora',serif; font-size:1rem; padding:0.65rem 0.8rem; border:1.5px solid #D1D5DB; border-radius:10px; background:#fff;
+}
+input:focus { border-color:var(--primary-light); }
+.hint { font-family:'Lato',sans-serif; font-size:0.82rem; color:var(--text-medium); margin-top:0.3rem; line-height:1.4; }
+.row2 { display:grid; grid-template-columns:1fr 1fr; gap:0.8rem; }
+.choice { display:flex; gap:1.2rem; flex-wrap:wrap; font-family:'Lato',sans-serif; margin-top:0.2rem; }
+.choice label { display:flex; gap:0.45rem; align-items:center; cursor:pointer; font-size:0.98rem; }
+.choice input { width:18px; height:18px; accent-color:var(--primary); }
+.check { display:flex; gap:0.7rem; align-items:flex-start; margin-top:1rem; font-family:'Lato',sans-serif; font-size:0.95rem; line-height:1.4; cursor:pointer; }
+.check input { width:20px; height:20px; margin-top:0.1rem; accent-color:var(--primary); flex-shrink:0; }
+
+.pick { display:block; width:100%; margin-top:0.2rem; padding:1.1rem; border:2px dashed #9CA3AF; border-radius:12px; background:#F9FAFB; cursor:pointer;
+        text-align:center; font-family:'Lato',sans-serif; color:var(--text-medium); }
+.pick:hover { border-color:var(--primary-light); color:var(--primary); }
+.pick input { position:absolute; opacity:0; width:1px; height:1px; }
+
+.frame { position:relative; aspect-ratio:16/9; background:#0E2456; border-radius:12px; overflow:hidden; margin-top:0.4rem; }
+.frame canvas { width:100%; height:100%; display:block; touch-action:none; }
+.frame.photo canvas { cursor:grab; }
+.frame.poster canvas { cursor:default; }
+.frame .empty { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; text-align:center; padding:1rem;
+                color:#B9C3D6; font-family:'Lato',sans-serif; font-size:0.92rem; }
+.cap-preview { font-family:'Lato',sans-serif; font-weight:700; color:var(--primary); margin-top:0.55rem; min-height:1.4em; }
+
+.btn { padding:0.8rem 1.4rem; border-radius:50px; border:none; cursor:pointer; background:var(--secondary); color:white;
+       font-family:'Lato',sans-serif; font-weight:700; font-size:1rem; transition:all .2s; }
+.btn:hover { background:var(--secondary-light); }
+.btn:disabled { opacity:0.6; cursor:default; }
+.btn.ghost { background:#fff; color:var(--primary); border:1.5px solid var(--primary); }
+.btn.ghost:hover { background:#EFF6FF; }
+.btn.small { padding:0.4rem 0.9rem; font-size:0.85rem; }
+.btn.danger { background:var(--accent); }
+.btn.danger:hover { background:#991B1B; }
+.actions { display:flex; gap:0.7rem; flex-wrap:wrap; margin-top:1.2rem; align-items:center; }
+
+.msg { display:none; margin-top:1rem; padding:0.85rem 1rem; border-radius:10px; font-family:'Lato',sans-serif; font-size:0.92rem; line-height:1.45; }
+.msg.show { display:block; }
+.msg.ok { background:var(--green-bg); color:#166534; }
+.msg.bad { background:var(--red-bg); color:#991B1B; }
+.msg.info { background:#EFF6FF; color:#1E3A8A; }
+
+.list { display:grid; gap:0.9rem; }
+.item { display:grid; grid-template-columns:150px 1fr; gap:1rem; padding:0.9rem; border:1.5px solid #E5E7EB; border-radius:12px; background:#fff; }
+@media (max-width:600px){ .item { grid-template-columns:1fr; } }
+.thumb { position:relative; aspect-ratio:16/9; background:#0E2456; border-radius:8px; overflow:hidden; }
+.thumb img { width:100%; height:100%; display:block; }
+.thumb.photo img { object-fit:cover; } .thumb.poster img { object-fit:contain; }
+.thumb .none { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; text-align:center; font-family:'Lato',sans-serif; font-size:0.78rem; color:#B9C3D6; padding:0.4rem; }
+.item h3 { font-family:'Lato',sans-serif; font-size:1.02rem; color:var(--text-dark); }
+.meta { font-family:'Lato',sans-serif; font-size:0.85rem; color:var(--text-medium); margin-top:0.25rem; line-height:1.5; }
+.chip { display:inline-block; font-family:'Lato',sans-serif; font-size:0.72rem; font-weight:700; letter-spacing:0.04em; text-transform:uppercase; padding:0.18rem 0.55rem; border-radius:20px; margin-right:0.4rem; }
+.chip.live { background:var(--green-bg); color:#166534; } .chip.hidden { background:#F3F4F6; color:#4B5563; }
+.chip.sched { background:var(--amber-bg); color:var(--amber); } .chip.expired { background:var(--red-bg); color:#991B1B; }
+.item .btns { display:flex; gap:0.5rem; flex-wrap:wrap; margin-top:0.7rem; }
+.editbox { margin-top:0.8rem; padding-top:0.8rem; border-top:1px dashed #E5E7EB; display:none; }
+.editbox.open { display:block; }
+.editbox label.fl:first-child { margin-top:0; }
+.council-footer { text-align:center; margin-top:2.5rem; font-family:'Lato',sans-serif; font-size:0.78rem; color:var(--text-medium); }
+.sr { position:absolute; left:-9999px; }
+
+.pdfchip { display:flex; align-items:center; gap:0.7rem; margin-top:0.6rem; padding:0.7rem 0.9rem; background:#F9FAFB; border:1.5px solid #E5E7EB; border-radius:10px; font-family:'Lato',sans-serif; font-size:0.92rem; }
+.pdfchip b { color:var(--primary); }
+.item.rep { grid-template-columns:1fr; }
+</style>
+<script src="config.js"></script>
+<script src="session.js"></script>
+</head>
+<body>
+<div class="brandbar"><div class="inner">
+    <a href="home.html" class="logo"><span class="logo-main">ST. LUKE KNIGHTS OF COLUMBUS</span><span class="logo-sub">Member Center · Council 14895</span></a>
+    <a class="back" href="home.html">&larr; Back to my profile</a>
+</div></div>
+
+<div class="page">
+    <h1>Website reports</h1>
+    <p class="sub">PDF reports listed on the News page of the public website. Only reports you mark &ldquo;Show on the public website&rdquo; are visible to the public. Everyone with the link can read them, so use only reports meant for the whole parish.</p>
+
+    <div class="card">
+        <h2>Add a report</h2>
+        <div class="grid">
+            <div>
+                <label class="fl" for="file">PDF file (up to 4 MB)</label>
+                <label class="pick" id="pickBox"><input type="file" id="file" accept="application/pdf,.pdf">Tap or click to choose a PDF<br><span style="font-size:0.82rem">If it is larger than 4 MB, save a smaller copy first (for example, &ldquo;Reduce file size&rdquo; in Adobe, or print to PDF at lower quality).</span></label>
+                <div class="pdfchip" id="chip" hidden><span aria-hidden="true">📄</span><span id="chipText"></span></div>
+            </div>
+            <div>
+                <label class="fl" for="title">Title (required)</label>
+                <input type="text" id="title" maxlength="140" placeholder="e.g. Grand Knight&rsquo;s Report, Fall 2026">
+                <label class="fl" for="summary">One-line summary (optional)</label>
+                <input type="text" id="summary" maxlength="300" placeholder="e.g. Fall Festival results and what is coming up">
+                <label class="fl" for="date">Date of the report</label>
+                <input type="date" id="date">
+                <label class="check"><input type="checkbox" id="show" checked> Show on the public website</label>
+                <label class="check"><input type="checkbox" id="reviewed"> I reviewed this report. It has no member personal information (addresses, phone numbers, health) and no individual financial details.</label>
+            </div>
+        </div>
+        <div class="actions">
+            <button class="btn" id="saveBtn" type="button">Add to website</button>
+            <button class="btn ghost" id="clearBtn" type="button">Clear</button>
+        </div>
+        <div class="msg" id="formMsg" role="status"></div>
+    </div>
+
+    <div class="card">
+        <h2>Reports on the website</h2>
+        <div class="msg info show" id="listMsg">Loading&hellip;</div>
+        <div class="list" id="list"></div>
+    </div>
+</div>
+<p class="council-footer">St. Luke Knights of Columbus, Council 14895</p>
+
+<script>
+const ENDPOINT = KOC_CONFIG.endpoint;
+const WP_SHEET = KOC_CONFIG.announcementsSheetId;
+const WP_TAB = 'Website Reports';
+const MAX_BYTES = 4 * 1024 * 1024;
+const $ = id => document.getElementById(id);
+let pdfB64 = null, items = [];
+
+function say(el, text, kind) { el.className = 'msg show ' + (kind || 'info'); el.textContent = text; }
+function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function today() { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+function viewUrl(id) { return 'https://drive.google.com/file/d/' + encodeURIComponent(id) + '/view'; }
+const isYes = v => /^(y|yes|true)$/i.test(String(v || ''));
+
+/* ---------- choose a PDF ---------- */
+$('file').addEventListener('change', e => {
+    const f = e.target.files[0];
+    pdfB64 = null; $('chip').hidden = true;
+    if (!f) return;
+    if (!/pdf$/i.test(f.type) && !/\.pdf$/i.test(f.name)) return say($('formMsg'), 'That is not a PDF. Please choose a PDF file.', 'bad');
+    if (f.size > MAX_BYTES) return say($('formMsg'), 'That PDF is ' + (f.size / 1048576).toFixed(1) + ' MB. The limit is 4 MB. Please save a smaller copy and try again.', 'bad');
+    const rd = new FileReader();
+    rd.onload = () => {
+        pdfB64 = String(rd.result).split(',')[1] || null;
+        $('chipText').innerHTML = '<b>' + esc(f.name) + '</b> &middot; ' + (f.size / 1024 < 1000 ? Math.round(f.size / 1024) + ' KB' : (f.size / 1048576).toFixed(1) + ' MB');
+        $('chip').hidden = false; $('formMsg').className = 'msg';
+        if (!$('title').value) $('title').value = f.name.replace(/\.pdf$/i, '').replace(/[_]+/g, ' ');
+    };
+    rd.onerror = () => say($('formMsg'), "That file couldn't be read. Please try again.", 'bad');
+    rd.readAsDataURL(f);
+});
+
+/* ---------- save ---------- */
+async function post(params) {
+    const s = Session.read();
+    const res = await fetch(ENDPOINT, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(Object.assign({ token: Session.token(), actor: s ? s.memberNumber : '', memberName: s ? s.firstName : '' }, params))
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const out = await res.json();
+    if (out && out.success) { try { localStorage.setItem('mcSiteReports', 'on'); } catch (e) {} }   // shows the menu tab on this device
+    return out;
+}
+function explain(r) {
+    if (r && r.error === 'not_allowed') return "You don't have permission to change the website reports. Ask the Data Administrator to add your email to the 'Website report editor email' row on the Assumptions tab.";
+    if (r && r.error === 'not_signed_in') return 'Your sign-in has expired. Please sign in again.';
+    return (r && r.error) || 'Something went wrong. Please try again.';
+}
+$('saveBtn').addEventListener('click', async () => {
+    const title = $('title').value.trim();
+    if (!pdfB64) return say($('formMsg'), 'Please choose a PDF first.', 'bad');
+    if (!title) return say($('formMsg'), 'Please give the report a title.', 'bad');
+    if (!$('date').value) return say($('formMsg'), 'Please choose the date of the report.', 'bad');
+    if (!$('reviewed').checked) return say($('formMsg'), 'Please confirm that you reviewed the report.', 'bad');
+    $('saveBtn').disabled = true; say($('formMsg'), 'Saving…', 'info');
+    try {
+        const r = await post({ action: 'saveSiteReport', pdf: pdfB64, title, summary: $('summary').value.trim(), reportDate: $('date').value,
+                               show: $('show').checked ? 'Yes' : 'No', reviewed: 'Yes' });
+        if (r.success) { say($('formMsg'), 'Added. It can take a minute or two to appear on the website.', 'ok'); resetForm(true); loadList(); }
+        else say($('formMsg'), explain(r), 'bad');
+    } catch (err) { say($('formMsg'), "We couldn't reach the Member Center just now. Please try again in a moment.", 'bad'); }
+    $('saveBtn').disabled = false;
+});
+function resetForm(keepMsg) {
+    pdfB64 = null; $('file').value = ''; $('chip').hidden = true;
+    ['title', 'summary'].forEach(id => $(id).value = ''); $('date').value = today();
+    $('show').checked = true; $('reviewed').checked = false;
+    if (!keepMsg) $('formMsg').className = 'msg';
+}
+$('clearBtn').addEventListener('click', () => resetForm(false));
+
+/* ---------- the list (read straight from the sheet) ---------- */
+function gvizDate(c) {
+    if (!c) return '';
+    const m = /^Date\((\d+),(\d+),(\d+)/.exec(String(c.v));
+    if (m) return m[1] + '-' + String(+m[2] + 1).padStart(2, '0') + '-' + String(+m[3]).padStart(2, '0');
+    return /^\d{4}-\d{2}-\d{2}$/.test(String(c.v || '')) ? c.v : '';
+}
+function cellText(c) { return c && c.v != null ? String(c.v).trim() : ''; }
+async function loadList() {
+    const url = 'https://docs.google.com/spreadsheets/d/' + WP_SHEET + '/gviz/tq?tqx=out:json&headers=1&sheet=' + encodeURIComponent(WP_TAB) + '&_=' + Date.now();
+    try {
+        const text = await (await fetch(url)).text();
+        const m = text.match(/setResponse\(([\s\S]*)\);?\s*$/);
+        if (!m) throw new Error('shape');
+        items = (JSON.parse(m[1]).table.rows || []).map(r => {
+            const c = r.c || [];
+            return { id: cellText(c[0]), title: cellText(c[1]), summary: cellText(c[2]), date: gvizDate(c[3]), show: cellText(c[4]) };
+        }).filter(it => it.id);
+        items.sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
+        renderList();
+    } catch (err) {
+        say($('listMsg'), "Couldn't load the list. Check that the Announcements workbook is shared so anyone with the link can view it, then refresh.", 'bad');
+    }
+}
+function renderList() {
+    const box = $('list');
+    if (!items.length) { box.innerHTML = ''; return say($('listMsg'), 'No reports yet. Add the first one above.', 'info'); }
+    $('listMsg').className = 'msg';
+    box.innerHTML = items.map((it, n) => {
+        const pub = isYes(it.show);
+        return '<div class="item rep" data-i="' + n + '"><div>' +
+            '<h3>' + esc(it.title) + '</h3>' +
+            '<div class="meta"><span class="chip ' + (pub ? 'live' : 'hidden') + '">' + (pub ? 'Live' : 'Hidden') + '</span>' + esc(it.date) + (it.summary ? ' &middot; ' + esc(it.summary) : '') + '</div>' +
+            '<div class="btns">' +
+              '<a class="btn small ghost" href="' + viewUrl(it.id) + '" target="_blank" rel="noopener" style="text-decoration:none">' + (pub ? 'Open PDF' : 'Open PDF (you only)') + '</a>' +
+              '<button class="btn small ghost" data-act="toggle">' + (pub ? 'Hide' : 'Show') + '</button>' +
+              '<button class="btn small ghost" data-act="edit">Edit</button>' +
+              '<button class="btn small danger" data-act="del">Delete</button>' +
+            '</div>' +
+            '<div class="editbox" id="eb' + n + '">' +
+              '<label class="fl" for="et' + n + '">Title</label><input type="text" id="et' + n + '" maxlength="140" value="' + esc(it.title) + '">' +
+              '<label class="fl" for="es' + n + '">Summary</label><input type="text" id="es' + n + '" maxlength="300" value="' + esc(it.summary) + '">' +
+              '<label class="fl" for="ed' + n + '">Date of the report</label><input type="date" id="ed' + n + '" value="' + esc(it.date) + '">' +
+              '<div class="actions"><button class="btn small" data-act="saveEdit">Save changes</button><button class="btn small ghost" data-act="cancelEdit">Cancel</button></div>' +
+            '</div>' +
+            '<div class="msg" id="im' + n + '" role="status"></div>' +
+          '</div></div>';
+    }).join('');
+}
+function itemMsg(n, text, kind) { const el = $('im' + n); if (el) say(el, text, kind); }
+async function saveOne(it, over) {
+    const o = Object.assign({}, it, over || {});
+    const r = await post({ action: 'updateSiteReport', id: o.id, title: o.title, summary: o.summary, reportDate: o.date, show: isYes(o.show) ? 'Yes' : 'No' });
+    if (!r.success) throw new Error(explain(r));
+}
+$('list').addEventListener('click', async e => {
+    const b = e.target.closest('button[data-act]');
+    if (!b) return;
+    const n = +b.closest('.item').dataset.i, it = items[n], act = b.dataset.act;
+    try {
+        if (act === 'edit') { $('eb' + n).classList.add('open'); return; }
+        if (act === 'cancelEdit') { $('eb' + n).classList.remove('open'); return; }
+        b.disabled = true; itemMsg(n, act === 'del' ? 'Deleting…' : 'Saving…', 'info');
+        if (act === 'toggle') await saveOne(it, { show: isYes(it.show) ? 'No' : 'Yes' });
+        else if (act === 'saveEdit') await saveOne(it, { title: $('et' + n).value.trim(), summary: $('es' + n).value.trim(), date: $('ed' + n).value });
+        else if (act === 'del') {
+            if (!confirm('Delete "' + it.title + '" from the website? This also deletes the PDF file from Drive.')) { b.disabled = false; $('im' + n).className = 'msg'; return; }
+            const r = await post({ action: 'deleteSiteReport', id: it.id });
+            if (!r.success) throw new Error(explain(r));
+        }
+        await loadList();
+        const idx = items.findIndex(x => x.id === it.id);
+        if (idx >= 0 && act !== 'del') itemMsg(idx, 'Saved. The website updates within a minute or two.', 'ok');
+    } catch (err) { itemMsg(n, err.message || 'Something went wrong. Please try again.', 'bad'); b.disabled = false; }
+});
+
+window.addEventListener('DOMContentLoaded', () => {
+    if (!Session.read()) { window.location.href = 'landing.html'; return; }
+    $('date').value = today();
+    loadList();
+});
+</script>
+</body>
+</html>
