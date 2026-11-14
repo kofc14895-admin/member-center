@@ -124,6 +124,9 @@ input:focus { border-color:var(--primary-light); }
                 <label class="fl" for="caption">Caption (required)</label>
                 <input type="text" id="caption" maxlength="140" placeholder="e.g. Lenten fish fry, March 2027">
                 <div class="hint">Shown under the picture, and read aloud for people who cannot see it. Please do not use last names of members.</div>
+                <label class="fl" for="second">Second line (optional)</label>
+                <input type="text" id="second" maxlength="160" placeholder="e.g. Join us every Friday in Lent, 5 to 7 pm">
+                <div class="hint">A smaller line of detail under the caption on the home page picture.</div>
 
                 <label class="fl">Kind of picture</label>
                 <div class="choice">
@@ -303,7 +306,7 @@ function explain(r) {
 }
 function formFields() {
     return {
-        caption: $('caption').value.trim(), type: kindOf(), link: $('link').value.trim(),
+        caption: $('caption').value.trim(), second: $('second').value.trim(), type: kindOf(), link: $('link').value.trim(),
         showFrom: $('from').value, showThrough: $('thru').value, order: $('order').value, show: $('show').checked ? 'Yes' : 'No'
     };
 }
@@ -328,7 +331,7 @@ $('saveBtn').addEventListener('click', async () => {
 });
 function resetForm(keepMsg) {
     srcImg = null; $('file').value = ''; $('cv').hidden = true; $('frameEmpty').hidden = false; view.zoom = 1; view.ox = 0.5; view.oy = 0.5; $('zoom').value = 100;
-    ['caption', 'link', 'from', 'thru', 'order'].forEach(id => $(id).value = '');
+    ['caption', 'second', 'link', 'from', 'thru', 'order'].forEach(id => $(id).value = '');
     $('show').checked = true; $('consent').checked = false;
     document.querySelector('input[name=kind][value=Photo]').checked = true;
     refreshPreview();
@@ -369,7 +372,7 @@ async function loadList() {
             const c = r.c || [];
             return { id: cellText(c[0]), caption: cellText(c[1]), type: /poster/i.test(cellText(c[2])) ? 'Poster' : 'Photo',
                      link: cellText(c[3]), show: cellText(c[4]), from: gvizDate(c[5]), through: gvizDate(c[6]),
-                     order: c[7] && c[7].v != null && c[7].v !== '' ? Number(c[7].v) : null };
+                     order: c[7] && c[7].v != null && c[7].v !== '' ? Number(c[7].v) : null, second: cellText(c[10]) };
         }).filter(it => it.id);
         items.sort((a, b) => ((a.order == null ? 1e9 : a.order) - (b.order == null ? 1e9 : b.order)) || (b.from < a.from ? -1 : 1));
         renderList();
@@ -399,6 +402,7 @@ function renderList() {
               '</div>' +
               '<div class="editbox" id="eb' + n + '">' +
                 '<label class="fl" for="ec' + n + '">Caption</label><input type="text" id="ec' + n + '" maxlength="140" value="' + esc(it.caption) + '">' +
+                '<label class="fl" for="e2' + n + '">Second line (optional)</label><input type="text" id="e2' + n + '" maxlength="160" value="' + esc(it.second) + '">' +
                 '<label class="fl">Kind</label><div class="choice"><label><input type="radio" name="ek' + n + '" value="Photo"' + (it.type === 'Photo' ? ' checked' : '') + '> Photo</label>' +
                   '<label><input type="radio" name="ek' + n + '" value="Poster"' + (it.type === 'Poster' ? ' checked' : '') + '> Poster</label></div>' +
                 '<label class="fl" for="el' + n + '">Link</label><input type="text" id="el' + n + '" value="' + esc(it.link) + '">' +
@@ -413,7 +417,7 @@ function renderList() {
 function itemMsg(n, text, kind) { const el = $('im' + n); if (el) say(el, text, kind); }
 function payload(it, over) {
     const o = Object.assign({}, it, over || {});
-    return { action: 'updateSitePhoto', id: o.id, caption: o.caption, type: o.type, link: o.link, showFrom: o.from, showThrough: o.through,
+    return { action: 'updateSitePhoto', id: o.id, caption: o.caption, second: o.second || '', type: o.type, link: o.link, showFrom: o.from, showThrough: o.through,
              order: o.order == null ? '' : o.order, show: /^(y|yes|true)$/i.test(o.show) ? 'Yes' : 'No' };
 }
 async function saveOne(n, over) {
@@ -433,7 +437,7 @@ $('list').addEventListener('click', async e => {
             await saveOne(n, { show: /^(y|yes|true)$/i.test(it.show) ? 'No' : 'Yes' });
         } else if (act === 'saveEdit') {
             itemMsg(n, 'Saving…', 'info');
-            await saveOne(n, { caption: $('ec' + n).value.trim(), type: document.querySelector('input[name=ek' + n + ']:checked').value,
+            await saveOne(n, { caption: $('ec' + n).value.trim(), second: $('e2' + n).value.trim(), type: document.querySelector('input[name=ek' + n + ']:checked').value,
                                link: $('el' + n).value.trim(), from: $('ef' + n).value, through: $('et' + n).value });
         } else if (act === 'del') {
             if (!confirm('Delete "' + it.caption + '" from the website? This also deletes the picture file.')) { b.disabled = false; return; }
